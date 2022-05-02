@@ -45,7 +45,7 @@ MGExplorer is a visualization tool based on the concept of chained views to supp
 | tippy.js| 6.3.1|
 | xmlhttprequest| 1.8.0|
 
-To use this project, start by running the following commands
+To use this project, clone the repository and run the following commands:
 
 ```bash
 # Install dependencies and libraries
@@ -55,6 +55,11 @@ npm run build
 # Run application via Server side
 npm run start:ssr
 ```
+
+Obs.: part of the tool requires authentication. For that, create a file caleld `users.json` and place it inside the `data/` folder. It should contain the list of users that can access the tool. The expected format is a list of JSON objects such as :
+
+`{ "id": 5, "name": "username", "email": "username@ldviz.com", "password": "password" }`
+
 
 ## License
 
