@@ -1,0 +1,470 @@
+form>p>label {
+    font-weight: unset;
+    width: 130px;
+}
+
+form>p>input:not([type=button]),
+select {
+    width: 300px;
+    padding: 5px;
+}
+
+#form_title {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+#titleDiv {
+    width: 1300px;
+    margin: 0 auto;
+
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+#tab {
+    /* border: 2px solid; */
+    width: 1300px;
+    margin: 0 auto;
+    margin-bottom: 50px;
+}
+
+#query_listDiv {
+    /* border: 2px solid; */
+    width: 1300px;
+    margin: 50px auto;
+
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+#query_listUl {
+    padding: 25px 0;
+}
+
+#visualisation_div {
+    width: 1300px;
+    margin: 50px auto;
+
+    padding-left: 100px;
+    padding-right: 100px;
+    display: none;
+}
+
+ul>li {
+    list-style: none;
+    padding: 5px
+}
+
+.queries-control-panel {
+    position: relative;
+    padding: 5px;
+    width: 100%;
+    display: table;
+}
+
+.queries-control-panel td {
+    padding: 10px;
+    margin-left: 30px;
+}
+
+.queries-control-panel select {
+    outline: none;
+    padding: 5px;
+    width: 250px;
+}
+
+.queries-control-panel input[type=text] {
+    width: 250px;
+    padding: 2px;
+}
+
+input[type=checkbox] {
+    transform: scale(1.5);
+    margin-left: 5px;
+}
+
+#checkboxes {
+    position: absolute;
+    z-index: 30;
+    background-color: white;
+    min-width: 600px;
+    overflow: auto;
+    max-height: 250px;
+}
+
+#checkboxes label {
+    display: block;
+}
+
+#checkboxes label:hover {
+    background-color: #f5f5f5;
+}
+
+.overSelect {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+.queries-control-panel #newQueryDiv {
+    cursor: pointer;
+    position:relative;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.queries-control-panel #filters-form{
+    position:relative;
+    display: table-cell;
+}
+
+.queries-control-panel a {
+    outline: none;
+    color: #333;
+}
+
+#newQueryDiv2 {
+    text-align: center;
+    width: fit-content;
+    margin-right: 75px;
+}
+
+#tab h3 {
+    border: 1px solid #cccccc;
+    margin: 2px 1px 0px 1px;
+    padding: 0px;
+    font-size: 20px;
+    float: left;
+    right: 5px;
+    width: 100px;
+    height: 30px;
+    line-height: 24px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#tab h3.bigtab {
+    width: 200px;
+}
+
+#tab h3.active {
+    background: lightblue;
+}
+
+#tab div.hide {
+    clear: both;
+    padding: 20px 0px 0px 20px;
+
+    border: 1px solid #cccccc;
+}
+
+div.content {
+    clear: both;
+    padding: 15px;
+    display: block;
+    background: lightblue;
+}
+
+.intro {
+    font-size: 24px
+}
+
+.text {
+    background-color: white
+}
+
+.blue {
+    color: blue
+}
+
+.red {
+    color: red
+}
+
+.yellow {
+    color: yellow
+}
+
+.green {
+    color: green
+}
+
+.visible {
+    visibility: visible
+}
+
+.invisible {
+    visibility: none
+}
+
+.icon {
+    cursor: pointer;
+    padding-left: 10px;
+    width: 24px;
+}
+
+.copy {
+    cursor: pointer;
+    height: 20px;
+    margin-bottom: 3px;
+    padding-left: 5px;
+    width: auto;
+}
+
+.labelTab {
+    padding-left: 40px;
+}
+
+.collapsible {
+    background-color: #d48a72;
+    color: black;
+    cursor: pointer;
+    padding: 13px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.collapsible:hover {
+    background-color: #e6bbad;
+}
+
+
+.collapsibleContent {
+    padding: 0 18px;
+    max-height: 0;
+    transition: max-height 0.2s ease-out;
+    /* background-color: lightblue; */
+    overflow: hidden;
+}
+
+.collapsible:after {
+    content: '\002B';
+    color: white;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.iconsStylesheet{
+    padding: 5px;
+    position: relative;
+    float: right;
+    left: 10px;
+    cursor: pointer;
+    width: 290px;
+}
+
+.iconsStylesheet i{
+    margin-right: 10px;
+}
+
+#helpStylesheet{
+    padding: 5px;
+    width: 100%;
+    display: none;
+}
+
+.form_section_div>div:nth-child(2) {
+    margin-left: auto;
+}
+
+.form_section_div {
+    display: flex;
+    padding: 20px;
+}
+
+#variables ul{
+    border: solid 1px;
+    color: #333;
+    width: fit-content;
+    padding: 10px;
+}
+
+#variables label{
+    font-weight: normal;
+}
+
+#query-head input[type=text] {
+    min-width: 250px;
+}
+
+#variables i{
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#variables input, #variables select{
+    padding: 2px;
+    position: relative;
+    left: 10px;
+}
+
+
+.form_endbutton {
+    display: inline-block;
+}
+
+/* .end_button {
+    border: 1px solid black;
+    padding: 10px 21px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 5px;
+    transition: 0.3s;
+} */
+
+.end_button:hover {
+    background-color: rgb(202, 200, 200);
+}
+
+/* .cancel_button {
+    color: #333;
+    border: 1px solid #606060;
+} */
+
+/* .save_button {
+    background-color: darkgreen;
+    transition: 0.3s;
+    color: whitesmoke;
+} */
+
+/* .save_button:hover{
+    background-color: darkgreen;
+} */
+
+#table {
+    /* display: table; */
+    max-height: 175px;
+    overflow: auto;
+}
+
+.table_row {
+    display: table-row;
+    width: 100%;
+}
+
+table, tr, td {
+    border: transparent !important;
+}
+
+.table_cell {
+    padding: 0 5px;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.table_cell:hover .tooltiptext {
+    visibility: visible;
+    opacity: 0.75;
+}
+
+.table_cell .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+
+.openedCollapsible:after {
+    content: "\2212";
+}
+
+.publishedText {
+    background-color: #6bf16b;
+    border: 1px solid black;
+    border-radius: 50%;
+    padding: 0 7px;
+    cursor: pointer;
+    margin-left: 7px;
+}
+
+.unpublishedText {
+    background-color: #ff9129;
+    border: 1px dashed black;
+    border-radius: 50%;
+    padding: 0 7px;
+    cursor: pointer;
+    margin-left: 7px;
+}
+
+#queries-list i{
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.close-icon{
+    position: relative;
+    float: right;
+    right: 5px;
+    top: 5px;
+    cursor: pointer;
+}
+
+.query_buttons input[type=button]{
+    border: 1px solid black;
+    padding: 5px 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+    margin-left: 10px;
+    background-color: white;
+}
+
+.query_buttons #save_button{
+    background-color: #386890 !important;
+    border-color: #386890 !important;
+    color: white;
+}
+
+#query_parameters ul{
+    padding: 10px;
+    width: 50%;
+    border: 1px solid black;
+}
+
+#query_parameters i{
+    cursor: pointer;
+}
+
+.resultsViewer{
+    width: 1100px;
+    margin: auto;
+}
+
+.resultsDownloadButton{
+    position: relative;
+    bottom: 10px;
+    left: 91%;
+    padding: 2px;
+}

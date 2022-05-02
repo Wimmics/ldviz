@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    
+    <%- include("ldviz/partials/head") %>
+    <title>LDViz</title>
+</head>
+
+<body class='body'>
+    <div class="header">
+        <h1>Linked Data Visualizer: About</h1>
+        <%- include("ldviz/partials/header") %>
+    </div>
+
+    <p>
+        This project support the visual exploration of linked data. You can use it to build, debug, and test SPARQL queries applied to the SPARQL endpoint of your choice. Further, you can visualize the results of your queries using the MGExplorer tool. The later is embedded in the queries management interface.
+    </p>
+
+    <h3>Usage</h3>
+    <p>
+        This website consists of two main interfaces:
+        <ul>
+            <li><b>A visualization dashboard:</b> <a href="http://dataviz.i3s.unice.fr/ldviz">http://dataviz.i3s.unice.fr/ldviz</a> <br>
+                Here, domain users can visualize the results of queries previously defined by data experts.
+            </li>
+            <li>
+                <b>LDViz:</b> <a href="http://dataviz.i3s.unice.fr/ldviz/query">http://dataviz.i3s.unice.fr/ldviz/query</a> <br>
+                In this page, advanced users can generate and debug SPARQL queries applied to any SPARQL endpoint. Their results can be then explored by the general public through the Home page. <br> 
+                For secutiry reasons, this page requires authentication. If you are interested in using this application, please contact us (see contact information below) and we will provide you authentication. 
+            </li>
+        </ul>
+    </p>
+
+    <h3>Coverage Analysis</h3>
+
+    <p>
+        To demonstrate the extent to which LDViz can support the exploration of LD datasets, we ran a coverage analysis that tested 419 different SPARQL endpoints to identify whether the SPARQL result set could be visualized by our tool. For more details, <a href="/ldviz/analysis">click here</a>.
+    </p>
+
+    <h3>Related Publications</h3>
+    <ul>
+        <li>Aline Menin, Catherine Faron Zucker, Olivier Corby, Carla Dal Sasso Freitas, Fabien Gandon, et al.. From Linked Data Querying to Visual Search: Towards a Visualization Pipeline for LOD Exploration. International Conference on Web Information Systems and Technologies (WEBIST), Oct 2021, Online Streaming, France. (<a href="https://dx.doi.org/10.5220/0010654600003058">10.5220/0010654600003058</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03404572">hal-03404572</a>)</li>
+        <li>Aline Menin, Ricardo Cava, Carla Dal Sasso Freitas, Olivier Corby, Marco Winckler. Towards a Visual Approach for Representing Analytical Provenance in Exploration Processes. IV 2021 - 25th International Conference Information Visualisation, Jul 2021, Melbourne / Virtual, Australia. (<a href="https://dx.doi.org/10.1109/IV53921.2021.00014">10.1109/IV53921.2021.00014</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03292172">hal-03292172</a>)</li>
+    </ul>
+
+    <h3>Contact information:</h3>
+    <ul class="people">
+        <li><a href="https://amenin.gitlab.io/">Aline Menin</a>, post-doc Unievrsité Côte d'Azur (Contact: aline.menin@inria.fr)</li>
+        <li><a href="https://www.i3s.unice.fr/~winckler/">Marco Winckler</a>, Prof. Université Cote d'Azur (Contact: marco.winckler@unice.fr)</li>
+        <li><a href="http://www-sop.inria.fr/members/Fabien.Gandon/">Fabien Gandon</a>, DR INRIA, Head of WIMMICS Team (Contact: fabien.gandon@inria.fr)</li>
+        <li><a href="https://www-sop.inria.fr/members/Olivier.Corby/">Olivier Corby</a>, CR INRIA (Concact: olivier.corby@inria.fr)</li>
+        <li><a href="http://sparks.i3s.unice.fr/fmichel">Franck Michel</a>, CR CNRS (Contact: franck.michel@cnrs.fr)</li>
+        <li><a href="http://www-sop.inria.fr/members/Alain.Giboin/">Alain Giboin</a>, Emeritous CR INRIA (Contact: alain.gibouin@inria.fr)</li>
+    </ul>
+
+    <footer>
+        <p class="f3">
+            <a href="/ldviz">Home</a>
+        </p>
+    </footer>
+</body>
+
+</html>

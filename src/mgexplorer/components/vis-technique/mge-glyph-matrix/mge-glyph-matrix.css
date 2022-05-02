@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.MG-TopLegend {
+	cursor:default;
+}
+
+.MG-LeftLegend {
+	cursor:default;
+}
+
+.MG-Tooltip {
+    position: absolute;
+    border-radius: 4px;
+	background-color:rgba(246,240,186,0.9);
+/*	background-color:rgba(204,221,255,0.9);
+	background-color:rgba(255,153,102,0.9);
+    border: 1px solid rgb(255,120,102);
+	border: 1px solid #6699ff; */
+	border: 1px solid #c7b51a; 	
+	font-family: sans-serif;
+	font-size: 10px;
+	font-weight:bold;	
+	z-index: 1000;		
+} 
+
+.MG-Tooltip-Attr {
+	font-family: sans-serif;
+	font-size: 9px;
+	font-weight:normal;
+}

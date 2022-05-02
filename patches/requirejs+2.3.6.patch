@@ -1,0 +1,13 @@
+diff --git a/node_modules/requirejs/bin/r.js b/node_modules/requirejs/bin/r.js
+index 5ca85bc..ce2b81b 100755
+--- a/node_modules/requirejs/bin/r.js
++++ b/node_modules/requirejs/bin/r.js
+@@ -1,6 +1,6 @@
+-#!/usr/bin/env node
++// #!/usr/bin/env node
+ /**
+- * @license r.js 2.3.6 Copyright jQuery Foundation and other contributors.
++ * @license r.js 2.3.6rsrCopyright jQuery Foundation and other contributors.
+  * Released under MIT license, http://github.com/requirejs/r.js/LICENSE
+  */
+ 

@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+.CV-Inner {
+  stroke: blue;
+  stroke-width: 0.5;
+  fill: none;
+}
+
+.CV-Outer {
+  stroke: green;
+  stroke-width: 0.5;  
+  fill: none;
+}
+
+.CV-grpRings circle {
+  stroke: gray;
+  stroke-width: 0.5;
+  fill:none;
+} 
+
+.CV-grpBars line {
+  stroke: black;
+  stroke-width: 0.5;   
+}
+
+.CV-grpBars text {
+    stroke: none;
+    fill: black;
+}
+
+.CV-grpBars {
+  fill: #993300;
+}
+
+.CV-grpLinks {
+  stroke: steelblue;
+  stroke-opacity: .3; 
+  fill: none;
+}
+
+.CV-grpLinks2 {
+  stroke: red;
+  stroke-opacity: 1;
+
+  fill: none;
+}
+
+.CV-nodeHL {
+  fill:green;
+  stroke:black;
+  stroke-width: 1.5;   
+} 
+
+.CV-linkHL  {
+  stroke:red;
+  stroke-opacity: 1;  
+  stroke-width: 1.5;   
+}
+ 

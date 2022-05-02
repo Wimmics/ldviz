@@ -1,0 +1,68 @@
+:host {
+  display: block;
+}
+
+@CHARSET "UTF-8";
+
+.iris {
+/*	background-color: #b0e0e6 !important;
+	position:absolute;*/
+}
+
+.IrisChart {
+	font-family: sans-serif;
+	font-size: 10px;
+	/*background-color: #b0e0e6 !important;*/
+}
+
+.IC-centroidBack {
+  stroke: blue;
+  stroke-width: 0.5;
+  fill: #D8F2FF;
+}
+
+.IC-centroidTitle, .IC-centroidSubtitle {
+	text-anchor: middle;
+	font-weight:bold; 
+	fill: black;
+}
+
+.IC-centroidDegree, .IC-totalLabel {
+	text-anchor: middle;
+	fill: black;
+}
+
+.IC-focus {
+	fill: rgb(210,210,210);
+}
+
+.IC-bars {
+    stroke: black;
+	stroke-width: 0.25;
+	cursor:pointer;
+}
+
+.IC-grpBar foreignObject.IC-active {
+	fill:#F48D2E;
+}
+
+.IC-grpBar foreignObject {
+    fill: black;
+	font-family: Arial;
+    font-weight:bold;
+	cursor:pointer;
+}
+
+
+.IC-panel {
+	font-family: sans-serif;
+	font-size: 10px;
+	font-weight:bold;
+	cursor:move;
+}
+
+.IC-panel select {
+	font-family: sans-serif;
+	font-size: 10px;
+	background:#f8f8f8;
+}

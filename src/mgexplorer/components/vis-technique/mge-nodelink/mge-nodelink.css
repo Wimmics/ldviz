@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.NE-edge {
+  stroke: steelblue;
+  stroke-opacity: .3;
+  fill: none;
+}
+
+.NE-node {
+  stroke: none;
+}
+
+.NE-node.NE-HighLight {
+  stroke: red;
+  stroke-width: 1.5;
+}
+
+.NE-node.NE-HighSearch {
+  stroke: #FF6600;
+  stroke-width: 2.0;
+  animation: rotate 1s ease-in-out 6 alternate
+}
+
+.NE-edge.NE-HighLight {
+  stroke: red;
+  stroke-opacity: 1;
+  stroke-width: 1.5;
+}
+
+.NE-Tooltip {
+  position: absolute;
+  border-radius: 4px;
+  background-color: rgba(246, 240, 186, 0.9);
+  border: 1px solid #c7b51a;
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+.helpContainer {
+  position: absolute;
+  top: 2%;
+  right: 3%;
+
+}
+
+.helpTooltip {
+  position: absolute;
+  top: 10%;
+  right: 3%;
+  border-radius: 4px;
+  background-color: rgba(246, 240, 186, 0.9);
+  border: 1px solid #c7b51a;
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+@keyframes rotate {
+  0% {
+    stroke-width: 2.0;
+  }
+
+  100% {
+    stroke-width: 20.0;
+  }
+}

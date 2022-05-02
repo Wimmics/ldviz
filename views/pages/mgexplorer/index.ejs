@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <%- include("./partials/head.ejs") %>
+        <title>LDViz</title>
+    </head>
+
+    <body>
+        <div id="titleDiv" style='display:flex;'>
+            <div style='padding:10px'>
+                <h1>Linked Data Explorer <h3 id="vis-title">Query name: </h3> </h1>
+                <a href='https://team.inria.fr/wimmics/'>Wimmics team</a> Inria, I3S, UCA, CNRS. 
+                
+                <i class="fas fa-spinner fa-spin fa-2x loading" style="display: none;text-align: center;"></i>   
+            </div>            
+            <div style="float: right; margin-left: auto; display: flex; width: 40px;" id='action-buttons'>
+                <button id="captureButton" class="fas fa-camera" style='top: 0px;'></button>
+                <button id="annotationButton" class="far fa-sticky-note" style='top: 40px;'></button>
+            </div>
+        </div>
+
+
+        <div id='viewArea'>
+            <template class="filter-content-mge-barchart">
+                <p style="font-weight: bold;">Histogram Filter Panel</p>
+                <div class="filter-item">
+                   <span>Order by</span>
+                   
+                   <select class="IC-selOrderBy" id="myRange">
+                     <option value="0">Alphabetic Order</option>
+                     <option value="1">Attribute</option>
+                   </select>
+                </div>
+                </div>
+               </template>
+               <template class="filter-content-mge-iris">
+                <p style="font-weight: bold;">Iris Filter Panel</p>
+                <div class="filter-item">
+                   <span>Order by</span>
+                   
+                   <select class="IC-selOrderBy" id="myRange">
+                     <option value="0">Alphabetic Order</option>
+                     <option value="1">Number of Items (Descending)</option>
+                     <option value="2">Number of Items (Ascending)</option>
+                   </select>
+                </div>
+                <div class="filter-item">
+                   <input type="text" placeholder="Search..">
+                </div>
+               </template>
+               <template class="filter-content-mge-nodelink">
+                <p style="font-weight: bold;">Node links Filter Panel</p>
+                <div class="filter-item">
+                    <div class="NE-panel" style="width: 180px;">
+                        <br />
+                        <label>&nbsp;Nodes:&nbsp;<span class="spanNodes">26</span></label><br />
+                        <label>&nbsp;Edges:&nbsp;<span class="spanEdges"></span></label><br />
+                        <br />
+                        <input list='nodes-labels' class="NE-Autocomplete ui-autocomplete-input" placeholder="Search" autocomplete="off" /><br />
+                        <datalist id="nodes-labels"></datalist>
+                        <br />
+                        <label>&nbsp;Gravity: <span  class="spanGravitys"></span></label>
+                        <input type="range" class="gravitySlider" style="width: 120px; height: 4px;">
+                        <br />
+                        <br />
+                        <label>&nbsp;Repulsion: <span class="spanCharge"></span></label>
+                        <input type="range" class="chargeSlider" style="width: 120px; height: 4px;">
+                        <br />
+                        <br />
+                        <label>&nbsp;Distance: <span class="spanLinkDistance"></span></label>
+                        <input type="range" class="linkDistanceSlider" style="width: 120px; height: 4px;">
+                    </div>
+                </div>
+            </template>
+        </div>
+    </body>
+
+</html>
+<script>
+    
+    // setGlobalParameters(<%- JSON.stringify(params) %>)
+
+    (async () => {
+        let locals = <%- JSON.stringify(locals) %>;
+
+        await customElements.whenDefined('mge-dashboard');
+        let dashboard = d3.select('#viewArea').append("mge-dashboard")
+            .attr("x", 20)
+            .attr("y", 20);
+
+        // the component is registered now, so its methods are immediately available
+        dashboard.node().componentOnReady().then(() => { 
+            dashboard.node().init(locals)
+        })
+    })();
+
+</script>

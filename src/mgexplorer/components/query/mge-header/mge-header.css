@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+
+#toolBar {
+  position: fixed;
+  width: 100%;
+    height: 35px;
+  font-family: Verdana, Arial;
+  font-weight: bold;
+  font-size: 14px;    
+    color: #000;
+    background-color:#AA9071;
+}
+
+#toolBar span{
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+#query {
+  padding: 7px 10px 0px 6px;
+  display: inline-block;
+}
+
+#titulo {
+  font-size: 14px;
+    color: #ffe066;
+  padding: 0px 60px 0px 0px;  
+}
+
+#lblMensagem {
+  font-size: 11px;
+  font-style: italic;
+    color: #ffe066;
+  padding: 0px 0px 0px 60px;  
+}
+
+
+
+@import url('../../../assets/fontawesome/css/all.css');

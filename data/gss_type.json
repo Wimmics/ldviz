@@ -1,0 +1,35 @@
+{
+    "appli": {
+        "name": "ldviz",
+        "debug": true
+    },
+    
+    "node": {            
+        "default": {"color": "steelblue"},
+        "mix":     {"color": "yellow"},
+        
+        "member":  {"color": "purple"},
+        "other":   {"color": "green"},
+        
+        "fst":  {"color": "lightgreen", "priority": 1},
+        "snd":  {"color": "orange",     "priority": 2},
+        "rst":  {"color": "purple",     "priority": 3}
+        
+        
+    },
+    
+    "edge": {
+        "color": "green"
+    },
+    "services": [
+        {   
+            "label": "ACTA",
+            "url": "http://134.59.134.234:8081/analyseddocs?id="
+        },
+        {
+            "label": "Browser Corese",
+            "url": "http://corese.inria.fr/srv/service/covid?uri="
+        }
+    ]
+    
+ }

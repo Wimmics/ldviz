@@ -1,0 +1,6 @@
+{
+  "name": "my-component/hydrate",
+  "description": "MyComponent component hydration app.",
+  "main": "index.js",
+  "types": "index.d.ts"
+}

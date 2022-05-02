@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.HC-abscissa {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+.histogram {
+	/*background-color: #b0e0e6 !important;*/
+	/*fill-opacity: 0.0;*/
+/*	border-style: groove;
+	border-width: "1px";*/
+	/*position:absolute;*/
+	/*position: absolute;*/
+}
+.helpContainer {
+    position: absolute;
+    top: 15%;
+    right: 3%;
+}
+.helpTooltip {
+	position: absolute;
+    top: 25%;
+    right: 3%;
+    border-radius: 4px;
+    background-color: rgba(246, 240, 186, 0.9);
+    border: 1px solid #c7b51a;
+    font-family: sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 1000;
+}
+.HistogramChart{
+	/*background-color: #b0e0e6 !important;*/
+	/*fill-opacity: 0.0;*/
+
+}
+@import url('../../../assets/fontawesome/css/all.css');

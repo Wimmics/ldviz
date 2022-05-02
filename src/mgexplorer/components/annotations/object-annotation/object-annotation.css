@@ -1,0 +1,160 @@
+.post-it-note {
+    padding: 0.2em;
+    background: whitesmoke;
+    position: relative;
+    min-height: 5em;
+ }
+ .post-it-note:after {
+    content: "";
+    position: absolute;
+    bottom: -2em;
+    left: 0;
+    right: 2em;
+    border-width: 1em;
+    border-style: solid;
+    border-color: whitesmoke;
+ }
+ .post-it-note:before {
+    content: "";
+    position: absolute;
+    bottom: -2em;
+    right: 0;
+    border-width: 2em 2em 0 0;
+    border-style: solid;
+    border-color: whitesmoke;
+ }
+ .annotation-tree {
+     height: 350px;
+     width: 350px;
+     display: flex;
+ }
+  
+ .dropdown {
+    padding: 0.2em;
+ }
+
+ .annotation-buttons button[type=button]{
+
+   padding: 8px;
+   background: #ddd;
+   color: #000;
+   cursor: pointer;
+   letter-spacing: 0.5px;
+   transition: all 0.5s linear;
+   margin-right: 5px;
+   margin-left: 5px; 
+   border-radius: 5px;
+   border:none;
+ }
+ .annotation-buttons button[type=button]:hover {
+   color: white;
+   background: #5CC4C0;
+ }
+
+ form#annotation_form {
+   clear: both;
+   padding: 15px;
+   display: block;
+   background: transparent;
+   font-size: var(--font-size -2px);
+   width: 100%;
+}
+
+.annotationform_section {
+   table-layout: fixed;
+}
+
+.annotation_section {
+   table-layout: fixed;
+}
+
+.annotation_view {
+   table-layout: fixed;
+}
+
+.annotationform_section_div {
+   display: flex;
+   padding: 20px;
+}
+
+#table {
+   /*display: table; */
+   max-height: 175px;
+   overflow: scroll;
+}
+
+.table_row {
+   display: table-row;
+   width: 100%;
+}
+
+table, tr, td {
+   border: transparent !important;
+}
+
+form>p>label {
+   font-weight: unset;
+   width: 100px;
+}
+
+form>p>input:not([type=button]),
+select {
+   /* width: 100px; */
+   margin-left: 5px;
+}
+
+#variables input, select{
+   padding: 5px;
+   /* background-color: #ddd; */
+   height: 35px;
+   position: relative;
+   border: none;
+}
+
+.table {
+   width: 100%;
+   max-width: 100%;
+   margin-bottom: 20px;
+ }
+ tr td:first-child {
+   width: 25%;
+   min-width: 10%;
+   max-width: 30%;
+   margin-top: 2px;
+   margin-bottom: 2px;
+   font-size: 14px;
+ }
+.multiselect {
+  width: 200px;
+}
+
+.selectBox {
+  position: relative;
+}
+
+.selectBox select {
+  width: 100%;
+  font-weight: bold;
+}
+
+.overSelect {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+#checkboxes {
+  display: none;
+  border: 1px #dadada solid;
+}
+
+#checkboxes label {
+  display: block;
+}
+
+#checkboxes label:hover {
+  background-color: #1e90ff;
+}
+ @import url('../../../assets/fontawesome/css/all.css');

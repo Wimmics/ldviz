@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+.history-tree {
+    overflow: scroll;
+}
+.HT-grpNodos {
+	cursor: pointer;	
+}
+.HT-grpRoot rect {
+	cursor: default;
+}
+
+.HT-grpNodos rect {
+    fill: whitesmoke;
+    stroke: cadetblue;
+    stroke-width: 1.5px;	
+}
+
+.HT-grpNodos text {
+    font-size:10px; 
+    font-family:sans-serif;
+	font-weight: bold;
+	cursor: move;
+}
+
+.HistoryTreeChart {
+	cursor: move;	
+}
+
+.HT-NodeHidden text{
+    fill: gray;
+    font-size:10px; 
+    font-family:sans-serif;
+}
+
+.HT-NodeHidden rect{
+    fill: #f0f0f0;
+    stroke: gray;
+}
+
+.history-buttons button[type=button]{
+
+    padding: 8px;
+    background: #ddd;
+    color: #000;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.5s linear;
+    margin-right: 5px;
+    margin-left: 5px; 
+    border-radius: 5px;
+    border:none;
+  }
+  .history-buttons button[type=button]:hover {
+    color: white;
+    background: #5CC4C0;
+  }

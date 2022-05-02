@@ -1,0 +1,114 @@
+
+.header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.summary {
+    font-size: 24px;
+    margin-top: 30px;
+}
+
+.logo {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+.logo a {
+    padding: 10px;
+}
+.logo img {
+    max-width: 80px;
+    vertical-align: middle;
+}
+
+.body {
+    margin: 0 50px;
+}
+
+.queryconf {
+    padding-left: 20px;
+}
+
+#legend {
+    padding-left: 20px;
+}
+
+.load-graphs {
+    color:rgb(31, 119, 180);
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 20px;
+}
+
+#queryselect{
+    padding: 5px;
+    margin-left: 5px;
+    outline: none;
+    border: none;
+    background-color: #f5f5f5;
+}
+
+.advancedquery {
+    float: right;
+}
+
+.loading {
+    color: rgb(31, 119, 180);
+    font-size: 36px;
+    margin: 50px 0 0 100px;
+}
+
+footer {
+    background: whitesmoke;
+    bottom: 0;
+    padding: 10px 20px 0 20px;
+    width: 100%;
+    display: inline-block;
+    z-index: 200;
+    height: 40px;
+}
+
+.f1,
+.f2,
+.f3 {
+   -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: inline-block;
+    width: 19%;
+}
+.f2 {
+    text-align: right;
+}
+.f3 {
+    float: right;
+    text-align: right;
+}
+
+.people {
+    margin-left: 50px;
+}
+
+.div-login{
+    position: absolute;
+    top: 20px;
+    left: 80%;
+    width: 300px;
+}
+
+.b-login{
+    float: left;
+    border: none;
+    padding: 5px;
+    background-color: lightblue;
+}
+
+.text-login{
+    float:left; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block; 
+    width: 130px;
+    padding: 5px;
+}

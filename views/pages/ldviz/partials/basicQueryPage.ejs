@@ -1,0 +1,238 @@
+<div id="titleDiv">
+    <!-- the title goes below -->
+    <h1>Linked Data Visualizer</h1> 
+    <div class='div-login'>
+        <div class = 'text-login' id ='username'></div>
+        <button class='b-login' id='login-button' onclick="LDViz.auth.login()">Sign In</button>
+    </div>
+    
+    <p><a href='https://team.inria.fr/wimmics/'>Wimmics team</a> Inria, I3S, UCA, CNRS.</p> 
+    <p>In this page you can create, edit, and try out your own queries and visualize them using the MGExplorer Visualization Tool.</p>   
+
+</div>
+
+<div id="query_listDiv" style="display:none;">
+    <div class="content">
+
+        <!-- new query button -->
+        <div class="queries-control-panel"> 
+            <div id="filters-form">
+                <form name='filter_form' id='filter_form'>
+                    <table>
+                        <tr>&nbsp;&nbsp; Filter queries by
+                            <td> 
+                                <div id="selectBox" onclick="showCheckboxes(this)">
+                                    <select id='filter-endpoints' name='filter_endpoints' onmousedown="(function(e){ e.preventDefault(); })(event, this)">
+                                        <option>SPARQL Endpoint</option>
+                                    </select>
+                                </div>
+                                <div id="checkboxes" style="display: none;">
+                                    <label style="padding:2px; margin-left: 10px; cursor: pointer;" onclick="LDViz.queryTable.clearEndpointSelection()">Clear selection</label>
+                                    <label style="padding:2px; margin-left: 10px; cursor: pointer;" onclick="LDViz.queryTable.selectAllEndpoints()">Select all</label>
+                                </div>
+                            </td>
+                            <td>Published <input name="published" id="checkbox_published" type="checkbox"/>
+                                &nbsp; Not Published <input name="no_published" id="checkbox_published_no" type="checkbox"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Search queries by name <br>
+                                <input id='filter-name' name='filter_name' type="text" oninput="LDViz.queryTable.setQueryList(this.value.toLowerCase())"></input>
+                            </td>
+                        </tr>
+                    </table>            
+                </form>
+            </div>
+            <div id="newQueryDiv">
+                <i class="fa fa-plus-circle fa-2x query-icon" data-tippy-content="Create a new query" onclick="LDViz.queryTable.newQuery()"></i>
+            </div>
+        </div>
+        <hr>
+        <!-- list of queries (filled later) -->
+        <div id="queries-list" style="overflow-y: auto;"> 
+            <ul id="queries-ul"></ul>
+            <div style="display:none;" id="empty-queries-list">We could not find queries corrsponding to the selected filters.</div>
+        </div>
+    </div>
+</div>
+
+<!-- editor space -->
+<button type="button" style="width:1100px;margin:0 auto;display:none;" class="collapsible" id="query-button" onclick="collapseFormContent(this)">Collapse Query Form</button>
+<div id="tab" style="padding-left:100px; padding-right:100px;" class="collapsibleContent">
+    <div class="content">
+
+        <form name='query_form' id='query_form'>
+
+            <!-- query parameters -->
+            <section id='query_parameters'>
+                <table class="form_section table" id='query-head'>
+                    <tr>
+                        <td>Query Title </td>
+                        <td><input style="width:450px"  class="table_cell" id="form_queryTitle"  type="text" name="query_name" placeholder="Name of your query" /></td>
+                    </tr>
+                    <tr>
+                        <td>SPARQL Endpoint </td>
+                        <td>
+                            <input style="width:450px" list='list_endpoints' class="table_cell" id="form_sparqlEndpoint" type="text" name="query_endpoint" />
+                            <datalist id="list_endpoints"></datalist>
+                        </td>
+                    </tr>
+
+                    <!-- customizable options (only displayed for covid and hal pages) -->
+                    <tr id='params_title' style="border-top: 1px solid white !important;">
+                        <td colspan="3">Custom query variables 
+                            <i class="fas fa-info-circle"></i>
+                        </td>
+                    </tr>
+
+                    <tr id="type_form" >
+                        <td>Query Type</td><td>
+                            <select id='select_query_type' name='query_type' onchange='LDViz.editor.updateQueryOptions()'></select>
+                        </td>
+                    </tr>
+
+                    <tr id='period_form' >
+                        <td>Publication Period</td>
+                        <td>From <i class="far fa-copy"></i> 
+                            <select id='select_from_year' name='from_year'></select>
+                        </td>
+                        <td>To <i class="far fa-copy"></i> 
+                            <select id='select_to_year' name='to_year'></select>
+                        </td>
+                    </tr>
+
+                    <tr id='lab1_form'>
+                        <td id='lab1_title'>Institution <i class="far fa-copy"></i></td><td>
+                            <input id='input_lab1' name='query_lab1' style='width:400px' list='select_laboratory'>
+                            <datalist id='select_laboratory'></datalist>
+                        </td>
+                    </tr>
+                    <tr id='lab2_form' style='display:none;'>
+                        <td>Institution 2 <i class="far fa-copy"></i></td><td>
+                            <input id='input_lab2' name='query_lab2' style='width:400px' list='select_laboratory2'>
+                            <datalist id='select_laboratory2'></datalist>
+                        </td>
+                    </tr>
+                    <tr id='country_form' >
+                        <td>Country <i class="far fa-copy"></i></td><td>
+                            <!-- <input id='input_country' name='query_country' list='select_country'>
+                            <datalist id='select_country' ></datalist> -->
+                            <select id="select_country" name="query_country" id="select_country"></select>
+                        </td>
+                    </tr>
+                    <tr id='list_form' >
+                        <td>List of Authors <i class="far fa-copy"></i></td><td>
+                            <textarea id='input_list' name='query_list_authors' style='width:400px'></textarea>
+                        </td>
+                    </tr>
+
+                    <tr id='custom_variables' >
+                        <datalist id='named_entities_list'></datalist>
+                        <td>Custom Variables <i class="fas fa-plus entities" onclick="LDViz.editor.addVariable()"></i></td>
+                    </tr>
+
+                    <tr id='prefixes' style="border-top: 1px solid white !important;">
+                        <datalist id='prefixes_list'></datalist>
+                        <td>Query Prefixes 
+                            <i class="fas fa-plus prefixes" style="margin-left:5px;" onclick="LDViz.editor.addPrefix()"></i>
+                            <i class="far fa-copy copy-prefixes " style="margin-left:5px;" onclick='LDViz.editor.copyPrefixesToClipboard()'></i>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+            
+            <!-- text area to type the query -->
+            <section class="form_section" >
+                <textarea id="form_sparqlQuery"  rows="30" cols="120" name="query_content"
+                    style="overflow-y: scroll; font-family: sans-serif;font-size:16px;">
+                    
+                </textarea>
+            </section>
+
+            <!-- "stylesheet", either use the current values for the query or a stylesheet-type -->
+            <section class="form_section">  
+                Apply Stylesheet: <input type='checkbox' class="withStylesheet" name="withStylesheet" id="withStylesheet" /> <br>
+
+                <button type="button" class="collapsible" id="stylesheet-content" onclick="collapseFormContent(this)">Collapse Style sheet</button>
+
+                <section class="collapsibleContent">
+                    <table>
+                    <tr>
+                        <td>
+                            <textarea rows="30" cols="100" id="stylesheet" name="stylesheet"
+                                style="overflow-y: scroll; font-family: sans-serif;font-size:16px;" class="stylesheet" >
+                            </textarea>
+                        </td>
+                        <td valign='top'>
+                            <span class='iconsStylesheet'>
+                                <span style="width: 100%;">
+                                    <i class="fas fa-download" title='Download Stylesheet' onclick="LDViz.results.exportStylesheetContent()"></i>
+                                    <i class="fas fa-question-circle" title="How to use the Stylesheet" onclick="LDViz.editor.displayStylesheetInfo()"></i>
+                                </span>
+                                <div id='helpStylesheet'>
+                                    <p>You can use the stylesheet to customize the color of nodes (representing the values ?s and ?o of the query).</p>
+                                    <p>The patterns to apply styles are defined as follows: </p>
+                                    <p>Same style for both variables: <br> 
+                                        &nbsp;	&nbsp;	bind(\"&#60;key&#62;\" as ?style)</p>
+                                    <p>Style for variable ?s: <br> 
+                                        &nbsp;	&nbsp;	bind(\"&#60;key&#62;\" as ?style1)</p>
+                                    <p>Style for variable ?o: <br> 
+                                        &nbsp;	&nbsp;	bind(\"&#60;key&#62;\" as ?style2)</p>
+                                    <p>Second style of variables: <br>  
+                                        &nbsp;	&nbsp;	bind(\"&#60;key&#62;\" as ?mix)</p>
+                                    <p>Example of application using the default stylesheet:</p>
+                                    <p>select * where { <br>
+                                        &nbsp;	 ?s ?p ?o <br>
+                                        &nbsp;	 bind ("fst" as ?style1) <br>
+                                        &nbsp;	 bind ("snd" as ?style2) <br>
+                                        
+                                        &nbsp;	 bind ("rst" as ?mix) <br>
+                                    } </p>
+
+                                </div>
+                            </span>
+                        </td>
+                    </tr>
+                    </table>
+                </section>
+            </section>
+            
+            <!-- buttons for visualizing and exporting query results -->
+            <!-- THIS MUST BE COMMON TO BOTH PAGES -->
+            <section>
+                <hr>
+                <table class='query_buttons'>
+                    <tr>
+                        <td><input type='button' id='preview_button' value='Visualize SPARQL Query Results' onclick="LDViz.query.processQuery(this.form)"/></td>
+                        <td><input type="button" id="brut" value="View SPARQL Query Results" onclick="LDViz.results.open('sparql')"></td>
+                        <td><input type="button" id="trans" value="View Transformed Results" onclick="LDViz.results.open('transformed')"></td>
+                        <td><input type="button" id="trans" value="Export SPARQL Query" onclick="LDViz.results.exportSparqlQuery()"></td>
+                        <td><input type="button" class='edit_button' id='cancel_button' value="Cancel" style='display:none;' onclick="LDViz.editor.cancelChanges()"></td>
+                        <td><input type="button" class='edit_button' id='save_button' value="Save Changes" style='display:none;' onclick="LDViz.queryTable.editQuery(this.form)"></td>
+                    </tr>
+                </table>
+            </section>
+        </form>
+    </div>
+    
+</div>
+
+
+<!-- visualization's container -->
+<div id="visualisation_div" style='display:none;'>
+<p>
+    <!-- information about query (response time, size, etc) -- filled up when previewing the query -->
+    <hr>
+    <i class="fas fa-times close-icon" onclick="LDViz.vis.updateVisualizationSpace('none')"></i>
+    <p id='query-title'></p>
+    <p id="time1"></p>
+    <p id="time2"></p>
+    <p id="time3"></p>
+    <p id="test"></p>
+    <p id="res1"></p>
+    <p id="res2"></p>
+    <p id="res3"></p>
+
+    <div id="viewArea" style="top:auto" class="viewing"></div>
+    </p>
+</div>

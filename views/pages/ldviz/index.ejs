@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <%- include("./partials/head") %>
+        <title>Linked Data Visualizer</title>
+    </head>
+
+    <body>
+        <%- include("./partials/basicQueryPage") %>
+    </body>
+
+</html>
+<script>
+
+    window.addEventListener('load', function() {
+        let locals = <%- JSON.stringify(locals) %>;
+        LDViz.init(locals)
+        LDViz.setPage()
+    })
+
+</script>

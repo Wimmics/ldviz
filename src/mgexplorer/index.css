@@ -1,0 +1,165 @@
+/*@import url('../../lib/jquery-ui-1.10.3.custom.min.css');*/
+
+* {
+	padding: 0;
+	margin: 0;
+}
+
+#toolBar {
+	position: fixed;
+	width: 100%;
+   	height: 35px;
+	font-family: Verdana, Arial;
+	font-weight: bold;
+	font-size: 14px;   	
+    color: #000;
+    background-color:#AA9071;
+}
+
+#toolBar span{
+	cursor: pointer;
+	margin-left: 10px;
+}
+
+#query {
+	padding: 7px 10px 0px 6px;
+	display: inline-block;
+}
+
+#titulo {
+	font-size: 14px;
+    color: #ffe066;
+	padding: 0px 60px 0px 0px;	
+}
+
+#lblMensagem {
+	font-size: 11px;
+	font-style: italic;
+    color: #ffe066;
+	padding: 0px 0px 0px 60px;	
+}
+
+#viewArea {
+	position: absolute;
+	top: 50px;
+	width: 100%;
+	height: 100%;
+	margin-top: 1%;
+}
+#viewArea svg {
+	position: absolute;
+}
+
+.INF-checkbox.INF-disabled {
+	color: #CCC;
+}
+
+.loadFile{
+	position: absolute;
+	width: 450px;
+	height: 370px;
+	z-index: 1000;
+	box-shadow: 5px 5px 5px #ccc;
+	color: black;
+	background-color: white;
+	top: 35px;
+	left: 610px;
+	border-radius: 5px;
+	font-weight: normal;
+	padding: 10px;
+	display: none; 
+}
+
+.loadFile label{
+	font-weight: normal;
+}
+
+.loadFile button{
+	margin-top: 10px;
+	padding: 0px 2px 0px 2px;
+}
+
+.DS-linkChartShow {
+    stroke: #3399FF;
+    stroke-width: 2.0;
+}
+
+.DS-linkChartHidden {
+    stroke: gray;
+    stroke-width: 1.0;
+    stroke-dasharray: 2, 3;
+}
+
+.DS-conect {
+    stroke: gray;
+    stroke-width: 1.0;
+    fill: #f0f0f0;
+    cursor: move;
+}
+
+
+.DS-popup {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: #F0F0F0;
+    width: 72px;
+    border: 1px #ccc solid;
+    border-radius: 4px;
+    box-shadow: #333 2px 2px 4px;
+    padding: 3px;
+    z-index: 1000;
+
+    font-family: sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.small-size {
+    /* height: 16px; */
+}
+
+.medium-size {
+    /* height: 72px; */
+}
+
+.big-size {
+    /* height: 82px; */
+}
+
+.DS-popup div {
+    padding: 3px 5px 3px 5px;
+}
+
+.DS-popup div:hover {
+    background-color: #FFF;
+}
+
+.autocomplete {
+    background: white;
+    z-index: 1000;
+    font: 14px/22px "-apple-system", BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow: auto;
+    box-sizing: border-box;
+    border: 1px solid rgba(50, 50, 50, 0.6);
+}
+
+.autocomplete * {
+    font: inherit;
+}
+
+.autocomplete > div {
+    padding: 0 4px;
+}
+
+.autocomplete .group {
+    background: #eee;
+}
+
+.autocomplete > div:hover:not(.group),
+.autocomplete > div.selected {
+    background: #81ca91;
+    cursor: pointer;
+}
+
+
