@@ -148,7 +148,7 @@
         {"id": "corese", "name": "Corese", "url": "http://corese.inria.fr/sparql"},
         {"id": "wasabi", "name": "Wasabi", "url": "http://wasabi.inria.fr/sparql"},
         {"id": "indegx", "name": "IndeGx", "url": "http://prod-dekalog.inria.fr/sparql"},
-        {"id": "issa", "name": "ISSA", "url": "http://erebe-vm3.i3s.unice.fr/sparql"}
+        {"id": "issa", "name": "ISSA", "url": "http://issa.i3s.unice.fr/sparql"}
     ],
     "prefixes": [
         {"id": "rdf", "name": "RDF", "value": "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"},

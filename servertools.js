@@ -45,14 +45,35 @@ class Cache{
         }
     }
 
-    getFileName(id) {
-        return path.join(__dirname, this.folder + id + '.json')
+    getFileName(query) {
+        let filename = query.id
+        let params = query.params;
+
+        if (params) {
+            if (params.country.length) {
+                filename += '_' + params.country
+            } 
+
+            params.lab.forEach(lab => {
+                if (lab.length) filename += '_' + lab
+            })
+
+            params.period.forEach(period => {
+                filename += '_' + period
+            })
+
+            params.variables.forEach(term => {
+                if (term.length) filename += '_' + term
+            })
+        }
+
+        return path.join(__dirname, this.folder + filename + '.json')
     }
 
-    async getFile(id) {
+    async getFile(query) {
         return new Promise( async (resolve, reject) => {
-            let filename = this.getFileName(id)
-            if (id && fs.existsSync(filename)) {
+            let filename = this.getFileName(query)
+            if (query.id && fs.existsSync(filename)) {
                 // Check if cache exists for request (for published queries only - query with id)
                 const stats = fs.statSync(filename);
                 if ((new Date().getTime() - stats.mtimeMs) < this.datafiletimeout) {
@@ -70,8 +91,8 @@ class Cache{
         })
     }
 
-    async saveFile(result, id) {
-        let filename = this.getFileName(id)
+    async saveFile(result, query) {
+        let filename = this.getFileName(query)
         fs.writeFileSync(filename, result, function (err) {
             if (err) {
                 console.log("Error while writing file " + filename + " - " + err);

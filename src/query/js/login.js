@@ -16,8 +16,8 @@ class Auth {
             let href = window.location.href
             let origin = window.location.origin
             console.log(href, origin)
-            href = href.replace(`${origin}/query/${action}`, '')
-            location.href = this.loginPage + href + '&action=' + action
+            // href = href.replace(`${origin}/query/${action}`, '')
+            location.href = this.loginPage + '?action=' + action + '&' + href.split('?')[1]
         } else 
             location.href = this.loginPage
     }

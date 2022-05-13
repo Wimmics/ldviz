@@ -74,7 +74,7 @@ app.post(prefix + '/login', async (req, res) => {
     if(user){
         req.session.user = user;
         if (req.query.action) {
-            res.redirect('/query/' + req.query.action + '?queryId=' + req.query.queryId);
+            res.redirect(prefix + '/query/' + req.query.action + '?queryId=' + req.query.queryId);
         } else res.redirect(prefix + '/query');
     }
     else {
@@ -86,7 +86,7 @@ app.get(prefix + '/logout', (req, res) => {
     if (req.session.user) {
         delete req.session.user;
     }
-    res.redirect('/ldviz');  
+    res.redirect('/ldviz/query');  
 })
 
 /////////// end login routes //////////////////////////
@@ -242,56 +242,33 @@ app.post(prefix + '/saveHistory', function (req, res) {
 ///////////////////////////////////////
 // SPARQL request
 app.post(prefix + '/sparql', async function (req, res) {
-    // console.log(req.body)
-    // Il s'agit de l'envoi d'une requête SPARQL.
-    // Le serveur reçoit la requête en JSON (chaîne de caractères) dont le format est:
-    // {"query":  SPARQL Query, "format": graphic display type, "type": query type number}
+    
+    let query = req.body;
+    
+    query.id = query.id === 'undefined' ? undefined : query.id;
 
-    // let data = '';      // contenu de la requête (objet transformé en string)
-
-    // req.on('data', function (text) {
-    //     data += text; // get data from HTML page form
-    // });
-
-    // req.on('end', async function () {
-        // data = JSON.parse(data);
-        // let query = data.query;
-        let query = req.body;
-
-        // let cachefilename = cachefile.ldviz + query.id + '.json';
-        query.id = query.id === 'undefined' ? undefined : query.id;
+    try {
+        let result = await cache.getFile(query)
 
         try {
-            let result = await cache.getFile(query.id)
-
-            try {
-                if (!result) {
-                    result = await sparql.sendRequest(query.query, query.uri)
-                    // Save request result in cache (for predefined queries only - query with id)
-                    if (query.id) await cache.saveFile(result, query.id)             
-                }
-
-                // send result back to client: HTML + JS graphic specification
-                // res.writeHeader(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-                res.send(result);
-            } catch (e) {
-                console.log('error = ', e)
-                // send error back to client
-                // res.writeHeader(400, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-                // res.write(JSON.stringify(e), "utf-8");
-                res.sendStatus(400)
+            if (!result) {
+                result = await sparql.sendRequest(query.query, query.uri)
+                // Save request result in cache (for predefined queries only - query with id)
+                if (query.id) await cache.saveFile(result, query)             
             }
 
-        } catch(e) {
+            // send result back to client: HTML + JS graphic specification
+            res.send(result);
+        } catch (e) {
             console.log('error = ', e)
-            // res.writeHeader(400, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-            // res.write(JSON.stringify(e), "utf-8");
+            // send error back to client
             res.sendStatus(400)
         }
-        
-        
-        // res.end();
-    // });
+
+    } catch(e) {
+        console.log('error = ', e)
+        res.sendStatus(400)
+    }
 })
 
 

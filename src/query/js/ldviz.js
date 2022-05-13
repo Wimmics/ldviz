@@ -42,7 +42,7 @@ class LDViz{
         this.editor.setQueryTypesList()
 
         setTabAction(document.getElementById('form_sparqlQuery')) // for using tabs inside textarea
-
+        
         if (this.action) {
             if (this.auth.user)
                 this.editor.displayQuery(this.queryTable.existingQuery, this.action)
