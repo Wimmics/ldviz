@@ -197,6 +197,8 @@ export class MgeQuery {
           if (params.variables.length > 1) {
             select(this.element.querySelector('#custom_value2')).node().style.display = 'table-row'
             select(this.element.querySelector('#input_value2')).node().value = params.variables[1]
+          } else if (params.variables.length === 1) {
+            select(this.element.querySelector('#custom_value2')).node().style.display = 'none'
           }
           
           // select(this.element.querySelector('#params_title'))
@@ -220,7 +222,7 @@ export class MgeQuery {
           select(this.element.querySelector('#custom_value2')).node().style.display = 'none'
         }
 
-        this.updateQueryOptions()
+        // this.updateQueryOptions()
 
       } else {
           this.disableButton()

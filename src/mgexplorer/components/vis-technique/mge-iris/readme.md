@@ -38,7 +38,6 @@
 
 ### `_getTheRightOrder(i: any) => Promise<any>`
 
-
 _getTheRightOrder
 
 Returns the order in which we need to display the types of documents
