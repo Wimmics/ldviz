@@ -11,6 +11,7 @@ export const config: Config = {
       './src/scripts/query-helper': ['query-helper']
     }
   },
+  enableCache: false,
   outputTargets: [
     {
       type: 'dist',
@@ -28,7 +29,7 @@ export const config: Config = {
     {
       type: 'www',
       serviceWorker: null, // disable service workers
-      baseUrl: 'http://localhost:8080',
+      baseUrl: 'http://localhost:8040',
     },
   ],
   rollupPlugins: {
