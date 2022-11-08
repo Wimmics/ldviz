@@ -130,9 +130,13 @@ class SPARQLRequest{
     async sendRequest(query, uri){
         let url = uri + "?query=";
         url = url + this.prepare(query); 
-        url = url + "&format=application%2Fsparql-results%2Bjson";
+        // url = url + "&format=application%2Fsparql-results%2Bjson";
+
+        let headers = {
+            accept: "application/sparql-results+json"
+        }
         
-        let result = await fetch(url).then(async function(response){
+        let result = await fetch(url, { method: 'GET', headers: headers}).then(async function(response){
          
           if(response.status >= 200 && response.status < 300){
             return await response.text().then(data => {

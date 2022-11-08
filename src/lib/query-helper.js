@@ -2,6 +2,7 @@ import Swal from 'sweetalert2'
 
 import state from "../mgexplorer/store"
 import isHTML from 'is-html';
+import detectCSV from 'detect-csv';
 import { transform } from './trans_mg4'
 
 /**

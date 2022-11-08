@@ -34,6 +34,7 @@
     "d3-collection": "^1.0.7",
     "d3-scale-chromatic": "^3.0.0",
     "d3-simple-slider": "^1.10.4",
+    "detect-csv": "^1.1.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "express-back": "0.0.2",
