@@ -25,7 +25,7 @@ class QueryTable{
             {'label': 'Delete Query', 'class': 'far fa-trash-alt', 'value': 'delete',
                 'action': d => this.deleteQuery(d), auth: true },
             {'label': 'Clear Query Cache', 'class': 'fas fa-broom', 'value': 'clear',
-            'action': d => this.clearQueryCache(d.id) }]
+            'action': d => this.clearQueryCache(d) }]
     }
 
     loadViewPage(query) {
@@ -202,20 +202,20 @@ class QueryTable{
                 exit => exit.remove()
             )
 
-        d3.select('input#checkbox_published')
-            .property('checked', this.filters.published)
-            .on('change', function() {
-                self.filters.published = this.checked
-                self.setQueryList()
-                self.saveFilters()
-            })
-        d3.select('input#checkbox_published_no')
-            .property('checked', this.filters.unpublished)
-            .on('change', function() {
-                self.filters.unpublished = this.checked
-                self.setQueryList()
-                self.saveFilters()
-            })
+        // d3.select('input#checkbox_published')
+        //     .property('checked', this.filters.published)
+        //     .on('change', function() {
+        //         self.filters.published = this.checked
+        //         self.setQueryList()
+        //         self.saveFilters()
+        //     })
+        // d3.select('input#checkbox_published_no')
+        //     .property('checked', this.filters.unpublished)
+        //     .on('change', function() {
+        //         self.filters.unpublished = this.checked
+        //         self.setQueryList()
+        //         self.saveFilters()
+        //     })
     }
 
     clearEndpointSelection() {
@@ -249,7 +249,6 @@ class QueryTable{
 
 
     processQuickPreview(queryObject) {
-        console.log(queryObject)
         window.open(`${LDViz.explorerPage}?id=${queryObject.id}`)
         
         
@@ -288,12 +287,12 @@ class QueryTable{
     /**
      * Clear the cache of a query
      */
-    clearQueryCache(queryId) {
+    clearQueryCache(query) {
 
         fetch(LDViz.cacheRoute, {
             method:'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id: queryId })
+            body: JSON.stringify({ query: query })
         }).then(response => {
             toast("Cache cleared!")
         }).catch(error => {

@@ -103,8 +103,9 @@ class Cache{
         });
     }
 
-    async deleteFile(id) {
-        let filename = this.getFileName(id)
+    async deleteFile(query) {
+        let filename = this.getFileName(query)
+
         if (fs.existsSync(filename)) {
             fs.unlink(filename, function (err) {
                 if (err) {

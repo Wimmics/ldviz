@@ -19,8 +19,8 @@
             <div id="filters-form">
                 <form name='filter_form' id='filter_form'>
                     <table>
-                        <tr>&nbsp;&nbsp; Filter queries by
-                            <td> 
+                        <tr>
+                            <td>Filter queries by
                                 <div id="selectBox" onclick="showCheckboxes(this)">
                                     <select id='filter-endpoints' name='filter_endpoints' onmousedown="(function(e){ e.preventDefault(); })(event, this)">
                                         <option>SPARQL Endpoint</option>
@@ -31,15 +31,16 @@
                                     <label style="padding:2px; margin-left: 10px; cursor: pointer;" onclick="LDViz.queryTable.selectAllEndpoints()">Select all</label>
                                 </div>
                             </td>
-                            <td>Published <input name="published" id="checkbox_published" type="checkbox"/>
+                            <!-- <td>Published <input name="published" id="checkbox_published" type="checkbox"/>
                                 &nbsp; Not Published <input name="no_published" id="checkbox_published_no" type="checkbox"/>
-                            </td>
-                        </tr>
-                        <tr>
+                            </td> -->
                             <td>Search queries by name <br>
                                 <input id='filter-name' name='filter_name' type="text" oninput="LDViz.queryTable.setQueryList(this.value.toLowerCase())"></input>
                             </td>
                         </tr>
+                        <!-- <tr>
+                            
+                        </tr> -->
                     </table>            
                 </form>
             </div>
