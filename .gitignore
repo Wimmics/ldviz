@@ -2,6 +2,7 @@ dist/
 www/
 loader/
 data/cache/**
+data/hceres/**
 
 data/users.json
 data/queries.json

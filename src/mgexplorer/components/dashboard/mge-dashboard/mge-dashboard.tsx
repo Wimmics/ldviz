@@ -7,7 +7,7 @@ import { toPng, toSvg } from 'html-to-image';
 import Swal from 'sweetalert2';
 import { takeScreenshot, screenshotOptions } from '../../../utils/utils';
 
-import { sendRequest } from '../../../../lib/query-helper';
+import { sendRequest, getResult } from '../../../../lib/query-helper';
 
 @Component({
   tag: 'mge-dashboard',
@@ -74,7 +74,13 @@ export class MgeDashboard {
     state.globalParams = locals.params;
     state.queriesList = locals.queries;
 
-    if (Object.keys(locals.queryParams).length) {
+    console.log(locals);
+    if (locals.hceres) {
+      this.initComponent = state.views.nodelink;
+      getResult(locals.hceres.data, null, 0)
+      this.setDashboard()
+    }
+    else if (Object.keys(locals.queryParams).length) {
       this.showLoading()
       let queryData = null
       if (locals.queryParams.id) {
@@ -106,6 +112,7 @@ export class MgeDashboard {
   setDashboard(){
     let key = 'data-' + state.indexQueryData;
     let data = state._data[key]
+    console.log(data)
     if (typeof data !== "undefined") {  
 
         this.hideLoading()

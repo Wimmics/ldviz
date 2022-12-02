@@ -97,6 +97,17 @@ app.get(prefix + '/', async function (req, res){
     res.render("pages/mgexplorer/index", result);
 })
 
+app.get(prefix + '/hceres', async function (req, res){
+    await users.checkConnection(req)
+    let result = await data.load(req)
+
+    let docs = fs.readFileSync('data/hceres/aline-menin-hal.json');
+    result.hceres = {
+        data: JSON.parse(docs)
+    }
+    res.render("pages/mgexplorer/index", result);
+})
+
 // LDViz about page 
 app.get(prefix + '/about', function (req, res) {
     res.render("pages/about");

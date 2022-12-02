@@ -181,12 +181,20 @@ Receives the result from the query and proceed to visualization
 async function getResult(res, query, dataIndex) {
     let result = res
 
+    console.log(res)
     if (!res.message) {
         // transform data for MGExplorer
-        result = await transform(res.results.bindings, query.params ? query.params.type : 1, query.stylesheetActive ? query.stylesheet : null);
-        result.sparql = res
+        if (res.result) {
+            result = await transform(res.results.bindings, query.params ? query.params.type : 1, query.stylesheetActive ? query.stylesheet : null);
+            result.sparql = res
+        }
+        else {
+            console.log("transforming")
+            result = await transform(res, 1, null)
+        }
     }
 
+    console.log("saving data")
     saveData(result, dataIndex)
 }
 
@@ -303,4 +311,4 @@ function getFrenchName(country) {
     Swal.fire(options);
 }
 
-export { processQuery, clearQueryCache, sendRequest }
+export { processQuery, clearQueryCache, sendRequest, getResult }
