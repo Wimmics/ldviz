@@ -3,7 +3,7 @@ import  { select, selectAll } from 'd3-selection'
 import {range} from "d3"
 import state from "../../../store"
 
-import { processQuery, clearQueryCache } from '../../../../lib/query-helper.js'
+import { processQuery, clearQueryCache, requestFile } from '../../../../lib/query-helper.js'
 
 
 @Component({
@@ -200,23 +200,6 @@ export class MgeQuery {
           } else if (params.variables.length === 1) {
             select(this.element.querySelector('#custom_value2')).node().style.display = 'none'
           }
-          
-          // select(this.element.querySelector('#params_title'))
-          //   .selectAll('td')
-          //   .data(params.variables.concat(...params.variables).sort())
-          //   .join(
-          //     enter => enter.append('td')
-          //       .call(table_td => table_td.filter((_,i) => i % 2 === 1)
-          //       .append('input')
-          //       .attr('class', 'table_cell')
-          //       .attr('value', d => d)
-          //       .attr('id', (_, i) => 'term' + (i + 1))
-          //       .attr('name', (_, i) => 'term' + (i + 1))),
-          //     update => update.call(table_td => table_td.select('input').attr('value', d => d)),
-          //     exit => exit.remove()
-          //   )
-          //   .call(table_td => table_td.filter((_,i) => i % 2 === 0)
-          //     .text((_,i) => 'Term ' + (i + 1)))
         } else {
           select(this.element.querySelector('#custom_value1')).node().style.display = 'none'
           select(this.element.querySelector('#custom_value2')).node().style.display = 'none'
@@ -244,16 +227,18 @@ export class MgeQuery {
    */
   changeEndpoint(event, value) {
 
+      
       select(this.element.querySelector('#form_query'))
-      .selectAll('option').remove()
+        .property('disabled', false)
+        .selectAll('option').remove()
 
       select(this.element.querySelector('#form_query'))
-      .selectAll('option')
-      .data(state.queriesList.filter(d => d.uri == value))
-      .enter()
-          .append('option')
-          .attr('value', d => d.id)
-          .text((d, i) => { return 'Query ' + (i+1) + '. ' + d.name})
+        .selectAll('option')
+        .data(state.queriesList.filter(d => d.uri == value))
+        .enter()
+            .append('option')
+            .attr('value', d => d.id)
+            .text((d, i) => { return 'Query ' + (i+1) + '. ' + d.name})
 
       if (!this.cloneStatus.isFirstTime){
         select(this.element.querySelector('#form_query'))
@@ -275,13 +260,23 @@ export class MgeQuery {
    * Event function when change the predefined query from the predefined query list input
    * After changing query, the information regarding predefined query will be update on the form
    */
-  changeQuery(event, value){
-      if (value == "")
-        this.query = null;
-      else 
-        this.query = state.queriesList.find(x => String(x.id) == value);
-      
-      this.displayQuery(this.query)
+  // changeQuery(event, value){
+  //   this.query = value.length ?  state.queriesList.find(x => String(x.id) == value) : null;
+  //   this.displayQuery(this.query)
+  // }
+
+  changeQuery() {
+    let sel = select(this.element.querySelector('#form_query')).node()
+    let value = sel.options[sel.selectedIndex].value
+    this.query = value.length ?  state.queriesList.find(x => String(x.id) == value) : null;
+    console.log(this.query)
+    this.displayQuery(this.query)
+  }
+
+  changeDataset(){
+    let value = select(this.element.querySelector('#form_datasets')).node().value
+    this.query = select(this.element.querySelector("#list_datasets")).selectAll('option').filter(function() { return this.text === value }).datum()
+    this.enableButton();
   }
 
   /**
@@ -348,6 +343,16 @@ export class MgeQuery {
     }
   }
 
+  defaultOption(id, text) {
+    select(this.element.querySelector(id))
+      .append('option')
+      .attr('value', "")
+      .attr("disabled", true)
+      .attr("hidden", true)
+      .attr("selected", true)
+      .text(text)
+  }
+
   /**
    * Import list input of endpoint field by Endpoints data from defined input params that set in the begin 
    */
@@ -366,30 +371,52 @@ export class MgeQuery {
 
       let globalThis = this;
       
-      select(this.element.querySelector('#vis_query'))
-          .selectAll('option')
-          .data(Object.keys(state.views).filter(d => !['query', 'history', 'annotation'].includes(d) ).map(key => state.views[key].title))
-          .enter()
-              .append('option')
-              .attr('value', d => d)
-              .text(d => d)
-
-      // Add disabled option to query input
-      select(this.element.querySelector('#form_query'))
-            .append('option')
-            .attr('value', "")
-            .attr("disabled", true)
-            .attr("hidden", true)
-            .attr("selected", true)
-            .text("Select a query")
-
       // Set onchange event to endpoint input
       select(this.element.querySelector('#form_sparqlEndpoint'))
         .on("change", function(event) { globalThis.changeEndpoint(event, this.value)})
-      // Set onchange event to query input
-      select(this.element.querySelector('#form_query'))
-          .on("change", function(event) { globalThis.changeQuery(event, this.value); })
+
+      // // Set onchange event to query input
+      // select(this.element.querySelector('#form_query'))
+      //     .on("change", function(event) { globalThis.changeQuery(event, this.value); })
+
    } 
+  }
+
+  initVisList() {
+    select(this.element.querySelector('#vis_query'))
+      .selectAll('option')
+      .data(Object.keys(state.views).filter(d => !['query', 'history', 'annotation'].includes(d) ).map(key => state.views[key].title))
+      .enter()
+          .append('option')
+          .attr('value', d => d)
+          .text(d => d)
+  }
+
+  async initDatasetsList() {
+    let data = await fetch('/ldviz/hceres/filenames', { method: 'GET' })
+      .then(async function(response){
+          if(response.status >= 200 && response.status < 300){
+              return await response.text().then(text => {
+                  return JSON.parse(text);
+              })}
+          else return response
+      })
+
+    data.sort( (a,b) => a.name.localeCompare(b.name));
+
+    select(this.element.querySelector("#list_datasets"))
+      .selectAll('option')
+      .data(data)
+      .enter()
+      .append('option')
+      .text(d => {
+        let value = d.filename.split('.')[0].replace(new RegExp(d.idHal, "g"), '').replace(/-/g, ' ')
+        value.charAt(0).toUpperCase() + value.slice(1);
+        return d.name + ': ' + value;
+      })
+
+    select(this.element.querySelector("#form_datasets"))
+      .on("change", () => this.changeDataset())
   }
 
   /**
@@ -412,8 +439,19 @@ export class MgeQuery {
             .append('option')
             .attr('value', d => d)
             .text(d => d)
-            //.property('selected', d => d == currentYear)
+  }
 
+  setDatalistInteraction(id) {
+    select(this.element.querySelector(id))
+      .on('click', function() {
+        select(this).attr('placeholder', this.value)
+        this.value = '';
+      })
+      .on('mouseleave', function() {
+        if (!this.value.length) {
+          this.value = this.placeholder;
+        }
+      })
   }
 
   /**
@@ -456,14 +494,28 @@ export class MgeQuery {
   }
 
   /**
+   * An offline version was created to visualize data that do not come from a SPARQL endpoint
+   * For now, it is applied to HAL data, which was used in the HCERES evaluation 2023
+   * to-do: generalize this functionality to use with any kind of data
+   */
+  async setOfflineMode() {
+      select(this.element.querySelector("#filename")).style('display', 'block')
+      select(this.element.querySelector("#sparql_endpoint")).style('display', 'none')
+      select(this.element.querySelector("#sparql_query")).style('display', 'none')
+  }
+
+  /**
     * Build function to the form for interacting on the form
     * 
   */
   buildForm(){
+
+    if (state._hceres) this.setOfflineMode()
+
     this._view = this._dashboard.shadowRoot.querySelector("[id-view='" + this.element.id + "']")
     select(this.element.querySelector("#clone")).on("click", () => this.cloneQuery() )
 
-    select(this.element.querySelector("#clear-cache")).on("click", () => clearQueryCache(this.query.id) )
+    select(this.element.querySelector("#clear-cache")).on("click", () => clearQueryCache(this.query) )
 
     select(this.element.querySelector("#run")).on("click", () => {
       this.disableButton();
@@ -479,9 +531,14 @@ export class MgeQuery {
       }
       
       this._indexDataset = Object.keys(state._data).length
-      state._queries["data-"+this._indexDataset] = this.query
-     
-      processQuery(this.form, this.query, this._indexDataset) // sending the query to recover prefixes 
+
+      if (state._hceres) {
+        requestFile(this.query, this._indexDataset)
+      } else {
+        state._queries["data-"+this._indexDataset] = this.query
+      
+        processQuery(this.form, this.query, this._indexDataset) // sending the query to recover prefixes 
+      }
       this.displayGraphics()  
     })
   }
@@ -493,9 +550,8 @@ export class MgeQuery {
     if (typeof data !== "undefined") {
         
         this.hideLoading()
-        if (data.message) {
-          alert(data.response)
-          console.log(data.response)
+        if (data.message) { 
+          alert(data.response || data.message)
         } else {
           // to-do: change the datasetName in the view
           await this._view.setDatasetName(key)
@@ -512,15 +568,20 @@ export class MgeQuery {
   }
 
   componentDidLoad(){
-      let selectQuery = select(this.element.querySelectorAll(".query")[0])
+      select(this.element.querySelectorAll(".query")[0])
                 .style("width", this.width + "px")
                 .style("height", this.height + "px")
                 .style("overflow", "auto");
       this.form = this.element.querySelector("#query_form");
+      this.defaultOption('#form_query', 'Select a query')
+      this.setDatalistInteraction('#form_sparqlEndpoint')
+      this.setDatalistInteraction("#form_datasets")
+
       this.initPeriodList();
       this.initLabList();
       this.initCountryList();
       this.initEndpointsList();
+      this.initDatasetsList();
       this.buildForm();
   }
 
@@ -531,19 +592,28 @@ export class MgeQuery {
         <form name='query_form' id='query_form' class="content">
             <section id='query_parameters'>
             <table class="form_section table" id='query-head'>
-                <tr>
+                <tr id="sparql_endpoint" >
                     <td >SPARQL Endpoint * </td>
                     <td>
-                        {/* <select class="table_cell" id="form_sparqlEndpoint" name="query_endpoint" style={{width: this.width * 0.65 + "px"}} /> */}
                         <input class="table_cell" id="form_sparqlEndpoint" list="list_endpoints" name="query_endpoint" style={{width: this.width * 0.65 + "px", "margin-left": "5px"}} placeholder="Select a SPARQL Endpoint"></input>
                         <datalist id="list_endpoints"></datalist> 
                   
                     </td>
                 </tr>
-                <tr>
+                <tr id="sparql_query">
                     <td > Query * </td>
                     <td >
-                        <select class="table_cell" id="form_query" name="query_list" style={{width: this.width * 0.65 + "px"}} />
+                        <select class="table_cell" id="form_query" name="query_list" disabled 
+                          style={{width: this.width * 0.65 + "px"}} 
+                          onChange={(event) => this.changeQuery()} />
+                    </td>
+                </tr>
+
+                <tr id="filename" style={{display: "none"}}>
+                    <td > Dataset * </td>
+                    <td >
+                        <input class="table_cell" id="form_datasets" list="list_datasets" name="datasets" style={{width: this.width * 0.65 + "px", "margin-left": "5px"}} placeholder="Select a Dataset"></input>
+                        <datalist id="list_datasets"></datalist> 
                     </td>
                 </tr>
 
@@ -603,12 +673,12 @@ export class MgeQuery {
                     <datalist id='prefixes_list'></datalist>
                 </tr>
 
-                <tr>
+                {/* <tr> // to-do: include it when the visual mapping is ready
                     <td > Visualization technique * </td>
                     <td >
                         <select class="table_cell" id="vis_query" name="vis_list" style={{width: this.width * 0.65 + "px"}} />
                     </td>
-                </tr>
+                </tr> */}
             </table>
         </section>
             <section class="form_section" >

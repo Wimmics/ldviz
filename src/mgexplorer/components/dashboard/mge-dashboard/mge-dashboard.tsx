@@ -73,14 +73,9 @@ export class MgeDashboard {
   async init (locals) {
     state.globalParams = locals.params;
     state.queriesList = locals.queries;
+    state._hceres = locals.hceres
 
-    console.log(locals);
-    if (locals.hceres) {
-      this.initComponent = state.views.nodelink;
-      getResult(locals.hceres.data, null, 0)
-      this.setDashboard()
-    }
-    else if (Object.keys(locals.queryParams).length) {
+    if (Object.keys(locals.queryParams).length) {
       this.showLoading()
       let queryData = null
       if (locals.queryParams.id) {
@@ -112,13 +107,11 @@ export class MgeDashboard {
   setDashboard(){
     let key = 'data-' + state.indexQueryData;
     let data = state._data[key]
-    console.log(data)
     if (typeof data !== "undefined") {  
 
         this.hideLoading()
         if (data.message) {
           alert(data.message)
-          console.log(data.response)
         } else{
           this.datasetName = key;
           let svg = select(this.element.shadowRoot.querySelectorAll(".graph")[0])

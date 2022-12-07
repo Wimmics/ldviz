@@ -8,13 +8,13 @@ import { transform } from './trans_mg4'
 /**
 * Clear cache that stored from server
 */
-function clearQueryCache(queryid) {
+function clearQueryCache(query) {
     // Send request
     let url = "/ldviz/clearcache";
     fetch(url, {
         method:'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ id: queryid })
+        body: JSON.stringify({ query: query })
     }).then(response => {
         toast("Cache cleared!")
     }).catch(error => {
@@ -71,7 +71,7 @@ function sendRequest(values, dataIndex) {
         try{
             let res = JSON.parse(text)
             // result.response = res
-            // console.log('res = ', res)
+            console.log('res = ', res)
     
             if (res.results) {
                 if (res.results.bindings && res.results.bindings.length) {
@@ -175,26 +175,39 @@ function sendRequest(values, dataIndex) {
 
 }
 
+async function requestFile(data, dataIndex) {
+    let result = await fetch('/ldviz/hceres/data/' + data.filename, { method: 'GET' })
+        .then( async function(response){
+        if(response.status >= 200 && response.status < 300){
+            return await response.text().then(text => {
+                return JSON.parse(text);
+            })}
+        else return response
+    })
+
+    if (!result.length) 
+        result = { message: `No publications found in the HAL database. Please verify that the publications are corrected associated to the idHal of the author (this search uses idHal=${data.idHal}).`}
+
+    getResult(result, null, dataIndex)
+}
+
 /**
 Receives the result from the query and proceed to visualization
 */
 async function getResult(res, query, dataIndex) {
     let result = res
 
-    console.log(res)
+    // transform data for MGExplorer
     if (!res.message) {
-        // transform data for MGExplorer
-        if (res.result) {
+        if (res.results) {
             result = await transform(res.results.bindings, query.params ? query.params.type : 1, query.stylesheetActive ? query.stylesheet : null);
             result.sparql = res
         }
         else {
-            console.log("transforming")
             result = await transform(res, 1, null)
         }
     }
 
-    console.log("saving data")
     saveData(result, dataIndex)
 }
 
@@ -311,4 +324,4 @@ function getFrenchName(country) {
     Swal.fire(options);
 }
 
-export { processQuery, clearQueryCache, sendRequest, getResult }
+export { processQuery, clearQueryCache, sendRequest, requestFile }

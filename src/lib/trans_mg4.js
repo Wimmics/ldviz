@@ -630,5 +630,4 @@ async function getEdgeInfo(id1, id2, qtEachTypeCo, qtPubCo) {
 }
 
 window.transformData = transform
-
-export { transform }
+export {transform}

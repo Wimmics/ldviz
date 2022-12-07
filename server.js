@@ -20,6 +20,8 @@ const morgan = require('morgan');
 const _ = require('lodash');
 const { config } = require('process');
 
+const csv = require('csvtojson');
+
 const servertools = require('./servertools');
 const { SPARQLRequest, Users, Cache, Data } = require('./servertools');
 const sparql = new SPARQLRequest()
@@ -100,12 +102,49 @@ app.get(prefix + '/', async function (req, res){
 app.get(prefix + '/hceres', async function (req, res){
     await users.checkConnection(req)
     let result = await data.load(req)
-
-    let docs = fs.readFileSync('data/hceres/aline-menin-hal.json');
-    result.hceres = {
-        data: JSON.parse(docs)
-    }
+    result.hceres = true;
     res.render("pages/mgexplorer/index", result);
+})
+
+app.get(prefix + "/hceres/filenames", async function(req, res) {
+    let filenames = fs.readdirSync("data/hceres/")
+
+    let result = []
+
+    let people = await csv().fromFile("data/hceres/SPARKS_ID_HAL.csv")
+    people.forEach(p => {
+        if (!p.idHal.length) return;
+
+        let files = filenames.filter(f => f.includes(p.idHal))
+        
+        files.forEach(f => {
+            result.push({
+                name: `${p.Nom} ${p.Prenom}`,
+                idHal: p.idHal,
+                orcid: p.ORCID,
+                filename: f
+            })
+        })
+    })
+
+    let sparks = filenames.filter(f => f.includes("SPARKS-"))
+    sparks.forEach(f => {
+        result.push({
+            name: "SPARKS",
+            idHal: "",
+            orcid: "",
+            filename: f
+        })
+    })
+       
+
+    res.send(JSON.stringify(result))
+})
+
+app.get(prefix + "/hceres/data/:dataset", async function(req, res) {
+    let result = fs.readFileSync('data/hceres/' + req.params.dataset)
+
+    res.send(result)
 })
 
 // LDViz about page 
@@ -245,7 +284,6 @@ app.post(prefix + '/saveAnnotation', function (req, res) {
 app.post(prefix + '/saveHistory', function (req, res) {
     var path = "data/history/history.json";
     var data = req.body; // query content
-    console.log(data);
     servertools.update_file(path,data);
     res.sendStatus(200);
 })

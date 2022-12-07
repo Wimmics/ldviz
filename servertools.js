@@ -56,7 +56,7 @@ class Cache{
 
             if (params.lab) 
                 params.lab.forEach(lab => {
-                    if (lab.length) filename += '_' + lab
+                    if (lab && lab.length) filename += '_' + lab
                 })
 
             if (params.period)
@@ -66,7 +66,7 @@ class Cache{
 
             if (params.variables)
                 params.variables.forEach(term => {
-                    if (term.length) filename += '_' + term
+                    if (term && term.length) filename += '_' + term
                 })
         }
 
@@ -270,20 +270,7 @@ class Data{
     }
 
     async load(req) {
-        let queryParams = req.query;
-        // console.log(req.session)
-        // let config = {}
-        // if (req.session.user) {
-        //     let userdir = configdir + req.session.user.id + '/'
-        //     if (fs.existsSync(userdir)) {
-        //         let filename = userdir + 'filters.json'
-        //         if (fs.existsSync(filename)) {
-        //             let rawdata = fs.readFileSync(filename);
-        //             config.filters = JSON.parse(rawdata);
-        //         }
-        //     }
-        // }
-    
+        let queryParams = req.query;    
         let queries = await this.getQueries()        
         let paramdata = await this.getParameters()
         let stylesheet = await this.getGSS()
@@ -293,7 +280,6 @@ class Data{
             queries: queries, 
             stylesheet: stylesheet, 
             user: req.session.user || null
-            // config: config
         }
     }
 }
