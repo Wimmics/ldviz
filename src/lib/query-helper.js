@@ -185,10 +185,12 @@ async function requestFile(data, dataIndex) {
         else return response
     })
 
-    if (!result.length) 
+    console.log(result)
+
+    if (!result.data.length) 
         result = { message: `No publications found in the HAL database. Please verify that the publications are corrected associated to the idHal of the author (this search uses idHal=${data.idHal}).`}
 
-    getResult(result, null, dataIndex)
+    getResult(result.data, result.stylesheet, dataIndex)
 }
 
 /**
@@ -204,7 +206,7 @@ async function getResult(res, query, dataIndex) {
             result.sparql = res
         }
         else {
-            result = await transform(res, 1, null)
+            result = await transform(res, 1, query) // for HCERES data -> query == stylesheet
         }
     }
 

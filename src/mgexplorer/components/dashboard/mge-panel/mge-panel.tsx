@@ -49,6 +49,7 @@ export class MgePanel {
   @Prop({ mutable: true }) _sliderLinkDistance = null;
   /** Text search input (of `mge-nodelinks`)*/
   @Prop({ mutable: true }) _searchAutocomplete = null;
+  @Prop({ mutable: true }) _selectNodeSize = null;
 
 
 
@@ -309,6 +310,14 @@ export class MgePanel {
       });
     }
 
+  async _addNodeSizeSelect() {
+    this._selectNodeSize = select(this.element.querySelector("#select-nodes-size"))
+
+    this._selectNodeSize.on('change', async (d) => {
+      this._chart.acChangeAttrSize(d.target.value);
+    });
+  }
+
   @Method()
   async updateNodePanel () {
 
@@ -318,6 +327,7 @@ export class MgePanel {
       this.upSliderLinkDistance();
       this.atualizaAutocomplete();
   }
+  
   //--------------      
   async upStatistics() {
     // let a = await this._chart.getQtNodes();
@@ -399,6 +409,8 @@ export class MgePanel {
 
           //------------- Slider to modify link distance attribute
           this._addSliderLinkDistance();
+
+          this._addNodeSizeSelect();
           break;
 
       case state.views.barchart.component:

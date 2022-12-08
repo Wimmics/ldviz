@@ -28,7 +28,7 @@
 
 ## Methods
 
-### `acChangeAttrSize(atributo: any) => Promise<void>`
+### `acChangeAttrSize(value: any) => Promise<void>`
 
 
 
@@ -108,26 +108,6 @@ Type: `Promise<any>`
 
 
 
-### `getColorBreaks() => Promise<any>`
-
-
-
-#### Returns
-
-Type: `Promise<any>`
-
-
-
-### `getColorScale() => Promise<any>`
-
-
-
-#### Returns
-
-Type: `Promise<any>`
-
-
-
 ### `getGravity() => Promise<any>`
 
 This function will get the `gravity` attribute of force layout in node-links chart
@@ -168,13 +148,13 @@ Type: `Promise<any>`
 
 
 
-### `indexAttrSize(_: any) => Promise<number>`
+### `indexAttrSize(_: any) => Promise<any>`
 
 Changes the attribute that will be used to map the size
 
 #### Returns
 
-Type: `Promise<number>`
+Type: `Promise<any>`
 
 
 

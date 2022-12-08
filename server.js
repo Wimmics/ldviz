@@ -111,7 +111,7 @@ app.get(prefix + "/hceres/filenames", async function(req, res) {
 
     let result = []
 
-    let people = await csv().fromFile("data/hceres/SPARKS_ID_HAL.csv")
+    let people = await csv().fromFile("data/hceres/config/SPARKS_ID_HAL.csv")
     people.forEach(p => {
         if (!p.idHal.length) return;
 
@@ -142,9 +142,11 @@ app.get(prefix + "/hceres/filenames", async function(req, res) {
 })
 
 app.get(prefix + "/hceres/data/:dataset", async function(req, res) {
-    let result = fs.readFileSync('data/hceres/' + req.params.dataset)
+    let result = {}
+    result.data = JSON.parse(fs.readFileSync('data/hceres/' + req.params.dataset))
+    result.stylesheet = JSON.parse(fs.readFileSync('data/hceres/config/stylesheet.json'))
 
-    res.send(result)
+    res.send(JSON.stringify(result))
 })
 
 // LDViz about page 

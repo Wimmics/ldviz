@@ -658,7 +658,7 @@ export namespace Components {
         /**
           * Colors for the different types
          */
-        "_colorsRect": string[];
+        "_colorsRect": any;
         /**
           * List of items in the data
          */
@@ -723,7 +723,7 @@ export namespace Components {
          */
         "_nodeEdgePanel": any;
         "_view": any;
-        "acChangeAttrSize": (atributo: any) => Promise<void>;
+        "acChangeAttrSize": (value: any) => Promise<void>;
         /**
           * This function will change the value of charge on force layout. This function will be called when adjust Charge slider in filter panel
          */
@@ -753,8 +753,6 @@ export namespace Components {
           * This function will get the `charge` attribute of force layout in node-links chart
          */
         "getCharge": () => Promise<any>;
-        "getColorBreaks": () => Promise<any>;
-        "getColorScale": () => Promise<any>;
         /**
           * This function will get the `gravity` attribute of force layout in node-links chart
          */
@@ -778,7 +776,7 @@ export namespace Components {
         /**
           * Changes the attribute that will be used to map the size
          */
-        "indexAttrSize": (_: any) => Promise<number>;
+        "indexAttrSize": (_: any) => Promise<any>;
         /**
           * This function will remove hightlight effect on all of nodes and links. This function will be called when clear text inside text search
          */
@@ -811,6 +809,7 @@ export namespace Components {
          */
         "_searchAutocomplete": any;
         "_selectLegend": any;
+        "_selectNodeSize": any;
         /**
           * Represents the select input for order of Iris(`mge-iris`) setting panel and  histogram(mge-barchart) setting panel
          */
@@ -1617,7 +1616,7 @@ declare namespace LocalJSX {
         /**
           * Colors for the different types
          */
-        "_colorsRect"?: string[];
+        "_colorsRect"?: any;
         /**
           * List of items in the data
          */
@@ -1715,6 +1714,7 @@ declare namespace LocalJSX {
          */
         "_searchAutocomplete"?: any;
         "_selectLegend"?: any;
+        "_selectNodeSize"?: any;
         /**
           * Represents the select input for order of Iris(`mge-iris`) setting panel and  histogram(mge-barchart) setting panel
          */

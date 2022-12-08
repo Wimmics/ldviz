@@ -5,6 +5,9 @@ import { sum, ascending, zoom } from 'd3'
 import { select } from 'd3-selection'
 import state from "../../../store"
 
+import { scaleOrdinal } from 'd3-scale';
+import { schemeCategory10  } from 'd3-scale-chromatic'
+
 import { subGraph } from '../../../../lib/mge-mappers'
 
 @Component({
@@ -56,7 +59,7 @@ export class MgeListing {
     @Prop({ mutable: true }) _data = null;
 
     /** Colors for the different types*/
-    @Prop({ mutable: true }) _colorsRect = ["#1f77b4", "#2ca02c", "#d62728", "#ff7d0e"];     // colors for the different types
+    @Prop({ mutable: true }) _colorsRect;     // colors for the different types
 
 
     constructor() {
@@ -64,6 +67,8 @@ export class MgeListing {
         this._dashboard = document.querySelector("mge-dashboard");
 
         this._subGraph = subGraph()
+
+        this._colorsRect = scaleOrdinal(schemeCategory10).domain([0,1,2,3]);
     }
 
     //---------------------
@@ -283,9 +288,7 @@ export class MgeListing {
                     .attr("class", "PL-type")
                     .attr("height", 10)
                     .attr("width", 10)
-                    .attr("fill", (d) => {
-                        return this._colorsRect[d.type.index];
-                    })
+                    .attr("fill", d => this._colorsRect(d.type.index))
                     .on("click", (d, f) => { this._onMouseClick(d,f) })
                     .append("title")
                     .text(d => d.type.label);

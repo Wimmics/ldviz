@@ -15,6 +15,7 @@
 | `_idPanel`            | `_id-panel`             | ID of the panel that generated from id of view                                                                     | `any` | `undefined` |
 | `_searchAutocomplete` | `_search-autocomplete`  | Text search input (of `mge-nodelinks`)                                                                             | `any` | `null`      |
 | `_selectLegend`       | `_select-legend`        |                                                                                                                    | `any` | `null`      |
+| `_selectNodeSize`     | `_select-node-size`     |                                                                                                                    | `any` | `null`      |
 | `_selectOrder`        | `_select-order`         | Represents the select input for order of Iris(`mge-iris`) setting panel and  histogram(mge-barchart) setting panel | `any` | `null`      |
 | `_sliderCharge`       | `_slider-charge`        | Slider to adjust linkDistance (of `mge-nodelinks`)                                                                 | `any` | `null`      |
 | `_sliderGravity`      | `_slider-gravity`       | Slider to adjust Gravity (of `mge-nodelinks`)                                                                      | `any` | `null`      |

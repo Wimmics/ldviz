@@ -3,7 +3,8 @@ import { select } from 'd3-selection';
 // import { zoom } from 'd3';
 // import {allPapersList, duoPapersList, clusterPapersList, sort} from './process-data'
 import { zoom, svg, axisBottom, axisLeft, format, max } from "d3";
-import { scaleLinear, scaleBand } from 'd3-scale';
+import { scaleLinear, scaleBand, scaleOrdinal } from 'd3-scale';
+import { schemeCategory10  } from 'd3-scale-chromatic'
 import state from "../../../store"
 import Model from 'model-js';
 
@@ -161,7 +162,7 @@ export class MgeBarchart {
                 },
 
         this._nbOfTypesDoc = 4     // number of types of documents in the base
-        this._colorsBars = ["#1f77b4", "#2ca02c", "#d62728", "#ff7d0e"]    // colors for the different types
+        this._colorsBars = scaleOrdinal(schemeCategory10).domain([0,1,2,3])   // colors for the different types
         
     }
 
@@ -293,48 +294,6 @@ export class MgeBarchart {
         this.model.redraw += 1;
     };
 
-    setupPrimaryVersion () {
-        this._x = scaleBand()
-            .domain(Array.from(this._years))     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.price })
-            .range([0, this.model.box.width]);
-        this._xAxis = axisBottom()
-            .scale(this._x);
-
-
-        // Y axis: 
-        this._y = scaleLinear()
-
-        this._yAxis = axisLeft()
-            .scale(this._y);
-
-        this._abscissaTitle = this._grpHistogram.append("text")
-            .attr("y", 1)
-            .attr("dy", ".71em")
-            .text("Publication Year");
-
-
-        this._ordinateTitle = this._helpTooltip.append("svg")
-            .attr("class", "HC-legend")
-            .attr("y", 1)
-            .attr("dy", ".71em")
-
-
-        this._ordinate = this._grpHistogram.append("g")
-            .attr("class", "HC-ordina")
-            .style("fill", "none")
-            .style("stroke", "black")
-            .style("shape-rendering", "crispEdges")
-            .call(this._yAxis);
-
-        this._abscissa = this._grpHistogram.append("g")
-            .attr("transform", "translate(0," + this.model.box.height + ")")
-            .attr("class", "HC-abscissa")
-            .style("fill", "none")
-            .style("stroke", "black")
-            .style("shape-rendering", "crispEdges")
-            .call(this._xAxis);
-    }
-
     setupVersionWithYearAndPublications() {
 
         this._x = scaleBand()
@@ -413,13 +372,15 @@ export class MgeBarchart {
         // ---------------- Initialization Actions
         let _svg = divTag.append("svg"),  // Create dimensionless svg
             _grpChart = _svg.append("g");                       // Does not exist in the original Iris
+            
         // Add zoom event
         let _zoomListener = zoom().on("zoom", _chartZoom);
         _zoomListener.scaleExtent([0.5, 10]);
-        _svg.call(_zoomListener).on("mousemove.zoom", null)
-                                .on("mousedown.zoom", null)
-                                .on("touchstart.zoom", null)
-                                .on("touchend.zoom", null);
+        _svg.call(_zoomListener)
+            .on("mousemove.zoom", null)
+            .on("mousedown.zoom", null)
+            .on("touchstart.zoom", null)
+            .on("touchend.zoom", null);
 
         let _helpContainer = divTag.append("div")
             .attr("class", "helpContainer")
@@ -427,22 +388,19 @@ export class MgeBarchart {
             .on("mouseout", this._closeToolTip.bind(this));
 
         _helpContainer.append("i")
-            .attr("class", "fas fa-info-circle")
-            .style("font-size", "24px");
-            // .text("&#xf05a")
-            // .style("font-family" , "FontAwesome");
+            .attr("class", "fas fa-palette")
+            .style("font-size", "20px");
 
         this._helpTooltip = divTag.append("div")
             .attr("class", "helpTooltip")
-            .attr("style", "width:40%;height:80px")
             .style("display", "none");
 
         this._grpHistogram = _grpChart.append("g").attr("class", "HistogramChart").attr("transform", "translate(30,20)");
 
         // _______________________
 
-        const dataTest = [{ price: "20.0" }, { price: "34.0" }, { price: "35.0" }, { price: "40.0" }, { price: "59.0" }, { price: "60.0" }, { price: "61.0" }, { price: "62.0" }, { price: "70.0" }, { price: "80.0" }, { price: "100.0" }];
-        const dataTestResearch = [{ year: '2007', qtResearch: "6", qtPublication: "5" }, { year: '2008', qtResearch: "1", qtPublication: "7" }, { year: '2009', qtResearch: "2", qtPublication: "3" }]
+        // const dataTest = [{ price: "20.0" }, { price: "34.0" }, { price: "35.0" }, { price: "40.0" }, { price: "59.0" }, { price: "60.0" }, { price: "61.0" }, { price: "62.0" }, { price: "70.0" }, { price: "80.0" }, { price: "100.0" }];
+        // const dataTestResearch = [{ year: '2007', qtResearch: "6", qtPublication: "5" }, { year: '2008', qtResearch: "1", qtPublication: "7" }, { year: '2009', qtResearch: "2", qtPublication: "3" }]
 
 
         //_______________________________
@@ -561,7 +519,7 @@ export class MgeBarchart {
                     })
                     .attr("width", _ => x1.bandwidth())
                     .attr("height", d => (this.model.box.height - this._abscissaBottomMargin) - this._y(d.count))
-                    .style("fill", d => this._colorsBars[d.index])
+                    .style("fill", d => this._colorsBars(d.index))
                         .append("title")
                         .text(d => d.label + " : " + d.count)
 
@@ -575,7 +533,7 @@ export class MgeBarchart {
             legendGrp.append("rect")
                 .attr("width", 10)
                 .attr("height", 10)
-                .style("fill", d => this._colorsBars[d.index])
+                .style("fill", d => this._colorsBars(d.index))
                 .attr("transform", (_,i) => "translate(10," + `${20 * i + 10}` + ")");
 
             legendGrp.append("text")

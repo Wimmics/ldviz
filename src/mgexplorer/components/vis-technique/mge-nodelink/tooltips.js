@@ -55,16 +55,14 @@ function normalNodeTooltips (data, indexAttrTitle, vIndexAttr, stAdjacent) {
             .attr("y", 26)
             .text(node.grau + " " + _stAdjacent);
 
-        let totalPubs = 0;
-        // console.log(node)
-        _vIndexAttr.forEach(d => {
-            totalPubs += node.values[d > 1000 ? d - 1000 : d]
-        })
+        // let totalPubs = 0
+        // for (let i = vIndexAttr; i < vIndexAttr + 3; i++) 
+        //     totalPubs += node.values[i]
 
         _svgTooltip.append("text")    // total n publications
             .attr("x", 5)
             .attr("y", 50)
-            .text("Number of Items: " + totalPubs);
+            .text("Number of Items: " + node.qtItems);
 
         _divTooltip.style("top", (event.layerY + 20) + "px")
             .style("left", (event.layerX + 5) + "px")

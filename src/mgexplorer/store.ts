@@ -23,6 +23,8 @@ const { state } = createStore({
 	ATN_ConnectComp: 1007,
 
 	ATN_Degree: 1011,
+	ATN_qtItems: 7,
+	ATN_qtNodes: 8,
 
 	ATE_QtPublicacoes: 1000,   // ATE: Attribute edge
 	ATE_QtJournals: 1001,

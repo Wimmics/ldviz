@@ -560,7 +560,10 @@ export class MgeIris {
             let result = this.model.data.children.data[this._vOrder[d.indexData]].labels[1] + "\n";
             let j;
             for (j = 0; j < this._nbOfTypesDoc; j++) {
-                result += this.model.data.edges.valueTitle[j] + ": " +
+                let title = this.model.data.edges.valueTitle[j]
+                if (title.match(/z[0-9]/g)) continue; // only include existing types in the dataset (there are placeholders such as z0, z1 when there is less than 4 different types)
+
+                result += title + ": " +
                     this.model.data.children.data[this._vOrder[d.indexData]].edge.values[j] + "\n";
             }
             return result;
@@ -600,7 +603,7 @@ export class MgeIris {
         return angle * Math.PI / 180;
     }
 
-      _calcGeometry() {
+    async _calcGeometry() {
         this.i_CalcFocusArea();
         this.i_CalcFishEyeArea();
         this.i_CalcHiddenArea();
@@ -620,7 +623,7 @@ export class MgeIris {
         // Initializes the dataVis vector with capacity for the maximum number of bars
         // Do not associate the dataVis with the data vector (indicated by the value -1 in the indices)
         // console.log(i_BindDataVisToData);
-        this.i_InicDataVisVector();
+        await this.i_InicDataVisVector();
         this.i_BindDataVisToData();
     }
 //--------
@@ -656,7 +659,7 @@ export class MgeIris {
     }
 
     //--------
-    i_InicDataVisVector () {
+    async i_InicDataVisVector () {
         let angleRotBar;
 
         this._dataVis = range(this._numMaxBars).map(function () { return { angleRot: 0.0, width: 0, widthText: 0, indexData: 0, children: [] }; });

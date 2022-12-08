@@ -90,7 +90,7 @@ export class MgeClustervis {
     private _vAngle = null;      // Vector that contains the angular measurement of each bar. Calculated at _calcGeometry
     private _grpBarsRotScale = scaleOrdinal();    // Scale used to set the angle of rotation of each bar
     private _ringScale = scaleLinear().domain([0, 100]);
-    private _colorScale = scaleOrdinal(schemeCategory10);
+    private _colorScale = scaleOrdinal(schemeCategory10).domain([3, 4, 5, 6]);
 
     constructor() {
         // ---------------- Model
@@ -115,8 +115,6 @@ export class MgeClustervis {
         this.model.pWidthBar = 0.0275;    // Percentage relative to the width of the graph for calculating the width of the bars
 
         this.model.redraw = 0;        // When changed perform a redraw
-
-
 
         let _svg = divTag.append("svg"),  //Create dimensionless svg
             _grpChart = _svg.append("g");                       // Does not exist in the original Irisv
@@ -156,6 +154,7 @@ export class MgeClustervis {
 
         //---------------------
         this.model.when(["widthChart", "pOuterRadius"], (widthChart, pOuterRadius) => {
+            // console.log(pOuterRadius)
             this._outerRadius = Math.floor(widthChart * pOuterRadius);
             this._ringScale.range([this._innerRadius, this._outerRadius]);
         });
@@ -180,17 +179,22 @@ export class MgeClustervis {
             _appendRings();
             _appendBars(data);
             _appendLinks();
+            _appendNodeNames();
             this._clusterVisPanel.updateClusterVisPanel()
         });
 
         var _appendRings = () => {
-            if (this._grpRings != null)
-                this._grpRings.remove();
+            // if (this._grpRings != null)
+            //     this._grpRings.remove();
+            console.log(this._vRings)
             this._grpRings = this._grpCluster.selectAll(".CV-grpRings")
                 .data(this._vRings)    // Original _vRings
-                .enter()
-                .append("g")
-                .attr("class", "CV-grpRings");
+                .join(
+                    enter => enter.append('g')
+                        .attr("class", "CV-grpRings"),
+                    update => update,
+                    exit => exit.remove()
+                )
 
             this._grpRings.append("circle")
                 .attr("r", (d) => { return this._ringScale(d.pHeight) });
@@ -201,69 +205,78 @@ export class MgeClustervis {
          *
          * Adds the SVG elements relative to the bars
          */
-        var _appendBars = (data) => {
-            let i, j, k, achei, maxDoAnel, categoriasAux = [], categorias = [];
+        var _appendBars = async (data) => {
+            
+            let i, j, k, categorias = [];
             let circleScale = scaleOrdinal();
 
-            if (this._grpBars != null)
-                this._grpBars.remove();
+            let setCategories = () => {
+                let categoriasAux = [], found = false;
+                for (i = 0; i < this._vRings.length; i++) {
+                    if (this._vRings[i].typeAttr === "L")
+                        categoriasAux = categoriasAux.concat(this._vRings[i].vLabelDomain.sort());
+                }
+    
+                // Removes duplicate vector elements
+                k = 0;
+                for (i = 0; i < categoriasAux.length; i++) {
+                    found = false;
+                    for (j = 0; j < categorias.length; j++)
+                        if (categoriasAux[i] === categorias[j]) {
+                            found = true;
+                            break;
+                        }
+                    if (!found) {
+                        categorias[k] = categoriasAux[i];
+                        k++;
+                    }
+                }
+            }
+
+            let setBarCircleScale = async () => {
+                if (this._sameScale) {
+                    let maxValue = max(this._vRings, d => d.maxValue);
+    
+                    for (i = 0; i < this._vRings.length; i++) {
+                        if (this._vRings[i].typeAttr === "V") {
+                            this._vRings[i].barCircleScale
+                                .range([1, Math.floor(this._vRings[i].pHeightBar * (this._outerRadius - this._innerRadius))])
+                                .domain([0, maxValue]);
+                        } else {
+                            this._vRings[i].barCircleScale.range(this._vCores20Inv).domain(categorias);
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this._vRings.length; i++) {
+                        if (this._vRings[i].typeAttr === "V") {
+                            this._vRings[i].barCircleScale.range([0, Math.floor(this._vRings[i].pHeightBar * (this._outerRadius - this._innerRadius))]).domain([0, this._vRings[i].maxValue]);
+                        } else {
+                            this._vRings[i].barCircleScale.range(this._vCores20Inv).domain(categorias);
+                        }
+                    }
+                }
+            }
+            
             this._grpBars = this._grpCluster.selectAll(".CV-grpBars")
                 .data(data.nodes.dataNodes)
-                .enter()
-                .append("g")
-                .attr("class", "CV-grpBars")
+                .join(
+                    enter => enter.append("g")
+                        .attr("class", "CV-grpBars"),
+                    update => update,
+                    exit => exit.remove()
+                )
                 .attr("transform", (d, i) => { return "rotate(" + this._grpBarsRotScale(i) + ")"; });
-
+ 
+            // separator of nodes
             this._grpBars.append("line")
                 .attr("x1", this._ringScale(0))
                 .attr("y1", 0)
                 .attr("x2", this._ringScale(100))
                 .attr("y2", 0);
 
-            for (i = 0; i < this._vRings.length; i++) {
-                if (this._vRings[i].typeAttr === "L")
-                    categoriasAux = categoriasAux.concat(this._vRings[i].vLabelDomain.sort());
-            }
+            setCategories(); // only useful when nodes are categorized
 
-            // Removes duplicate vector elements
-            k = 0;
-            for (i = 0; i < categoriasAux.length; i++) {
-                achei = false;
-                for (j = 0; j < categorias.length; j++)
-                    if (categoriasAux[i] === categorias[j]) {
-                        achei = true;
-                        break;
-                    }
-                if (!achei) {
-                    categorias[k] = categoriasAux[i];
-                    k++;
-                }
-            }
-
-            if (this._sameScale) {
-                maxDoAnel = -1;
-                for (i = 0; i < this._vRings.length; i++) {
-                    if (this._vRings[i].maxValue > maxDoAnel)
-                        maxDoAnel = this._vRings[i].maxValue;
-                }
-                for (i = 0; i < this._vRings.length; i++) {
-                    if (this._vRings[i].typeAttr === "V") {
-                        this._vRings[i].barCircleScale.range([1, Math.floor(this._vRings[i].pHeightBar * (this._outerRadius - this._innerRadius))]).domain([0, maxDoAnel]);
-                    } else {
-                        this._vRings[i].barCircleScale.range(this._vCores20Inv).domain(categorias);
-                    }
-                }
-            } else {
-                // let maxValue =  max(this._vRings, d => d.maxValue)
-                for (i = 0; i < this._vRings.length; i++) {
-                    if (this._vRings[i].typeAttr === "V") {
-                        this._vRings[i].barCircleScale.range([0, Math.floor(this._vRings[i].pHeightBar * (this._outerRadius - this._innerRadius))]).domain([0, this._vRings[i].maxValue]);
-                    } else {
-                        this._vRings[i].barCircleScale.range(this._vCores20Inv).domain(categorias);
-                    }
-                }
-            }
-
+            await setBarCircleScale()
         
             for (i = 0; i < this._vRings.length; i++) {
                 if (this._vRings[i].typeAttr === "V") {
@@ -298,6 +311,8 @@ export class MgeClustervis {
                 }
             }
 
+            
+
         }
 
         /**
@@ -306,8 +321,8 @@ export class MgeClustervis {
          * Adds the SVG elements relative to the edges
          */
         var _appendLinks = () => {
-            if (this._grpLinks != null)
-                this._grpLinks.remove();
+            // if (this._grpLinks != null)
+            //     this._grpLinks.remove();
 
             this._grpLinks = this._grpCluster.append("g")
                 .attr("class", "CV-grpLinks")
@@ -315,10 +330,58 @@ export class MgeClustervis {
 
             this._links = this._grpLinks.selectAll("path")
                 .data(this._dataLinks.vBundleLinks)
-                .enter()
-                .append("path")
-                .each(function (d) { d.source = d[0].data, d.target = d[d.length - 1].data; })
-                .attr("d", this._drawLine);
+                .join(
+                    enter => enter.append("path"),
+                    update => update,
+                    exit => exit.remove()
+                )
+                .attr("d", this._drawLine)   
+                .each(function (d) { 
+                    d.source = d[0].data 
+                    d.target = d[d.length - 1].data 
+                })
+                
+        }
+
+        var _appendNodeNames = () => {
+            ; // For showing names on mouseover
+
+            let index = max(this._vRings, d => d.maxValue);
+            let x = this._ringScale(this._vRings[this._vRings.length - 1].pX) + this._vRings[index]
+                .barCircleScale(this._vRings[index].maxValue);
+
+            this._grpBars.append("text")
+                .classed("CV-names", true)
+                .attr("x", x)
+                .attr("y", 0)
+                .attr("text-anchor", "start")
+                .text(d => d.labels[1])
+                // .text(function (n) {
+                //     if (n.highLight === true) {
+                //         if (_isTheFirstOccurence(n.id, d.cluster)) {
+                //             d.cluster.push(n);
+                //         }
+                //         let names = n.labels[1]
+                //         return names;
+                //     }
+                //     return "";
+                // })
+                .style("font-size", "10px")
+                .style("font-family", "Arial")
+                .style("color", "black");
+
+
+            // function _isTheFirstOccurence(id, tab) {
+            //     if (tab.length === 0) return true;
+            //     else {
+            //         for (let i = 0; i < tab.length; i++) {
+            //             if (tab[i].id === id)
+            //                 return false;
+            //         }
+            //         return true;
+            //     }
+            // }
+
         }
 
         /**
@@ -372,9 +435,6 @@ export class MgeClustervis {
     _mouseOverNode(event, d) {
         this._grpBars.each(function (n) { n.highLight = false; });
 
-        //   state.selectedobj = d;
-        //   console.log(state.selectedobj);
-        //  this._onMouseClick(d);
         this._links.classed("CV-linkHL", function (link) {
             if (link.source === d || link.target === d) {
                 return link.source.highLight = link.target.highLight = true;
@@ -384,56 +444,12 @@ export class MgeClustervis {
 
         this._grpBars.classed("CV-nodeHL", function (node) { return node.highLight; });
 
-        this._grpBars.append("text")
-            .text("")
-            .classed("CV-names", true); // For showing names on mouseover
-
-        let index = _findMaxValue(this._vRings);
-        let x = this._ringScale(this._vRings[this._vRings.length - 1].pX) + this._vRings[index].barCircleScale(this._vRings[index].maxValue);
-
-        this._grpBars.selectAll("text.CV-names")
-            .attr("x", x)
-            .attr("y", 0)
-            .attr("text-anchor", "start")
-            .text(function (n) {
-                if (n.highLight === true) {
-                    if (_isTheFirstOccurence(n.id, d.cluster)) {
-                        d.cluster.push(n);
-                    }
-                    let names = n.labels[1]
-                    return names;
-                }
-                return "";
-            })
-            .style("font-size", "10px")
-            .style("font-family", "Arial")
-            .style("color", "black");
-
-
-        function _isTheFirstOccurence(id, tab) {
-            if (tab.length === 0) return true;
-            else {
-                for (let i = 0; i < tab.length; i++) {
-                    if (tab[i].id === id)
-                        return false;
-                }
-                return true;
-            }
-        }
-
-        function _findMaxValue(_vRings) {
-            let i, max = 0;
-            for (i = 0; i < _vRings.length; i++) {
-                if (_vRings[i].maxValue > max)
-                    max = i;
-            }
-            return max;
-        }
+        this._grpBars.selectAll('text.CV-names').style('display', d => d.highLight ? 'block' : 'none')
     }
     _mouseOutNode(event, d) {
         this._grpBars.classed("CV-nodeHL", false);
         this._links.classed("CV-linkHL", false);
-        this._grpBars.selectAll("text.CV-names").text(" ");
+        this._grpBars.selectAll("text.CV-names").style('display', 'block');
     }
 
     /**

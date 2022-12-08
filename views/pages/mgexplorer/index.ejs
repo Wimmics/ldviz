@@ -53,24 +53,39 @@
                <template class="filter-content-mge-nodelink">
                 <p style="font-weight: bold;">Node links Filter Panel</p>
                 <div class="filter-item">
-                    <div class="NE-panel" style="width: 180px;">
-                        <br />
-                        <label>&nbsp;Nodes:&nbsp;<span class="spanNodes">26</span></label><br />
-                        <label>&nbsp;Edges:&nbsp;<span class="spanEdges"></span></label><br />
-                        <br />
-                        <input list='nodes-labels' class="NE-Autocomplete ui-autocomplete-input" placeholder="Search" autocomplete="off" /><br />
-                        <datalist id="nodes-labels"></datalist>
-                        <br />
-                        <label>&nbsp;Gravity: <span  class="spanGravitys"></span></label>
-                        <input type="range" class="gravitySlider" style="width: 120px; height: 4px;">
-                        <br />
-                        <br />
-                        <label>&nbsp;Repulsion: <span class="spanCharge"></span></label>
-                        <input type="range" class="chargeSlider" style="width: 120px; height: 4px;">
-                        <br />
-                        <br />
-                        <label>&nbsp;Distance: <span class="spanLinkDistance"></span></label>
-                        <input type="range" class="linkDistanceSlider" style="width: 120px; height: 4px;">
+                    <div class="NE-panel">
+                        <div class="group">
+                            <label>Nodes:<span class="spanNodes">26</span></label>
+                            <label>Edges:<span class="spanEdges"></span></label>
+                        </div>
+
+                        <div class="group">
+                            <label class="select-label">Node size:</label> 
+                            <select id="select-nodes-size">
+                                <option value="qtNodes">Number of connected nodes</option>
+                                <option value="qtItems">Number of items</option>
+                            </select>
+                        </div>
+
+                        <div class="group">
+                            <input list='nodes-labels' class="NE-Autocomplete ui-autocomplete-input" placeholder="Search" autocomplete="off" />
+                            <datalist id="nodes-labels"></datalist>
+                        </div>
+
+                        <div class="group">
+                            <label>Gravity: <span  class="spanGravitys"></span></label>
+                            <input type="range" class="gravitySlider" style="height: 4px;">
+                        </div>
+                        
+                        <div class="group">
+                            <label>Repulsion: <span class="spanCharge"></span></label>
+                            <input type="range" class="chargeSlider" style="height: 4px;">
+                        </div>
+                        
+                        <div class="group">
+                            <label>Distance: <span class="spanLinkDistance"></span></label>
+                            <input type="range" class="linkDistanceSlider" style="height: 4px;">
+                        </div>
                     </div>
                 </div>
             </template>

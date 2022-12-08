@@ -29,7 +29,6 @@ export class MgeNodelink {
   public model: any;
   public lcv: any;
   public _tooltips: any;
-  // public algCluster: any;                                                                                
 
   /** Represents the panel associated with the graphic */
   @Prop() _nodeEdgePanel = null;  // Represents the panel associated with the graphic
@@ -40,19 +39,12 @@ export class MgeNodelink {
   @Prop() _grpNodeEdge = null;    // Group representing todo o grafico
   private _forceLayout = null;
 
-  private _indexAttrSize = 0;      // Just for categorical
+  private _indexAttrSize = null;      // Just for categorical
 
   private _rClusterScale;
   private _linkWidthScale;
   private _linkDistanceScale;
   private _chargeScale;
-
-  private _colors = {
-      nodoNormal: "blue",
-      nodoNormal2: "red",
-      nodoMix: "purple",
-      edgeNormal: "gray"
-  };
 
   private _configDefault = {
       charge: 100,
@@ -63,7 +55,6 @@ export class MgeNodelink {
   private _configLayout = null;
   private _graphElem = null; // DOM elements
   private _graphData = null;
-  private _colorScale = null;
   public selectedobj = null;
 
   constructor(){
@@ -72,7 +63,7 @@ export class MgeNodelink {
 
     this._forceLayout = forceSimulation(),
 
-    this._indexAttrSize = 0;      // Just for categorical
+    this._indexAttrSize = 'qtNodes';      // default size of circles depends on the number of connections (e.g. coauthors)
 
     this._rClusterScale = scaleLinear().range([3, 20]);
     this._linkWidthScale = scaleLinear().range([1, 7]);
@@ -93,7 +84,8 @@ export class MgeNodelink {
             return - (this._chargeScale(d.qtNodes) + this._configLayout.charge);
         },
         linkDistance: this._configDefault.linkDistance,
-        gravity: 0            // calculated
+        gravity: 0,            // calculated,
+        nodeSize: "links" // default is qtNodes
     }
 
     this._graphElem = { nodes: null, edges: null};
@@ -146,7 +138,6 @@ export class MgeNodelink {
 
     //---------------------
     this.model.when(["data", "redraw"], (data) => {
-        console.log('data', data)
         let dataLength = data.nodes.dataNodes.length;
 
         this._configLayout.gravity = 300 / ((Math.PI * this.model.widthChart * this.model.widthChart / 4) / dataLength); // no idea why 300
@@ -163,9 +154,7 @@ export class MgeNodelink {
         this._forceLayout.force("forceY").strength(this._configLayout.gravity)//.y(this.height * .7))
         this._forceLayout.alpha(1).restart();
 
-        // this._forceLayout.force("gravity", this._configLayout.gravity);
         this._nodeEdgePanel.updateNodePanel();  // Updates information in the panel associated with the technique
-        // this._nodeEdgeLegend.update()
         this._appendEdges();
         this._appendNodes();
         
@@ -231,60 +220,32 @@ export class MgeNodelink {
     }
 
     _appendNodes() {
-        
-        if (this._graphElem.nodes != null) {
-            this._graphElem.nodes = null;
-        }
-       
-        if (this._graphData.nodes[0].cluster) {
-            this._graphElem.nodes = this._grpNodeEdge.selectAll(".NE-node")
-                .data(this._graphData.nodes)
-                .enter()
-                .append("circle")
-                .attr("class", "NE-node")
-                .attr("r", (d) => { return this._rClusterScale(d.qtNodes) })
-                .style("fill", this._colors.nodoNormal)
-                .on("mouseover", this._onMouseOverNode.bind(this))
-                .on("mouseout", this._onMouseOutNode.bind(this))
-                .on("click", this._onMouseClick.bind(this,"node"));
+        this._graphElem.nodes = this._grpNodeEdge.selectAll(".NE-node")
+            .data(this._graphData.nodes)
+            .join(
+                enter => enter.append('circle')
+                            .attr("class", "NE-node"),
+                update => update,
+                exit => exit.remove()
                 
-                // .call(this.dragNode(this._forceLayout));
-
-
-            var color_nodes = this._graphElem.nodes[0];
-        } else {
-            let setColors = new Set();
-            this._graphElem.nodes = this._grpNodeEdge.selectAll(".NE-node")
-                .data(this._graphData.nodes)
-                .enter()
-                .append("circle")
-                .attr("class", "NE-node")
-                //      .attr("r", function (d) { return _rClusterScale(1)} )
-                .attr("r", (d) => { return this._rClusterScale(d.values[this._indexAttrSize]/*qtNodes*/); })
-                .style("fill", (d) => {
-                    if (d.style != null) {
-                        return d.style;
-                    }
-                    return this._colorScale(d.values[12])
-                })
-
-                .on("mouseover", this._onMouseOverNode.bind(this))
-                .on("mouseout", this._onMouseOutNode.bind(this))
-                .on("click", this._onMouseClick.bind(this, "node"));
-
-
-        }
+            )
+            .attr("r", d => this._rClusterScale(d[this._indexAttrSize]) )
+            .style("fill", d => d.style)
+            .on("mouseover", this._onMouseOverNode.bind(this))
+            .on("mouseout", this._onMouseOutNode.bind(this))
+            .on("click", this._onMouseClick.bind(this, "node"));
     }
 
     _appendEdges() {
-        if (this._graphElem.edges != null)   
-            this._graphElem.edges = null;
 
         this._graphElem.edges = this._grpNodeEdge.selectAll(".NE-edge")
             .data(this._graphData.edges)
-            .enter()
-            .append("line")
-            .attr("class", "NE-edge")
+            .join(
+                enter => enter.append('line')
+                    .attr("class", "NE-edge"),
+                update => update,
+                exit => exit.remove()
+            )            
             .style("stroke-width", (d) => {return this._linkWidthScale(d.qt); })
             .on("mouseover", this._onMouseOverEdge.bind(this))
             .on("mouseout", this._onMouseOutEdge.bind(this))
@@ -293,7 +254,7 @@ export class MgeNodelink {
 
 
     _onMouseOverNode(event, d) {
-          this._graphElem.nodes.each(function (n) { n.highLight = false; });
+        this._graphElem.nodes.each(function (n) { n.highLight = false; });
 ;
         state.selectedobj=d;
           d.highLight = true;
@@ -303,8 +264,6 @@ export class MgeNodelink {
           } else {
               if (this._tooltips.normalNode != null)
                   this._tooltips.normalNode.create(this._tooltips.divTT, d, event); 
-                  
-
           }
           this._graphElem.edges.classed("NE-HighLight", function (edge) {
               if (edge.source === d || edge.target === d) return edge.source.highLight = edge.target.highLight = true;
@@ -472,19 +431,18 @@ export class MgeNodelink {
             this.model.data.nodes.dataNodes.forEach(function (d, i) { d.grau = vNodesTemp[i]; });
         }
 
-        this._colorScale = scaleOrdinal(schemeCategory10)
-            .domain(await this.getColorBreaks())
-
         this.model.data.nodes.dataNodes.forEach(function (d) { d.highLight = false; });
 
         this._graphData = this._adjustGraph(this.model.data);
 
         this._graphData.nodes.forEach(node => {
             node.qtNodes = this._graphData.edges.filter(d => d.src === node.id).length
+            node.qtItems = this.qtItems(node)
         })
 
-        let maxQtNodes = max(this._graphData.nodes, d => d.qtNodes);
-        this._rClusterScale.domain([1, maxQtNodes]); // radius scale
+        await this._setClusterScale()
+
+        let maxQtNodes =  max(this._graphData.nodes, d => d.qtNodes);
         this._chargeScale.domain([1, maxQtNodes]); // repulsion scale
 
         let maxLinkDistance = this._rClusterScale(maxQtNodes)
@@ -498,15 +456,27 @@ export class MgeNodelink {
           this._linkWidthScale.domain([1, maxQtEdges]);
         }
 
+        await this._setForceLayout()
+
+        this.setTTNormalNode(normalNodeTooltips(this.model.data, state.ATN_AuthorName, state.ATN_QtPublicacoes - 1000, state.headerTitle));
+        this.setTTNormalEdge(normalEdgeTooltips(this.model.data, state.ATN_AuthorName, [state.ATE_QtPublicacoes]));
+    };
+
+    async _setClusterScale() {
+        let maxQtAttr = max(this._graphData.nodes, d => d[this._indexAttrSize]);
+        this._rClusterScale.domain([1, maxQtAttr]); // radius scale (changes according to the selected attribute)
+        
+    }
+
+    async _setForceLayout() {
         this._forceLayout
             .nodes(this._graphData.nodes)
             .force("charge", forceManyBody().strength(-this._configLayout.charge))
             .force("link", forceLink().links(this._graphData.edges)
                 .distance((d) => this._configLayout.linkDistance + this._linkDistanceScale(d.source.qtNodes) + this._linkDistanceScale(d.target.qtNodes)))
-            .force("forceX", forceX().strength(this._configLayout.gravity))//.x(this.width * .7))
-            .force("forceY", forceY().strength(this._configLayout.gravity))//.y(this.height * .7))
-            .force('collide', forceCollide(d => this._rClusterScale(d.qtNodes)))
-            // .force("center", forceCenter(this.model.widthChart / 2, this.model.heightChart / 2))
+            .force("forceX", forceX().strength(this._configLayout.gravity))
+            .force("forceY", forceY().strength(this._configLayout.gravity))
+            .force('collide', forceCollide(d => this._rClusterScale(d[this._indexAttrSize])))
 
         this._forceLayout.on("tick", () => {
             if (this.model.data !== null)
@@ -535,15 +505,7 @@ export class MgeNodelink {
                     })
             }
         })
-        // .on("end", function () {
-
-        // });
-        let indexNodeAttrTitle = [state.ATN_Category, state.ATN_LinhaPesq, state.ATN_QtLinhaPesq, state.ATN_QtPublicacoes]
-        this.setTTNormalNode(normalNodeTooltips(this.model.data, state.ATN_AuthorName, indexNodeAttrTitle, state.headerTitle));
-        this.setTTNormalEdge(normalEdgeTooltips(this.model.data, state.ATN_AuthorName, [state.ATE_QtPublicacoes]));
-        
-        // _appendLegend();
-    };
+    }
 
     //---------------------
     /** This function will get the `gravity` attribute of force layout in node-links chart
@@ -585,6 +547,14 @@ export class MgeNodelink {
         return this._graphData.edges.length;
     };
 
+    qtItems(node) {
+        let total = 0
+        let index = state.ATN_QtPublicacoes - 1000;
+        for (let i = index; i < index + 3; i++) 
+            total += node.values[i]
+
+        return total;
+    }
 
 
     //---------------------
@@ -593,8 +563,8 @@ export class MgeNodelink {
     @Method()
     async indexAttrSize(_) {
         if (!arguments.length)
-            return this._indexAttrSize + 1000;
-        this._indexAttrSize = _ - 1000;
+            return this._indexAttrSize;
+        this._indexAttrSize = _;
     };
 
     //======== Actions Functions
@@ -628,19 +598,21 @@ export class MgeNodelink {
     acChangeLinkDistance(value) {
         this._configLayout.linkDistance = +value;
         this._forceLayout.force("link", forceLink().links(this._graphData.edges).distance((d) => {
-                return this._configLayout.linkDistance + this._linkDistanceScale(d.source.qtNodes) + this._linkDistanceScale(d.target.qtNodes);
-            })).alpha(1).restart();
+            return this._configLayout.linkDistance + this._linkDistanceScale(d.source[this._indexAttrSize]) + this._linkDistanceScale(d.target[this._indexAttrSize]);
+        })).alpha(1).restart();
     }
     
 
     //---------------------
     @Method()
-    async acChangeAttrSize(atributo) {
-        this._indexAttrSize = atributo;
-        this._appendEdges();
-        this._appendNodes();
+    async acChangeAttrSize(value) {
+        this._indexAttrSize = value;
+        await this._setClusterScale();
+        this._forceLayout.force('collide', forceCollide(d => this._rClusterScale(d[this._indexAttrSize])))
+        .alpha(1).restart()
         this.model.redraw += 1;
     };
+    
 
     //---------------------
     /** This function will remove hightlight effect on all of nodes and links. This function will be called when clear text inside text search
@@ -664,6 +636,8 @@ export class MgeNodelink {
         this._graphElem.nodes.classed("NE-HighSearch", function (d) { return d.highSearch });
     };
 
+    
+
     //---------------------
     /** This function will hightlight all nodes in a cluster. This function will be called when used text search in filter panel
     */
@@ -676,25 +650,11 @@ export class MgeNodelink {
         });
         this._graphElem.nodes.classed("NE-HighSearch", function (d) { return d.highSearch });
     };
-    @Method()
-    async getColorBreaks() {
-        let breaks = this.model.data.nodes.dataNodes.map(d => d.values[12])
-        breaks = breaks.filter((d,i) => breaks.indexOf(d) == i).sort()
-        return breaks;
-    };
-    @Method()
-    async getColorScale() {
-        return this._colorScale;
-    };
-
-    // getColorLabels(){
-    //     return this._colorLabels;
-    // }
 
 
   buildChart(idDiv, svg){ 
     this.setBox(this.model.box);
-    this.indexAttrSize(1011);
+    // this.indexAttrSize(state.ATN_qtNodes);
     this.addNodeLinkChart(idDiv, svg);
   }
 

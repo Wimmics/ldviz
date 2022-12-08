@@ -6,16 +6,16 @@
  * Yun Tian - Olivier Corby - Marco Winckler - 2019-2020
 **/
 
+import { sum } from "d3";
+
 
 let types = {};
 
-const defaultType = "not informed";
+const defaultType = "items";
+const defaultColor = "lightblue"
 
-const undef = "undef";
-const skip  = "skip";
-const mix   = "mix";
-
-const endpoint_array = ["http://servolis.irisa.fr/dbpedia/sparql"];
+const SKIP  = "skip";
+const MIX   = "mix";
 
 function isURI(str) {
     var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -70,9 +70,6 @@ function transformType(type) {
     })
     return newType || 'Unknown';
 }
-
-const name1 = "s";
-const name2 = "o";
 
 // demander une valeur dans le résultat SPARQL
 // data : résultat SPARQL
@@ -192,17 +189,20 @@ function addCoauthor(map, a1, a2) {
  * variable ?mix when it exists is the style to assign to a node having two different styles
  */
 function defStyle(stylesheet, styleMap, a1, a2, elem) {
-    var mix = undef;
-    if (elem.mix != null) {
+    var mix = null;
+    if (elem.mix) {
         mix = elem.mix.value;
     }
-    if (elem.style1 != null) {
+
+    if (elem.style1) {
         addStyle(stylesheet, styleMap, a1, elem.style1.value, mix);    
     }
-    if (elem.style2 != null) {
+
+    if (elem.style2) {
         addStyle(stylesheet, styleMap, a2, elem.style2.value, mix);    
     }
-    if (elem.style != null) {
+
+    if (elem.style) {
         addStyle(stylesheet, styleMap, a1, elem.style.value, mix);    
         addStyle(stylesheet, styleMap, a2, elem.style.value, mix);    
     } 
@@ -211,16 +211,8 @@ function defStyle(stylesheet, styleMap, a1, a2, elem) {
 /**
  * name is either the name of a style in the stylesheet of the name of a color
  */
-function getStyle(stylesheet, name) {
-    if (stylesheet.node != null && stylesheet.node[name] != null) {
-        // style name
-        var elem = stylesheet.node[name];
-        if (elem.color != null) {
-            return elem.color;
-        }
-    }
-    // color name
-    return name;
+function getStyle(stylesheet, colorname) {
+    return stylesheet.node && stylesheet.node[colorname] && stylesheet.node[colorname].color ? stylesheet.node[colorname].color : colorname;
 } 
 
 /**
@@ -228,20 +220,15 @@ function getStyle(stylesheet, name) {
  * mixvar is a backup style in case node already has a style, comes from ?mix variable
  */
 function addStyle(stylesheet, map, node, style, mixvar) {
-    if (style == skip) {
-        // do nothing yet, style may be set by another result
-    }
-    else if (map.has(node)) {
+    if (style === SKIP) return // do nothing yet, style may be set by another result
+    
+    if (map.has(node)) {
         // node already has style
         var val = map.get(node);
-        if (val != style) {
-            // different styles for same node
-            if (mixvar != undef) {
-                // set mix style from ?mix variable
-                map.set(node, mixvar);
-            }
-            else if (stylesheet.node != null && stylesheet.node.mix != null ) {
-                // set mix style from stylesheet
+        if (val != style) { // different styles for same node
+            if (mixvar) map.set(node, mixvar); // set mix style from ?mix variable
+            
+            else if (stylesheet.node != null && stylesheet.node.mix != null ) { // set mix style from stylesheet
                 getMixValue(stylesheet, map, node, val, style);
             }
         }
@@ -251,44 +238,34 @@ function addStyle(stylesheet, map, node, style, mixvar) {
     }
 }
 
-
-
 /**
  * value: current value 
  * style: new value
  */ 
 function getMixValue(stylesheet, map, node, value, style) {
-    if (stylesheet.node[value] != null && stylesheet.node[value].priority != null &&
-        stylesheet.node[style] != null && stylesheet.node[style].priority != null) {
-        if (stylesheet.node[value].priority < stylesheet.node[style].priority) {
-            // prefer old style
-        }
-        else {
-            // prefer new style 
+    if (stylesheet.node[value] && stylesheet.node[value].priority &&
+        stylesheet.node[style] && stylesheet.node[style].priority) {
+        if (stylesheet.node[value].priority > stylesheet.node[style].priority) {  // keep style with higher priority
             map.set(node, style);
         }
     }
-    else {
-        // mix is the name of the mix style
-        map.set(node, mix);
+    else { // uses the color assigned to MIX in the stylesheet
+        map.set(node, MIX);
     }
 }
-
-
-
 
 /**
  * Style eventually assigned to mgexplorer author node data structure
  * When there is a stylesheet with default style, return default color
  */
 function getFinalStyle(stylesheet, map, node) {
-    if (map.has(node)) {
+    if (map.has(node)) 
         return getStyle(stylesheet, map.get(node));
-    }
-    if (stylesheet.node != null && stylesheet.node.default != null && stylesheet.node.default.color != null) {
+    
+    if (stylesheet.node != null && stylesheet.node.default != null && stylesheet.node.default.color != null) 
         return stylesheet.node.default.color;
-    }
-    return undef;
+    
+    return null;
 }
 
 /**
@@ -297,7 +274,6 @@ function getFinalStyle(stylesheet, map, node) {
 * docMap:  author -> Set of doc
 * typeMap: author -> array of number of documents by type
 **/
-// addType(docMap, docTypeMap, a1, doc, typeIndex.get(type));
 function addType(docMap, typeMap, a, doc, i) {
     if (! docMap.has(a)) {
         docMap.set(a, new Set());
@@ -392,6 +368,7 @@ async function transform(data, q_type, stylesheet) {
 
         if (elem.author) {
             let authorList = elem.author.value.split('--') 
+
             authorList.forEach(a => {
                 authorSet.add(a);
 
@@ -412,8 +389,11 @@ async function transform(data, q_type, stylesheet) {
             authorSet.add(a2);
             
             // coauthor set
-            addCoauthor(authorMap, a1, a2);
-            addCoauthor(authorMap, a2, a1);
+            if (a1 != a2) { 
+                // only add co-author if the authors are not the same (as we recover ?s and ?o every time, we can have the same author twice for an article if they have no co-authors)
+                addCoauthor(authorMap, a1, a2);
+                addCoauthor(authorMap, a2, a1);
+            }
 
             // count doc by type of doc
             addType(docMap, docTypeMap, a1, p, typeIndex.get(type));
@@ -425,11 +405,9 @@ async function transform(data, q_type, stylesheet) {
     })
 
     var id = 0;
-    // name -> ID
     var idMap = new Map();
          
     // generate node data structure
-
     for (let author of authorSet) {
         let shortName = getShortName(author);
         let coauthorSet = authorMap.get(author);
@@ -437,18 +415,18 @@ async function transform(data, q_type, stylesheet) {
         let qtEachType = docTypeMap.get(author);
         
         // lb is a style info to specify graph node color in MG-Explorer/nodeEdge/js/nodeEdgeChart.js
-        var lb = 1;
-        var style = undef;
+        // var lb = 1;
+        var style = null;
         
-        if (q_type && q_type == 2) {
-            lb = getLB(data, author);      
-        }
-        else if (q_type) {
-            style = stylesheet ? getFinalStyle(stylesheet, styleMap, author) : null;
-        }
+        // if (q_type && q_type == 2) {
+        //     lb = getLB(data, author);      
+        // }
+        // else if (q_type) {
+            style = stylesheet ? getFinalStyle(stylesheet, styleMap, author) : defaultColor;
+        // }
         
         idMap.set(author, id);
-        var nodeInfo = getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style, lb);
+        var nodeInfo = getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style);
         nodes.dataNodes.push(nodeInfo);
         id++;
 
@@ -502,7 +480,7 @@ async function transform(data, q_type, stylesheet) {
         "res_number": len,
         "node_number": nodes.dataNodes.length,
         "edge_number": edges.dataEdges.length,
-        "data_type": lb
+        "data_type": 1 //lb
     }
     // return [res1, res2, res3];
     return {
@@ -521,25 +499,25 @@ async function transform(data, q_type, stylesheet) {
  * return 2 if author = n2
  * return 3 if author = n1 && author = n2 in two different results
  */
-function getLB(data, author) {
-    var isInLab1 = false;
-    var isInLab2 = false;
+// function getLB(data, author) {
+//     var isInLab1 = false;
+//     var isInLab2 = false;
             
-    for (var j = 0; j < data.length; j++) {
-        if (getValue(data, j, name1) == author) {
-            isInLab1 = true;
-        }
-        if (getValue(data, j, name2) == author) {
-            isInLab2 = true;
-        }
-    }
+//     for (var j = 0; j < data.length; j++) {
+//         if (getValue(data, j, "s") == author) {
+//             isInLab1 = true;
+//         }
+//         if (getValue(data, j, "o") == author) {
+//             isInLab2 = true;
+//         }
+//     }
                         
-    if (isInLab1 && isInLab2) lb = 3;
-    else if (isInLab1) lb = 1;
-    else if (isInLab2) lb = 2;
+//     if (isInLab1 && isInLab2) lb = 3;
+//     else if (isInLab1) lb = 1;
+//     else if (isInLab2) lb = 2;
     
-    return lb;
-}
+//     return lb;
+// }
 
 function getRes(items, nodes, edges) {
     return {
@@ -560,16 +538,16 @@ function getRes(items, nodes, edges) {
 * qtCoauthor = number of all coauthors
 * lb =  style data for graph node color
 **/
-function getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style, lb) {
+function getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style) {
     var not = "Not Informed";
     var nodeInfo = {
         "id": id, "idBD": id, "labels": [shortName, author, not, not, not], 
         "values": [2004, 0, 0]
             .concat(qtEachType)
-            .concat([qtCoauthor, qtCoauthor, 0.1, 0.1, qtCoauthor / 2 + 1, lb]),
+            .concat([qtCoauthor, qtCoauthor, 0.1, 0.1, qtCoauthor / 2 + 1]),
         "images": null
     };
-    if (style != undef) {
+    if (style != null) {
         nodeInfo.style = style;
     }
     return nodeInfo;
