@@ -604,10 +604,10 @@ export class MgeIris {
     }
 
     async _calcGeometry() {
-        this.i_CalcFocusArea();
-        this.i_CalcFishEyeArea();
-        this.i_CalcHiddenArea();
-        this.i_CalcMinArea();   // It should be the last one to be calculated as it is the area left over
+        await this.i_CalcFocusArea();
+        await this.i_CalcFishEyeArea();
+        await this.i_CalcHiddenArea();
+        await this.i_CalcMinArea();   // It should be the last one to be calculated as it is the area left over
         // Recalculates the sector angle of the hidden area
         // adding what's missing to 360 degrees
 
@@ -627,13 +627,14 @@ export class MgeIris {
         this.i_BindDataVisToData();
     }
 //--------
-    i_CalcFocusArea() {
+    async i_CalcFocusArea() {
+        
         this._focusArea.angleBar = this._widthToAngle(this._focusArea.widthBar + this._focusArea.marginBar, this._innerRadius);
         this._focusArea.angleSector = this._focusArea.angleBar * this._focusArea.numBars;
     }
 
     //--------
-    i_CalcFishEyeArea() {
+    async i_CalcFishEyeArea() {
         let index = 0;
         this._fishEyeArea.angleSector = 0.0;
         this._fishEyeArea.geometry = [{ width: 0.0, angle: 0.0 }];
@@ -646,13 +647,14 @@ export class MgeIris {
     }
 
     //--------
-    i_CalcHiddenArea (){
+    async i_CalcHiddenArea (){
         this._hiddenArea.angleBar = this._widthToAngle(this._hiddenArea.widthBar + 1, this._innerRadius);
         this._hiddenArea.angleSector = this._hiddenArea.angleBar * this._hiddenArea.numBars;
     }
 
     //--------
-    i_CalcMinArea (){
+    async i_CalcMinArea (){
+        
         this._minArea.angleBar = this._widthToAngle(this._minArea.widthBar + this._minArea.marginBar, this._innerRadius);
         this._minArea.numBars = Math.floor((360.0 - this._fishEyeArea.angleSector * 2 - this._focusArea.angleSector - this._hiddenArea.angleSector) / (2 * this._minArea.angleBar));
         this._minArea.angleSector = this._minArea.numBars * this._minArea.angleBar;
@@ -663,6 +665,7 @@ export class MgeIris {
         let angleRotBar;
 
         this._dataVis = range(this._numMaxBars).map(function () { return { angleRot: 0.0, width: 0, widthText: 0, indexData: 0, children: [] }; });
+
 
         // Determines as the initial rotation angle of the bar with index 0 the angle of the upper line of the sector of the not visible area
         angleRotBar = 180 + this._hiddenArea.angleSector / 2;
@@ -677,6 +680,7 @@ export class MgeIris {
         angleRotBar = this.i_CalcGeometryFixedArea(angleRotBar, this._minArea.numBars + this._fishEyeArea.numBars,
             this._minArea.numBars + this._fishEyeArea.numBars + this._focusArea.numBars - 1,
             this._focusArea.widthBar, this._focusArea.angleBar); // Focus Area
+
         // ---------- Fish Eye Area 2
         angleRotBar = this.i_CalcGeometryFishEyeArea(angleRotBar, this._minArea.numBars + this._fishEyeArea.numBars + this._focusArea.numBars,
             this._minArea.numBars + 2 * this._fishEyeArea.numBars + this._focusArea.numBars - 1,
@@ -689,6 +693,7 @@ export class MgeIris {
     }
         //--------
     i_CalcGeometryFixedArea(angleRotBar, startIndex, finalIndex, width, angleBar) {
+            
             let radiusText = this._innerRadius + this._maxHeightBar;
             for (let i = startIndex; i <= finalIndex; i++) {         // adjusts the angle of rotation to the center of the bar
                 this._dataVis[i].angleRot = (angleRotBar + angleBar / 2) % 360;
@@ -770,6 +775,9 @@ export class MgeIris {
 
         this.model.redraw = 0;
 
+        this.model.widthChart = this.model.box.width - this.model.margin.left - this.model.margin.right;
+        this.model.heightChart = this.model.box.height - this.model.margin.top - this.model.margin.bottom;
+
         // ---------------- Initialization Actions
         let _svg = divTag.append("svg"),  // Create dimensionless svg
             _grpChart = _svg.append("g");                       // Does not exist in the original Iris
@@ -792,10 +800,10 @@ export class MgeIris {
         this._grpIris.append("path").attr("class", "IC-focus");
 
         //===================================================
-        this.model.when(["box", "margin"], (box, margin) => {
-            this.model.widthChart = box.width - margin.left - margin.right;
-            this.model.heightChart = box.height - margin.top - margin.bottom;
-        });
+        // this.model.when(["box", "margin"], (box, margin) => {
+        //     this.model.widthChart = box.width - margin.left - margin.right;
+        //     this.model.heightChart = box.height - margin.top - margin.bottom;
+        // });
 
         this.model.when("box", (box) => {
             _svg.attr("width", box.width).attr("height", box.height);
@@ -895,19 +903,15 @@ export class MgeIris {
   }
 
   buildChart(idDiv, svg){ 
-    // this.setBox(this.model.box);
-    // this.setData(this.chartData);
     this.addIrisChart(idDiv, svg);
-    // console.log(this._chart);
-    // this._chart().data(this.chartData);
   }
 
 
   componentDidLoad(){
-  let svg = select(this.element.querySelectorAll(".iris")[0])
-    .attr("width", this.width)
-    .attr("height", this.height);
-  this.buildChart("iris", svg);
+    let svg = select(this.element.querySelectorAll(".iris")[0])
+        .attr("width", this.width)
+        .attr("height", this.height);
+    this.buildChart("iris", svg);
   }
 
   render() {
