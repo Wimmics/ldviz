@@ -182,7 +182,7 @@ export namespace Components {
         /**
           * The initial function to create all of elements in the cluster chart In this function, it will set Geometric attributes of the graph create actions on graph and manage all of the interaction on the graph
          */
-        "addClusterChart": (idDiv: any, divTag: any) => Promise<void>;
+        "addClusterChart": (divTag: any) => Promise<void>;
         "alteraAttribute": (_indexAnel: any, _indexAttr: any, _typeAttr: any) => Promise<void>;
         /**
           * The dataset name being used
@@ -193,8 +193,6 @@ export namespace Components {
          */
         "height": number;
         "indexAttrSort": (_: any) => Promise<number>;
-        "obtemRings": () => Promise<any[]>;
-        "removeAnelExterno": () => Promise<void>;
         "setBox": (_: any) => Promise<any>;
         /**
           * This function is to set the data to the chart If no arguments, It will return the value of data
@@ -744,7 +742,7 @@ export namespace Components {
           * This function will hightlight all nodes in a cluster. This function will be called when used text search in filter panel
          */
         "acSelectByNameCluster": (nomeCluster: any) => Promise<void>;
-        "addNodeLinkChart": (idDiv: any, divTag: any) => Promise<void>;
+        "addNodeLinkChart": (div: any) => Promise<void>;
         /**
           * The dataset name being used
          */

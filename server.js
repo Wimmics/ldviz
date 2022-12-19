@@ -305,11 +305,14 @@ app.post(prefix + '/sparql', async function (req, res) {
             if (!result) {
                 result = await sparql.sendRequest(query.query, query.uri)
                 // Save request result in cache (for predefined queries only - query with id)
-                if (query.id) await cache.saveFile(result, query)             
+                console.log(result)
+                console.log(result.status)
+                if (!result.status && query.id) await cache.saveFile(result, query)             
             }
 
-            // send result back to client: HTML + JS graphic specification
-            res.send(result);
+            // send result back to client
+            if (result.status) res.sendStatus(result.status)
+            else res.send(result);
         } catch (e) {
             console.log('error = ', e)
             // send error back to client

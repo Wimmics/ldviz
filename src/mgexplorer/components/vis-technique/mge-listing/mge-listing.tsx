@@ -102,7 +102,6 @@ export class MgeListing {
             return this.model.data;
 
         if (secondNode || isFromEdge) {
-            console.log('taking second node into account')
             _ = this._subGraph.duoPapersList(_, secondNode, globalData);
         } else if (isFromCluster) {
             _ = this._subGraph.clusterPapersList(_, globalData);
@@ -114,7 +113,6 @@ export class MgeListing {
         }
         
         this.model.data = _;
-        console.log('list data = ', this.model.data)
         let headerHeight = 50;
         this._view.height = this.model.box.height;
         // _papersListPanel.update();
@@ -151,10 +149,7 @@ export class MgeListing {
 
     @Event({ bubbles: true, composed: true }) testevent: EventEmitter;
     _onMouseClick(type, data) {
-        //console.log("state listing" + state.annotations);
         Object.entries(state.annotations).forEach(([key, value]) => {
-            //console.log("mge-listing");
-            //console.log(key, value);
             if (value["disabled"] == false) {
                 if (value["data"] == "" || value["data"].view != "listing") {
                     value["data"] = {
@@ -296,8 +291,6 @@ export class MgeListing {
 
                 let maxLenghtTitle = this.model.widthChart;
 
-                const protocol = window.location.protocol + '//';
-                const hostname = window.location.host;
                 x = 15;
                 this._grpPapers.append('a')
                     .attr("xlink:href", function (d) { return d.link })
@@ -348,29 +341,13 @@ export class MgeListing {
                 infoText.append("title")
                     .text(d => d.label)
 
-
-                // this._grpPapers.append("text")
-                //     .attr("class", "PL-infos")
-                //     .text(d => d.authors.map(e => e.label).join(' and '))
-                //     .attr('transform', `translate(${x}, 15)`)
-                //     .style("font-size", "12px")
-                //     .append("title")
-                //     .text(d => d.authors.map(e => e.label).join(' and '))
-
-
-                // to-do : update the maximum width for the scrolling
-                // let globalThis = this
-                // updateSVGWidth()
-                // function updateSVGWidth() {
-                    this._grpPapers.selectAll('text.PL_title')
-                        .each(function () {
-                            let textlength = this.getComputedTextLength();
-                            if (textlength > maxLenghtTitle) maxLenghtTitle = textlength;
-                            // console.log(this.getComputedTextLength())
-                        })
-                    _svg.attr("width", maxLenghtTitle + 100);
-                // }
-
+                this._grpPapers.selectAll('text.PL_title')
+                    .each(function () {
+                        let textlength = this.getComputedTextLength();
+                        if (textlength > maxLenghtTitle) maxLenghtTitle = textlength;
+                    })
+                _svg.attr("width", maxLenghtTitle + 100);
+            
             } // End
         );
     }

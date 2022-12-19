@@ -353,7 +353,7 @@ export class MgeBarchart {
    * In this function, it will set Geometric attributes of the graph
    * create actions on graph and manage all of the interaction on the graph
    * */
- addHistogramChart(idDiv, divTag) {
+ addHistogramChart(div) {
 
         // ---------------- Geometric attributes of the graph
         this.model.margin = { top: 2, right: 2, bottom: 2, left: 2 };
@@ -370,7 +370,7 @@ export class MgeBarchart {
 
 
         // ---------------- Initialization Actions
-        let _svg = divTag.append("svg"),  // Create dimensionless svg
+        let _svg = div.append("svg"),  // Create dimensionless svg
             _grpChart = _svg.append("g");                       // Does not exist in the original Iris
             
         // Add zoom event
@@ -382,7 +382,7 @@ export class MgeBarchart {
             .on("touchstart.zoom", null)
             .on("touchend.zoom", null);
 
-        let _helpContainer = divTag.append("div")
+        let _helpContainer = div.append("div")
             .attr("class", "helpContainer")
             .on("mouseover", this._openToolTip.bind(this))
             .on("mouseout", this._closeToolTip.bind(this));
@@ -391,7 +391,7 @@ export class MgeBarchart {
             .attr("class", "fas fa-palette")
             .style("font-size", "20px");
 
-        this._helpTooltip = divTag.append("div")
+        this._helpTooltip = div.append("div")
             .attr("class", "helpTooltip")
             .style("display", "none");
 
@@ -555,8 +555,8 @@ export class MgeBarchart {
         }
     }
 
-    buildChart(idDiv, svg){ 
-        this.addHistogramChart(idDiv, svg);
+    buildChart(div){ 
+        this.addHistogramChart(div);
     }
 
     componentWillLoad(){
@@ -566,10 +566,10 @@ export class MgeBarchart {
     }
 
     componentDidLoad(){
-        let svg = select(this.element.querySelectorAll(".histogram")[0])
+        let div = select(this.element.querySelector("div.histogram"))
             .attr("width", this.width)
             .attr("height", this.height);
-        this.buildChart("histogram", svg);
+        this.buildChart(div);
     }
 
     render() {

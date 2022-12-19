@@ -162,7 +162,7 @@ Type: `Promise<void>`
 
 
 
-### `addClusterChart(idDiv: any, divTag: any) => Promise<void>`
+### `addClusterChart(divTag: any) => Promise<void>`
 
 The initial function to create all of elements in the cluster chart
 In this function, it will set Geometric attributes of the graph
@@ -191,26 +191,6 @@ Type: `Promise<void>`
 #### Returns
 
 Type: `Promise<number>`
-
-
-
-### `obtemRings() => Promise<any[]>`
-
-
-
-#### Returns
-
-Type: `Promise<any[]>`
-
-
-
-### `removeAnelExterno() => Promise<void>`
-
-
-
-#### Returns
-
-Type: `Promise<void>`
 
 
 

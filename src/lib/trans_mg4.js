@@ -12,7 +12,7 @@ import { sum } from "d3";
 let types = {};
 
 const defaultType = "items";
-const defaultColor = "lightblue"
+const defaultColor = "steelblue"
 
 const SKIP  = "skip";
 const MIX   = "mix";
@@ -211,9 +211,9 @@ function defStyle(stylesheet, styleMap, a1, a2, elem) {
 /**
  * name is either the name of a style in the stylesheet of the name of a color
  */
-function getStyle(stylesheet, colorname) {
-    return stylesheet.node && stylesheet.node[colorname] && stylesheet.node[colorname].color ? stylesheet.node[colorname].color : colorname;
-} 
+// function getStyle(stylesheet, colorname) {
+//     return stylesheet.node && stylesheet.node[colorname] ? stylesheet.node[colorname] : colorname;
+// } 
 
 /**
  * Assign a style to author node in the style map
@@ -259,12 +259,12 @@ function getMixValue(stylesheet, map, node, value, style) {
  * When there is a stylesheet with default style, return default color
  */
 function getFinalStyle(stylesheet, map, node) {
-    if (map.has(node)) 
-        return getStyle(stylesheet, map.get(node));
-    
-    if (stylesheet.node != null && stylesheet.node.default != null && stylesheet.node.default.color != null) 
-        return stylesheet.node.default.color;
-    
+    if (stylesheet.node) {
+        if (map.has(node)) 
+            // return getStyle(stylesheet, map.get(node));
+            return stylesheet.node[map.get(node)]
+        return stylesheet.node.default;
+    }
     return null;
 }
 
@@ -422,7 +422,7 @@ async function transform(data, q_type, stylesheet) {
         //     lb = getLB(data, author);      
         // }
         // else if (q_type) {
-            style = stylesheet ? getFinalStyle(stylesheet, styleMap, author) : defaultColor;
+            style = stylesheet ? getFinalStyle(stylesheet, styleMap, author) : { color: defaultColor };
         // }
         
         idMap.set(author, id);

@@ -1,5 +1,5 @@
 import { Component, Element, Host, Prop, h, Event, EventEmitter, Method } from '@stencil/core';
-import { tree, zoom, hierarchy, curveBundle, radialLine, schemeCategory10, groups, ascending } from "d3";
+import { tree, zoom, hierarchy, curveBundle, radialLine, schemeCategory10, groups, ascending, schemeAccent } from "d3";
 // import { clusterClusterVis, normalClusterVis, sort } from "./process-data"
 import { scaleLinear, scaleOrdinal } from 'd3-scale';
 import { max } from 'd3-array'; import Model from 'model-js';
@@ -84,8 +84,8 @@ export class MgeClustervis {
 
     private _indexAttrSort = 0; // Index of the attribute used for sort (0-first labels[] 1000-first values[])
     // Vector of colors with 20 elements inverted (da d3)
-    private _vCores20Inv = ["#17becf", "#bcbd22", "#7f7f7f", "#e377c2", "#8c564b", "#9467bd", "#9edae5", "#dbdb8d", "#c7c7c7", "#f7b6d2",
-        "#c49c94", "#c5b0d5", "#ff9896", "#d62728", "#98df8a", "#2ca02c", "#ffbb78", "#ff7f0e", "#aec7e8", "#1f77b4"];
+    // private _vCores20Inv = ["#17becf", "#bcbd22", "#7f7f7f", "#e377c2", "#8c564b", "#9467bd", "#9edae5", "#dbdb8d", "#c7c7c7", "#f7b6d2",
+        // "#c49c94", "#c5b0d5", "#ff9896", "#d62728", "#98df8a", "#2ca02c", "#ffbb78", "#ff7f0e", "#aec7e8", "#1f77b4"];
     private _vOrder = null;      // Indirect ordering vector
     private _vAngle = null;      // Vector that contains the angular measurement of each bar. Calculated at _calcGeometry
     private _grpBarsRotScale = scaleOrdinal();    // Scale used to set the angle of rotation of each bar
@@ -106,7 +106,7 @@ export class MgeClustervis {
      * create actions on graph and manage all of the interaction on the graph
      * */
     @Method()
-    async addClusterChart(idDiv, divTag) {
+    async addClusterChart(divTag) {
 
         this.model.margin = { top: 30, right: 40, bottom: 30, left: 40 };
         this.model.box = { width: this.width, height: this.height };
@@ -184,9 +184,6 @@ export class MgeClustervis {
         });
 
         var _appendRings = () => {
-            // if (this._grpRings != null)
-            //     this._grpRings.remove();
-            console.log(this._vRings)
             this._grpRings = this._grpCluster.selectAll(".CV-grpRings")
                 .data(this._vRings)    // Original _vRings
                 .join(
@@ -207,54 +204,24 @@ export class MgeClustervis {
          */
         var _appendBars = async (data) => {
             
-            let i, j, k, categorias = [];
-            let circleScale = scaleOrdinal();
+            let categories = []; //circleScale = scaleOrdinal(schemeAccent);
 
             let setCategories = () => {
-                let categoriasAux = [], found = false;
-                for (i = 0; i < this._vRings.length; i++) {
-                    if (this._vRings[i].typeAttr === "L")
-                        categoriasAux = categoriasAux.concat(this._vRings[i].vLabelDomain.sort());
-                }
-    
-                // Removes duplicate vector elements
-                k = 0;
-                for (i = 0; i < categoriasAux.length; i++) {
-                    found = false;
-                    for (j = 0; j < categorias.length; j++)
-                        if (categoriasAux[i] === categorias[j]) {
-                            found = true;
-                            break;
-                        }
-                    if (!found) {
-                        categorias[k] = categoriasAux[i];
-                        k++;
-                    }
-                }
+                categories = this._vRings.map(d => d.typeAttr === "L" ? d.vLabelDomain.sort() : []).flat()
+                categories = categories.filter( (d,i) => d && categories.indexOf(d) === i)
             }
 
             let setBarCircleScale = async () => {
-                if (this._sameScale) {
-                    let maxValue = max(this._vRings, d => d.maxValue);
-    
-                    for (i = 0; i < this._vRings.length; i++) {
-                        if (this._vRings[i].typeAttr === "V") {
-                            this._vRings[i].barCircleScale
-                                .range([1, Math.floor(this._vRings[i].pHeightBar * (this._outerRadius - this._innerRadius))])
-                                .domain([0, maxValue]);
-                        } else {
-                            this._vRings[i].barCircleScale.range(this._vCores20Inv).domain(categorias);
-                        }
+                
+                this._vRings.forEach(ring => {
+                    if (ring.typeAttr === "V") {
+                        ring.barCircleScale = scaleOrdinal(schemeAccent)
+                            .range([0, Math.floor(ring.pHeightBar * (this._outerRadius - this._innerRadius))])
+                            .domain([0, this._sameScale ? max(this._vRings, d => d.maxValue) : ring.maxValue]);
+                    } else {
+                        ring.barCircleScale = scaleOrdinal(schemeAccent).domain(categories);
                     }
-                } else {
-                    for (i = 0; i < this._vRings.length; i++) {
-                        if (this._vRings[i].typeAttr === "V") {
-                            this._vRings[i].barCircleScale.range([0, Math.floor(this._vRings[i].pHeightBar * (this._outerRadius - this._innerRadius))]).domain([0, this._vRings[i].maxValue]);
-                        } else {
-                            this._vRings[i].barCircleScale.range(this._vCores20Inv).domain(categorias);
-                        }
-                    }
-                }
+                })
             }
             
             this._grpBars = this._grpCluster.selectAll(".CV-grpBars")
@@ -275,10 +242,10 @@ export class MgeClustervis {
                 .attr("y2", 0);
 
             setCategories(); // only useful when nodes are categorized
-
+        
             await setBarCircleScale()
         
-            for (i = 0; i < this._vRings.length; i++) {
+            for (let i = 0; i < this._vRings.length; i++) {
                 if (this._vRings[i].typeAttr === "V") {
                     this._grpBars.append("rect")
                         .attr("class", "CV-node")
@@ -293,13 +260,12 @@ export class MgeClustervis {
                         .append("title")
                         .text((d) => { return d.labels[1] + "\n" + data.nodes.valueTitle[this._vRings[i].indexAttr] + ": " + d.values[this._vRings[i].indexAttr] });
                 } else {
-                    circleScale.range(this._vCores20Inv).domain(this._vRings[i].vLabelDomain);
                     this._grpBars.append("circle")
                         .attr("class", "CV-node")
                         .attr("cx", this._ringScale(this._vRings[i].pX) + this._barsArea.widthBar / 2)
                         .attr("cy", 0)
                         .attr("r", this._barsArea.widthBar / 2)
-                        .style("fill", (d) => { return this._vRings[i].barCircleScale(d.labels[this._vRings[i].indexAttr]); })  //<-- Check how to put the color
+                        .style("fill", (d) => { return this._vRings[i].barCircleScale(d.labels[this._vRings[i].indexAttr]); })  
                         .on("mouseover", this._mouseOverNode.bind(this))
                         .on("mouseout", this._mouseOutNode.bind(this))
                         .on("click", this._onMouseClick.bind(this))
@@ -310,9 +276,6 @@ export class MgeClustervis {
                         });
                 }
             }
-
-            
-
         }
 
         /**
@@ -344,9 +307,9 @@ export class MgeClustervis {
         }
 
         var _appendNodeNames = () => {
-            ; // For showing names on mouseover
 
-            let index = max(this._vRings, d => d.maxValue);
+            let maxValue = max(this._vRings, d => d.maxValue);
+            let index = this._vRings.findIndex(d => d.maxValue === maxValue)
             let x = this._ringScale(this._vRings[this._vRings.length - 1].pX) + this._vRings[index]
                 .barCircleScale(this._vRings[index].maxValue);
 
@@ -356,31 +319,9 @@ export class MgeClustervis {
                 .attr("y", 0)
                 .attr("text-anchor", "start")
                 .text(d => d.labels[1])
-                // .text(function (n) {
-                //     if (n.highLight === true) {
-                //         if (_isTheFirstOccurence(n.id, d.cluster)) {
-                //             d.cluster.push(n);
-                //         }
-                //         let names = n.labels[1]
-                //         return names;
-                //     }
-                //     return "";
-                // })
                 .style("font-size", "10px")
                 .style("font-family", "Arial")
                 .style("color", "black");
-
-
-            // function _isTheFirstOccurence(id, tab) {
-            //     if (tab.length === 0) return true;
-            //     else {
-            //         for (let i = 0; i < tab.length; i++) {
-            //             if (tab[i].id === id)
-            //                 return false;
-            //         }
-            //         return true;
-            //     }
-            // }
 
         }
 
@@ -399,10 +340,8 @@ export class MgeClustervis {
 
     @Event({ bubbles: true, composed: true }) testevent: EventEmitter;
     _onMouseClick(event, data) {
-        //console.log("state clustervis" + data.clusters);
         Object.entries(state.annotations).forEach(([key, value]) => {
-            //console.log("mge-clustervis");
-            //console.log(key, value);
+           
             if (value["disabled"] == false) {
 
                 if (value["data"] == "" || value["data"].view != "clustervis") {
@@ -419,9 +358,7 @@ export class MgeClustervis {
             }
         });
         this.testevent.emit(state.annotations);
-        //("after mouse click");
-        //console.log(state.annotations);
-        //console.log(event)
+      
         this._send_id(this.element.id);
     }
 
@@ -444,12 +381,17 @@ export class MgeClustervis {
 
         this._grpBars.classed("CV-nodeHL", function (node) { return node.highLight; });
 
-        this._grpBars.selectAll('text.CV-names').style('display', d => d.highLight ? 'block' : 'none')
+        this._grpBars.selectAll('text.CV-names')
+            .style('font-weight', d => d.highLight ? 'bold' : 'normal')
+            .style('display', d => d.highLight ? "block" : "none")
     }
+
     _mouseOutNode(event, d) {
         this._grpBars.classed("CV-nodeHL", false);
         this._links.classed("CV-linkHL", false);
-        this._grpBars.selectAll("text.CV-names").style('display', 'block');
+        this._grpBars.selectAll("text.CV-names")
+            .style('font-weight', 'normal')
+            .style('display', 'block')
     }
 
     /**
@@ -642,11 +584,6 @@ export class MgeClustervis {
         });
     }
 
-    @Method()
-    async obtemRings() {
-        return this._vRings;
-    };
-
     //---------------------
     @Method()
     async setBox(_) {
@@ -684,14 +621,17 @@ export class MgeClustervis {
             _ = this._subGraph.normalClusterVis(_, globalData);
         }
 
-        this.model.data = _
+        this.model.data = _;
+
         this.addAttribute(state.ATN_Category, "L")
         this.addAttribute(state.ATN_QtPublicacoes - 1000, "V")
         this.addAttribute(state.ATN_QtProceedings - 1000, "V")
         this.addAttribute(state.ATN_QtJournals - 1000, "V")
-        this.addAttribute(state.ATN_QtBooks - 1000, "V");
+        this.addAttribute(state.ATN_QtBooks - 1000, "V")
+
         this._sort.inic(this.model.data.nodes.labelTitle.length, this.model.data.nodes.valueTitle.length)
             .data(this.model.data.nodes.dataNodes);
+
         this._sort.exec(this._indexAttrSort);
         this._vOrder = this._sort.getVetOrder();
         this._dataLinks.tree = hierarchy(await this._getTree(this._dataLinks.heightTree, this.model.data.nodes.dataNodes, this._dataLinks.degreeTree, this._vOrder));
@@ -700,7 +640,6 @@ export class MgeClustervis {
 
         this.model.data.nodes.dataNodes.forEach(function (d) { d.highLight = false; });
         this._updateMaxRings();
-        // this._clusterVisPanel.update();   // For now it's only here.
     };
 
     //---------------------
@@ -727,33 +666,34 @@ export class MgeClustervis {
         this.model.pOuterRadius = _;
     };
 
+    // //---------------------
+    // @Method()
+    // async removeAnelExterno() {
+    //     let i, deltaHeight, pHeight, pX;
+
+    //     this._vRings.pop();  // Removes the data from the ring
+    //     deltaHeight = 100 / this._vRings.length;
+
+    //     // Adjust todo o this._vRings
+    //     for (i = 0, pHeight = deltaHeight; i < this._vRings.length; i++, pHeight += deltaHeight) {
+    //         this._vRings[i].pHeight = pHeight;
+    //         this._vRings[i].pHeightBar = deltaHeight / 100;
+    //     }
+
+    //     if (this._vRings.length > 0) {
+    //         this._vRings[0].pX = 0;
+    //         pX = this._vRings[this._vRings.length - 1].pHeight;
+
+    //         for (i = 1; i < this._vRings.length; i++)
+    //             this._vRings[i].pX = this._vRings[i - 1].pHeight;
+    //     }
+
+    //     this.model.redraw += 1;
+
+    // };
+
     //---------------------
-    @Method()
-    async removeAnelExterno() {
-        let i, deltaHeight, pHeight, pX;
-
-        this._vRings.pop();  // Removes the data from the ring
-        deltaHeight = 100 / this._vRings.length;
-
-        // Adjust todo o this._vRings
-        for (i = 0, pHeight = deltaHeight; i < this._vRings.length; i++, pHeight += deltaHeight) {
-            this._vRings[i].pHeight = pHeight;
-            this._vRings[i].pHeightBar = deltaHeight / 100;
-        }
-
-        if (this._vRings.length > 0) {
-            this._vRings[0].pX = 0;
-            pX = this._vRings[this._vRings.length - 1].pHeight;
-
-            for (i = 1; i < this._vRings.length; i++)
-                this._vRings[i].pX = this._vRings[i - 1].pHeight;
-        }
-
-        this.model.redraw += 1;
-
-    };
-
-    //---------------------
+    
     @Method()
     addAttribute(_indexAttr, _typeAttr) {
         let maxValue, tempKeys, pX,
@@ -774,7 +714,6 @@ export class MgeClustervis {
         }
 
         pX = 0;
-        //      barScale = d3.scale.linear().range(0, model.ringScale(deltaHeight)-_innerRadius).domain(0,maxValue);
 
         // Adjust todo o _vRings
         for (var i = 0, pHeight = deltaHeight; i < this._vRings.length; i++, pHeight += deltaHeight) {
@@ -782,7 +721,6 @@ export class MgeClustervis {
             this._vRings[i].pHeightBar = deltaHeight / 100;
         }
 
-        //    barScale.range(0, ringScale() ).domain(0,maxValue);  
         if (this._vRings.length > 0) {
             this._vRings[0].pX = 0;
             pX = this._vRings[this._vRings.length - 1].pHeight;
@@ -791,16 +729,16 @@ export class MgeClustervis {
                 this._vRings[i].pX = this._vRings[i - 1].pHeight;
         }
 
-        if (_typeAttr === "V")
-            this._vRings.push({
-                indexAttr: _indexAttr, typeAttr: _typeAttr, pHeight: pHeight, pX: pX,
-                pHeightBar: deltaHeight / 100, maxValue: maxValue, vLabelDomain: _vLabelDomain, barCircleScale: scaleLinear()
-            });
-        else
-            this._vRings.push({
-                indexAttr: _indexAttr, typeAttr: _typeAttr, pHeight: pHeight, pX: pX,
-                pHeightBar: deltaHeight / 100, maxValue: maxValue, vLabelDomain: _vLabelDomain, barCircleScale: scaleOrdinal()
-            });
+        this._vRings.push({
+            indexAttr: _indexAttr, 
+            typeAttr: _typeAttr, 
+            pHeight: pHeight, 
+            pX: pX,
+            pHeightBar: deltaHeight / 100, 
+            maxValue: maxValue, 
+            vLabelDomain: _vLabelDomain,
+            barCircleScale : _typeAttr !== "V" ? scaleLinear() : scaleOrdinal()
+        })
 
         this.model.redraw += 1;
     };
@@ -816,7 +754,7 @@ export class MgeClustervis {
         } else {    // Determines or domain for categorical attributes (should also be placed in the function chart.data)
             maxValue = -1;
             tempKeys = groups(this.model.data.nodes.dataNodes, d => d.labels[_indexAttr]).sort((a, b) => ascending(a[0], b[0]));
-            // tempKeys = nest().key(function (d) { return d.labels[_indexAttr]; }).sortKeys(ascending).entries(this.model.data.nodes.dataNodes);
+           
             for (i = 0; i < tempKeys.length; i++)
                 _vLabelDomain[i] = tempKeys[i].key;
         }
@@ -825,10 +763,8 @@ export class MgeClustervis {
         this._vRings[_indexAnel].typeAttr = _typeAttr;
         this._vRings[_indexAnel].maxValue = maxValue;
         this._vRings[_indexAnel].vLabelDomain = _vLabelDomain;
-        if (_typeAttr === "V")
-            this._vRings[_indexAnel].barCircleScale = scaleLinear();
-        else
-            this._vRings[_indexAnel].barCircleScale = scaleOrdinal();
+        this._vRings[_indexAnel].barCircleScale = _typeAttr === "V" ? scaleLinear() : scaleOrdinal()
+
         this.model.redraw += 1;
 
     };
@@ -879,17 +815,17 @@ export class MgeClustervis {
     };
 
 
-    buildChart(idDiv, svg) {
+    buildChart(svg) {
         this.setBox(this.model.box);
         this.indexAttrSort(2)
-        this.addClusterChart(idDiv, svg);
+        this.addClusterChart(svg);
     }
 
     componentDidLoad() {
         let clusterDiv = select(this.element.querySelectorAll(".cluster")[0])
             .attr("width", this.width)
             .attr("height", this.height);
-        this.buildChart("cluster", clusterDiv);
+        this.buildChart(clusterDiv);
     }
 
 

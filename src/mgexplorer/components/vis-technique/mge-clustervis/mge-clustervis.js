@@ -491,10 +491,7 @@ let MgeClustervis = class MgeClustervis {
                 ring.maxValue = 0; // Copy here what was done in the addAttribute()
         });
     }
-    async obtemRings() {
-        return this._vRings;
-    }
-    ;
+    
     //---------------------
     async setBox(_) {
         if (!arguments.length)

@@ -4,7 +4,7 @@ import state from "../../../store"
 import { drag } from 'd3-drag';
 import {normalNodeTooltips, normalEdgeTooltips} from './tooltips'
 import Model from 'model-js';
-import {max, zoom , forceSimulation, forceLink , range, schemeCategory10, forceCenter, forceManyBody, forceCollide, forceX, forceY} from 'd3'
+import {max, zoom , forceSimulation, forceLink , range, schemeCategory10, forceCenter, forceManyBody, forceCollide, forceX, forceY, extent} from 'd3'
 import { nest } from 'd3-collection'
 import  { select } from 'd3-selection'
 import  { scaleLinear, scaleOrdinal } from 'd3-scale'
@@ -29,6 +29,8 @@ export class MgeNodelink {
   public model: any;
   public lcv: any;
   public _tooltips: any;
+
+  public selectedobj = null;
 
   /** Represents the panel associated with the graphic */
   @Prop() _nodeEdgePanel = null;  // Represents the panel associated with the graphic
@@ -55,7 +57,10 @@ export class MgeNodelink {
   private _configLayout = null;
   private _graphElem = null; // DOM elements
   private _graphData = null;
-  public selectedobj = null;
+  private _helpTooltip = null;
+  private _nodeTypes = null;
+
+  
 
   constructor(){
 
@@ -93,7 +98,7 @@ export class MgeNodelink {
   }
 
   @Method()
-  async addNodeLinkChart(idDiv, divTag){
+  async addNodeLinkChart(div){
 
     this.model.margin = { top: 2, right: 2, bottom: 2, left: 2 };
     this.model.box = { width: this.width, height: this.height };
@@ -101,7 +106,7 @@ export class MgeNodelink {
     this.model.redraw = 0;        // When changed perform a redraw
 
     // ---------------- Initialization Actions
-    let _svg = divTag.append("svg"),  // Create dimensionless svg
+    let _svg = div.append("svg"),  // Create dimensionless svg
         _grpChart = _svg.append("g");                       // Does not exist in the original Iris
     
         // Add zoom event
@@ -109,10 +114,27 @@ export class MgeNodelink {
     _zoomListener.scaleExtent([0.5, 10]);
     _svg.call(_zoomListener);
 
-
-    this._tooltips.divTT = divTag.append("div")
+    this._tooltips.divTT = div.append("div")
         .style("display", "none")
         .classed("NE-Tooltip", true);  // Tooltip for the normal node
+
+    let _helpContainer = div.append("div")
+        .attr("class", "helpContainer")
+        .on("mouseover", this._openToolTip.bind(this))
+        .on("mouseout", this._closeToolTip.bind(this));
+
+    _helpContainer.append("i")
+        .attr("class", "fas fa-palette")
+        .style("font-size", "20px");
+
+    this._helpTooltip = div.append("div")
+        .attr("class", "helpTooltip")
+        .style("display", "none");
+
+    this._helpTooltip.append("svg")
+        .attr("class", "HC-legend")
+        .attr("y", 1)
+        .attr("dy", ".71em")
 
     this._grpNodeEdge = _grpChart.append("g").attr("class", "NodeEdgeChart");
 
@@ -155,6 +177,7 @@ export class MgeNodelink {
         this._forceLayout.alpha(1).restart();
 
         this._nodeEdgePanel.updateNodePanel();  // Updates information in the panel associated with the technique
+        this._setLegend()
         this._appendEdges();
         this._appendNodes();
         
@@ -219,6 +242,27 @@ export class MgeNodelink {
         this.idevent.emit(id)
     }
 
+    _setLegend() {
+
+        let legendSvg = this._helpTooltip.select("svg")
+
+        let legendGrp = legendSvg.selectAll('g')
+            .data(this._nodeTypes)
+            .enter()
+                .append('g')
+
+        legendGrp.append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", d => d.color)
+            .attr("transform", (_,i) => "translate(10," + `${20 * i + 10}` + ")");
+
+        legendGrp.append("text")
+            .attr("transform", (_,i) => "translate(30," + `${20 * i + 10}` + ")")
+            .attr("y", "10")
+            .text(d => d.label || "No description provided")
+    }
+
     _appendNodes() {
         this._graphElem.nodes = this._grpNodeEdge.selectAll(".NE-node")
             .data(this._graphData.nodes)
@@ -230,7 +274,7 @@ export class MgeNodelink {
                 
             )
             .attr("r", d => this._rClusterScale(d[this._indexAttrSize]) )
-            .style("fill", d => d.style)
+            .style("fill", d => d.style.color)
             .on("mouseover", this._onMouseOverNode.bind(this))
             .on("mouseout", this._onMouseOutNode.bind(this))
             .on("click", this._onMouseClick.bind(this, "node"));
@@ -331,6 +375,15 @@ export class MgeNodelink {
       }
       
   }
+
+_openToolTip(){
+    this._helpTooltip.style("display", "block");
+}
+
+_closeToolTip(){
+    this._helpTooltip.style("display", "none");
+
+}
 
   _adjustGraph(data) {
       let result = {
@@ -440,20 +493,23 @@ export class MgeNodelink {
             node.qtItems = this.qtItems(node)
         })
 
+        this._nodeTypes = this._graphData.nodes.map(d => d.style)
+        this._nodeTypes = this._nodeTypes.filter( (d,i) => this._nodeTypes.findIndex(e => e.color === d.color) === i)
+
         await this._setClusterScale()
 
         let maxQtNodes =  max(this._graphData.nodes, d => d.qtNodes);
         this._chargeScale.domain([1, maxQtNodes]); // repulsion scale
 
         let maxLinkDistance = this._rClusterScale(maxQtNodes)
-        this._linkDistanceScale.range([1, maxLinkDistance]).domain([1, maxQtNodes]);
+        this._linkDistanceScale.domain([0, maxQtNodes]).range([1, maxLinkDistance]);
 
         maxQtEdges = max(this._graphData.edges, function (d) { return d.qt });
         if (maxQtEdges === 1){
           this._linkWidthScale.domain([maxQtEdges]);
         }
         else {
-          this._linkWidthScale.domain([1, maxQtEdges]);
+          this._linkWidthScale.domain([0, maxQtEdges]);
         }
 
         await this._setForceLayout()
@@ -463,8 +519,8 @@ export class MgeNodelink {
     };
 
     async _setClusterScale() {
-        let maxQtAttr = max(this._graphData.nodes, d => d[this._indexAttrSize]);
-        this._rClusterScale.domain([1, maxQtAttr]); // radius scale (changes according to the selected attribute)
+
+        this._rClusterScale.domain(extent(this._graphData.nodes, d => d[this._indexAttrSize])); // radius scale (changes according to the selected attribute)
         
     }
 
@@ -652,18 +708,18 @@ export class MgeNodelink {
     };
 
 
-  buildChart(idDiv, svg){ 
+  buildChart(svg){ 
     this.setBox(this.model.box);
     // this.indexAttrSize(state.ATN_qtNodes);
-    this.addNodeLinkChart(idDiv, svg);
+    this.addNodeLinkChart(svg);
   }
 
 
   componentDidLoad(){
-      let svg = select(this.element.querySelectorAll(".nodelink")[0])
+      let div = select(this.element.querySelectorAll(".nodelink")[0])
         .attr("width", this.width)
         .attr("height", this.height);
-      this.buildChart("nodelink", svg);
+      this.buildChart(div);
   }
 
 

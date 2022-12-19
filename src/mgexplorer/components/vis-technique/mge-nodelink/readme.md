@@ -88,7 +88,7 @@ Type: `Promise<void>`
 
 
 
-### `addNodeLinkChart(idDiv: any, divTag: any) => Promise<void>`
+### `addNodeLinkChart(div: any) => Promise<void>`
 
 
 
