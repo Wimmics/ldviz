@@ -265,10 +265,7 @@ export class MgeClustervis {
                         .on("mouseout", this._mouseOutNode.bind(this))
                         .on("click", this._onMouseClick.bind(this))
                         .append("title")
-                        .text((d) => {
-                            return d.labels[1] + "\n" +
-                                data.nodes.labelTitle[ring.indexAttr] + ": " + d.labels[ring.indexAttr]
-                        });
+                        .text((d) => d.labels[1] );
                 }
             }
         }
