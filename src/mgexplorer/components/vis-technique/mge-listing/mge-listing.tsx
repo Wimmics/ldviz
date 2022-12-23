@@ -101,6 +101,7 @@ export class MgeListing {
         if (!arguments.length)
             return this.model.data;
 
+        
         if (secondNode || isFromEdge) {
             _ = this._subGraph.duoPapersList(_, secondNode, globalData);
         } else if (isFromCluster) {
@@ -113,11 +114,8 @@ export class MgeListing {
         }
         
         this.model.data = _;
-        let headerHeight = 50;
+
         this._view.height = this.model.box.height;
-        // _papersListPanel.update();
-        // _irisPanel.update();
-        // setupPrimaryVersion();
     };
 
 
@@ -181,7 +179,7 @@ export class MgeListing {
         this.idevent.emit(id)
     }
 
-    addPaperListChart(idDiv, divTag) {
+    addPaperListChart(divTag) {
 
         this.model.margin = { top: 2, right: 2, bottom: 2, left: 2 };
         this.model.box = { width: this.width, height: this.height };
@@ -354,18 +352,18 @@ export class MgeListing {
 
     //--------------------------------- Private functions
 
-    buildChart(idDiv, svg) {
+    buildChart(div) {
 
-        this.addPaperListChart(idDiv, svg);
+        this.addPaperListChart(div);
     }
 
 
     componentDidLoad() {
         this._view = this._dashboard.shadowRoot.querySelector("[id-view='" + this.element.id + "']");
-        let svg = select(this.element.querySelectorAll(".paper-list")[0])
+        let div = select(this.element.querySelectorAll(".paper-list")[0])
             .style("width", this.width + "px")
             .style("height", this.height + "px");
-        this.buildChart("paper-list", svg);
+        this.buildChart(div);
     }
 
     render() {

@@ -15,10 +15,10 @@ const { state } = createStore({
 
 	ATN_QtLinhaPesq: 1001,
 
-	ATN_QtPublicacoes: 1003,
-	ATN_QtJournals: 1004,
-	ATN_QtBooks: 1005,
-	ATN_QtProceedings: 1006,
+	ATN_QtPublicacoes: 1000, // 1st type (indices of the "values" array)
+	ATN_QtJournals: 1001, // 2nd type
+	ATN_QtBooks: 1002, // 3rd type
+	ATN_QtProceedings: 1003, // 4th type
 
 	ATN_ConnectComp: 1007,
 
@@ -30,6 +30,7 @@ const { state } = createStore({
 	ATE_QtJournals: 1001,
 	ATE_QtBooks: 1002,
 	ATE_QtProceedings: 1003,
+	ATE_Category: 1005,
 
 	TC_NodeEdge: 0,   // Technique
 	TC_ClusterVis: 1,

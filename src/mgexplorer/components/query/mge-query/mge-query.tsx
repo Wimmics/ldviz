@@ -269,7 +269,6 @@ export class MgeQuery {
     let sel = select(this.element.querySelector('#form_query')).node()
     let value = sel.options[sel.selectedIndex].value
     this.query = value.length ?  state.queriesList.find(x => String(x.id) == value) : null;
-    console.log(this.query)
     this.displayQuery(this.query)
   }
 

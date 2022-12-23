@@ -67,11 +67,8 @@ function sendRequest(values, dataIndex) {
     .then(response => response.text())
     .then(text => {
         let result = {}
-        // console.log("text = ", text)
         try{
             let res = JSON.parse(text)
-            // result.response = res
-            console.log('res = ', res)
     
             if (res.results) {
                 if (res.results.bindings && res.results.bindings.length) {
@@ -162,13 +159,11 @@ function sendRequest(values, dataIndex) {
             } 
         }
 
-        // console.log('result = ', result)
         if (Object.keys(result).length)
             getResult(result, values, dataIndex);
         })
     .catch(e => {
         console.log("e = ", e)
-        // console.log('erreur response = ', e.response) 
     })
 
     
@@ -185,7 +180,6 @@ async function requestFile(data, dataIndex) {
         else return response
     })
 
-    console.log(result)
 
     if (!result.data.length) 
         result = { message: `No publications found in the HAL database. Please verify that the publications are corrected associated to the idHal of the author (this search uses idHal=${data.idHal}).`}

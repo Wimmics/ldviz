@@ -228,21 +228,11 @@ export class MgeIris {
             return this.model.data;
         this.model.data = this._subGraph.normalIris(_, globalData);
 
-
-        // Configure to sort node names
-        // this._sort.inic(this.model.data.children.labelTitle.length, this.model.data.children.valueTitle.length)
-        //     .data(this.model.data.children.data);
-        // this._sort.exec(this._cfgIndexAttr.textBar);
-
-        // this._vOrder = this._sort.getVetOrder();
-
         this._vOrder = range(this.model.data.children.data.length)
         this._vOrder.sort((a,b) => {
             return this.model.data.children.data[a].labels[1].localeCompare(this.model.data.children.data[b].labels[1])
         })
 
-
-        // _irisPanel.update();
     };
 
     //---------------------
@@ -834,6 +824,7 @@ export class MgeIris {
 
         //---------------------
         this.model.when(["data", "indexAttBar", "pMaxHeightBar"], (data, indexAttBar, pMaxHeightBar) => {
+            console.log("iris dat a= ", data)
             let maxValue = max(data.children.data, d => sum(d.edge.values.filter( (e,i) => i < this._nbOfTypesDoc)))
             this._maxHeightBar = Math.floor(this.model.widthChart * pMaxHeightBar);
 

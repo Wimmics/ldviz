@@ -668,7 +668,6 @@ let MgeView = class MgeView {
     }
     //------------
     _execCtxMenuNodeEdgeHAL(popupDiv, clickedElem, parentId) {
-        console.log("enter here 1");
         if (clickedElem.classed("NE-node")) {
             // Display the main context menu only if a node is clicked
             popupDiv.selectAll("div")
@@ -703,7 +702,6 @@ let MgeView = class MgeView {
             this._contextMenu.showing = false;
             selectAll(this.element.shadowRoot.querySelectorAll(".DS-popup")).remove();
             d.fActionNode(clickedElem.datum(), parentId);
-            console.log("here 1");
         })
             .append("label")
             .text(function (d) { return d.label; });
@@ -718,7 +716,6 @@ let MgeView = class MgeView {
             this._contextMenu.showing = false;
             selectAll(this.element.shadowRoot.querySelectorAll(".DS-popup")).remove();
             d.fActionNode(clickedElem.datum(), parentId);
-            console.log("here 2");
         })
             .append("label")
             .text(function (d) { return d.label; });

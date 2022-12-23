@@ -18,7 +18,7 @@
 | `_innerRadius`     | `_inner-radius`      | (calculated) Internal circle radius where the graph is drawn | `number`  | `0`         |
 | `_links`           | `_links`             | Selection that contains the links                            | `any`     | `null`      |
 | `_outerRadius`     | `_outer-radius`      | (calculated) Outernal circle radius where the graph is drawn | `number`  | `0`         |
-| `_sameScale`       | `_same-scale`        | Indicates that the same scale should be used for all bars    | `boolean` | `false`     |
+| `_sameScale`       | `_same-scale`        | Indicates that the same scale should be used for all bars    | `boolean` | `true`      |
 | `_xClusterCenter`  | `_x-cluster-center`  | Coordinate x of the center of the cluster                    | `number`  | `0`         |
 | `_yClusterCenter`  | `_y-cluster-center`  | Coordinate y of the center of the cluster                    | `number`  | `0`         |
 | `datasetName`      | `dataset-name`       | The dataset name being used                                  | `string`  | `"[]"`      |
@@ -28,10 +28,10 @@
 
 ## Events
 
-| Event       | Description | Type               |
-| ----------- | ----------- | ------------------ |
-| `idevent`   |             | `CustomEvent<any>` |
-| `testevent` |             | `CustomEvent<any>` |
+| Event       | Description                                                                            | Type               |
+| ----------- | -------------------------------------------------------------------------------------- | ------------------ |
+| `idevent`   |                                                                                        | `CustomEvent<any>` |
+| `testevent` | Upon a click, it associates the object (rectangle or circle) to the current annotation | `CustomEvent<any>` |
 
 
 ## Methods

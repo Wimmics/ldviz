@@ -56,12 +56,11 @@ export class MgeClustervis {
     /** Selection that contains the links */
     @Prop({ mutable: true }) _links = null;   // Selection that contains the links
     /** Indicates that the same scale should be used for all bars */
-    @Prop({ mutable: true }) _sameScale = false;  // Indicates that the same scale should be used for all bars
+    @Prop({ mutable: true }) _sameScale = true;  // Indicates that the same scale should be used for all bars
     /** Generator of splines that makes up the edges */
     @Prop({ mutable: true }) _drawLine;
 
     private _vRings = [];       // List with the data of the rings:
-    // { indexAttr, typeAttr ("L"-label, "V"-value), pHeight (percentage of _widthAllFaixas, maxValue (maximum value of the data for the ring }
 
     private _barsArea = {
         widthBar: 0,       // (calculated) Width of bar in the area of maximum width (focus) Original: 11
@@ -83,14 +82,11 @@ export class MgeClustervis {
     };
 
     private _indexAttrSort = 0; // Index of the attribute used for sort (0-first labels[] 1000-first values[])
-    // Vector of colors with 20 elements inverted (da d3)
-    // private _vCores20Inv = ["#17becf", "#bcbd22", "#7f7f7f", "#e377c2", "#8c564b", "#9467bd", "#9edae5", "#dbdb8d", "#c7c7c7", "#f7b6d2",
-        // "#c49c94", "#c5b0d5", "#ff9896", "#d62728", "#98df8a", "#2ca02c", "#ffbb78", "#ff7f0e", "#aec7e8", "#1f77b4"];
     private _vOrder = null;      // Indirect ordering vector
     private _vAngle = null;      // Vector that contains the angular measurement of each bar. Calculated at _calcGeometry
     private _grpBarsRotScale = scaleOrdinal();    // Scale used to set the angle of rotation of each bar
     private _ringScale = scaleLinear().domain([0, 100]);
-    private _colorScale = scaleOrdinal(schemeCategory10).domain([3, 4, 5, 6]);
+    private _colorScale = scaleOrdinal(schemeCategory10).domain([0, 1, 2, 3]);
 
     constructor() {
         // ---------------- Model
@@ -154,7 +150,6 @@ export class MgeClustervis {
 
         //---------------------
         this.model.when(["widthChart", "pOuterRadius"], (widthChart, pOuterRadius) => {
-            // console.log(pOuterRadius)
             this._outerRadius = Math.floor(widthChart * pOuterRadius);
             this._ringScale.range([this._innerRadius, this._outerRadius]);
         });
@@ -215,7 +210,7 @@ export class MgeClustervis {
                 
                 this._vRings.forEach(ring => {
                     if (ring.typeAttr === "V") {
-                        ring.barCircleScale = scaleOrdinal(schemeAccent)
+                        ring.barCircleScale = scaleLinear()
                             .range([0, Math.floor(ring.pHeightBar * (this._outerRadius - this._innerRadius))])
                             .domain([0, this._sameScale ? max(this._vRings, d => d.maxValue) : ring.maxValue]);
                     } else {
@@ -245,34 +240,34 @@ export class MgeClustervis {
         
             await setBarCircleScale()
         
-            for (let i = 0; i < this._vRings.length; i++) {
-                if (this._vRings[i].typeAttr === "V") {
+            for (let ring of this._vRings) {
+                if (ring.typeAttr === "V") {
                     this._grpBars.append("rect")
                         .attr("class", "CV-node")
-                        .attr("x", this._ringScale(this._vRings[i].pX))
+                        .attr("x", this._ringScale(ring.pX))
                         .attr("y", () => { return -this._barsArea.widthBar / 2; })
                         .attr("height", () => { return this._barsArea.widthBar; })
-                        .attr("width", (d) => { return this._vRings[i].barCircleScale(d.values[this._vRings[i].indexAttr]); })
-                        .style("fill", () => { return this._colorScale(this._vRings[i].indexAttr); })
+                        .attr("width", (d) => ring.barCircleScale(d.values[ring.indexAttr]))
+                        .style("fill", () => { return this._colorScale(ring.indexAttr); })
                         .on("mouseover", this._mouseOverNode.bind(this))
                         .on("mouseout", this._mouseOutNode.bind(this))
                         .on("click", this._onMouseClick.bind(this))
                         .append("title")
-                        .text((d) => { return d.labels[1] + "\n" + data.nodes.valueTitle[this._vRings[i].indexAttr] + ": " + d.values[this._vRings[i].indexAttr] });
+                        .text((d) => { return d.labels[1] + "\n" + data.nodes.valueTitle[ring.indexAttr] + ": " + d.values[ring.indexAttr] });
                 } else {
                     this._grpBars.append("circle")
                         .attr("class", "CV-node")
-                        .attr("cx", this._ringScale(this._vRings[i].pX) + this._barsArea.widthBar / 2)
+                        .attr("cx", this._ringScale(ring.pX) + this._barsArea.widthBar / 2)
                         .attr("cy", 0)
                         .attr("r", this._barsArea.widthBar / 2)
-                        .style("fill", (d) => { return this._vRings[i].barCircleScale(d.labels[this._vRings[i].indexAttr]); })  
+                        .style("fill", (d) => { return ring.barCircleScale(d.labels[ring.indexAttr]); })  
                         .on("mouseover", this._mouseOverNode.bind(this))
                         .on("mouseout", this._mouseOutNode.bind(this))
                         .on("click", this._onMouseClick.bind(this))
                         .append("title")
                         .text((d) => {
                             return d.labels[1] + "\n" +
-                                data.nodes.labelTitle[this._vRings[i].indexAttr] + ": " + d.labels[this._vRings[i].indexAttr]
+                                data.nodes.labelTitle[ring.indexAttr] + ": " + d.labels[ring.indexAttr]
                         });
                 }
             }
@@ -284,8 +279,6 @@ export class MgeClustervis {
          * Adds the SVG elements relative to the edges
          */
         var _appendLinks = () => {
-            // if (this._grpLinks != null)
-            //     this._grpLinks.remove();
 
             this._grpLinks = this._grpCluster.append("g")
                 .attr("class", "CV-grpLinks")
@@ -338,6 +331,9 @@ export class MgeClustervis {
     }
 
 
+    /**
+     * Upon a click, it associates the object (rectangle or circle) to the current annotation 
+     */
     @Event({ bubbles: true, composed: true }) testevent: EventEmitter;
     _onMouseClick(event, data) {
         Object.entries(state.annotations).forEach(([key, value]) => {
@@ -401,7 +397,7 @@ export class MgeClustervis {
        */
     @Method()
     async _calcGeometry(data) {
-        let largBarra, percMargin, percBar; // Percentage of the margin in relation to the width occupied by the sector
+        let widthBar, percMargin, percBar; // Percentage of the margin in relation to the width occupied by the sector
 
         this._barsArea.angleBar = await this._widthToAngle(this._barsArea.widthBar + this._barsArea.marginBar, this._innerRadius);
 
@@ -415,9 +411,9 @@ export class MgeClustervis {
             percBar = 1 - percMargin;
             this._barsArea.angleBar = 360.0 / this._barsArea.numBars;
 
-            largBarra = await this._angleToWidth(this._barsArea.angleBar, this._innerRadius);
-            this._barsArea.widthBar = largBarra * percBar;
-            this._barsArea.marginBar = largBarra * percMargin;
+            widthBar = await this._angleToWidth(this._barsArea.angleBar, this._innerRadius);
+            this._barsArea.widthBar = widthBar * percBar;
+            this._barsArea.marginBar = widthBar * percMargin;
             this._barsArea.startSector = 0;
         }
 
@@ -509,34 +505,35 @@ export class MgeClustervis {
         let result = createTree(0, vOrder);
         result.depth = 0;
 
-        function createTree(nivel, vNodos) {
-            let obj = [], objPai, inic, fim, delta;
-            if (nivel < levelMax) {
-                delta = Math.floor(vNodos.length / degree);
+        function createTree(level, vNodes) {
+
+            let obj = [], parent, inic, fim, delta;
+            if (level < levelMax) {
+                delta = Math.floor(vNodes.length / degree);
                 inic = 0;
                 fim = delta;
                 for (let i = 0; i < degree - 1; i++) {
-                    obj.push(createTree(nivel + 1, vNodos.slice(inic, fim)));
+                    obj.push(createTree(level + 1, vNodes.slice(inic, fim)));
                     inic = fim;
                     fim += delta;
                 }
-                obj.push(createTree(nivel + 1, vNodos.slice(inic)));
-                objPai = { id: "N" + nivel, children: obj };
+                obj.push(createTree(level + 1, vNodes.slice(inic)));
+                parent = { id: "N" + level, children: obj };
             } else
-                if (nivel === levelMax) {
+                if (level === levelMax) {
                     children = [];
-                    vNodos.forEach(function (d) {
+                    vNodes.forEach(function (d) {
                         children.push(dados[d]);
                     });
-                    objPai = { id: "N" + nivel, children: children };
+                    parent = { id: "N" + level, children: children };
 
                 }
 
-            objPai.children.forEach(function (d) {
-                d.parent = objPai;
-                d.depth = nivel + 1;
+            parent.children.forEach(function (d) {
+                d.parent = parent;
+                d.depth = level + 1;
             });
-            return objPai;
+            return parent;
         }
 
         return result;
@@ -615,6 +612,7 @@ export class MgeClustervis {
     async setData(_, globalData) {
         if (!arguments.length)
             return this.model.data;
+
         if (_.cluster) {
             _ = this._subGraph.clusterClusterVis(_, globalData);
         } else {
@@ -624,10 +622,10 @@ export class MgeClustervis {
         this.model.data = _;
 
         this.addAttribute(state.ATN_Category, "L")
-        this.addAttribute(state.ATN_QtPublicacoes - 1000, "V")
-        this.addAttribute(state.ATN_QtProceedings - 1000, "V")
-        this.addAttribute(state.ATN_QtJournals - 1000, "V")
-        this.addAttribute(state.ATN_QtBooks - 1000, "V")
+        this.addAttribute(state.ATE_QtPublicacoes - 1000, "V")
+        this.addAttribute(state.ATE_QtProceedings - 1000, "V")
+        this.addAttribute(state.ATE_QtJournals - 1000, "V")
+        this.addAttribute(state.ATE_QtBooks - 1000, "V")
 
         this._sort.inic(this.model.data.nodes.labelTitle.length, this.model.data.nodes.valueTitle.length)
             .data(this.model.data.nodes.dataNodes);
@@ -695,15 +693,15 @@ export class MgeClustervis {
     //---------------------
     
     @Method()
-    addAttribute(_indexAttr, _typeAttr) {
+    async addAttribute(_indexAttr, _typeAttr) {
         let maxValue, tempKeys, pX,
             deltaHeight = 100 / (this._vRings.length + 1),
             _vLabelDomain = [];
 
         if (_typeAttr === "V") {
-            maxValue = max(this.model.data.nodes.dataNodes, function (d) { return d.values[_indexAttr]; });
+            maxValue = max(this.model.data.nodes.dataNodes, d => d.values[_indexAttr]);
 
-            // if the ring has no data, return withour adding a new ring to the list
+            // if the ring has no data, return without adding a new ring to the list
             if (maxValue === 0) return
         }
         else {    // Determines domain for categorical attributes (deve ser colocado tamb�m na fun��o chart.data)
@@ -745,7 +743,7 @@ export class MgeClustervis {
 
     //---------------------
     @Method()
-    alteraAttribute(_indexAnel, _indexAttr, _typeAttr) {
+    async alteraAttribute(_indexAnel, _indexAttr, _typeAttr) {
         let maxValue, tempKeys, i,
             _vLabelDomain = [];
 
@@ -795,7 +793,7 @@ export class MgeClustervis {
 
     //-------------------------
     @Method()
-    acAlteraAnel(indexAnel, indexAttr) {
+    async acAlteraAnel(indexAnel, indexAttr) {
         let indexAtributo;
 
         indexAtributo = +indexAttr;
@@ -809,16 +807,16 @@ export class MgeClustervis {
 
     //-------------------------
     @Method()
-    acSameScale(checked) {
+    async acSameScale(checked) {
         this._sameScale = checked;
         this.model.redraw += 1;
     };
 
 
-    buildChart(svg) {
+    buildChart(div) {
         this.setBox(this.model.box);
         this.indexAttrSort(2)
-        this.addClusterChart(svg);
+        this.addClusterChart(div);
     }
 
     componentDidLoad() {

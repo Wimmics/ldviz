@@ -22,7 +22,6 @@
         <script>
             let locals = <%- JSON.stringify(locals) %>;
             LDViz.init(locals)
-            console.log(locals)
             d3.select('#titleDiv').select('h1')
                 .text(locals.params.type.charAt(0).toUpperCase() + 
                     locals.params.type.slice(1) + 

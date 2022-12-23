@@ -58,7 +58,7 @@
 </div>
 
 <!-- editor space -->
-<button type="button" style="width:1100px;margin:0 auto;display:none;" class="collapsible" id="query-button" onclick="collapseFormContent(this)">Collapse Query Form</button>
+<!-- <button type="button" style="width:1100px;margin:0 auto;display:none;" class="collapsible" id="query-button" onclick="collapseFormContent(this)">Collapse Query Form</button> -->
 <div id="tab" style="padding-left:100px; padding-right:100px;" class="collapsibleContent">
     <div class="content">
 
@@ -86,42 +86,47 @@
                         </td>
                     </tr>
 
-                    <tr id="type_form" >
+                    <tr id="type_form" style="display: none;">
                         <td>Query Type</td><td>
                             <select id='select_query_type' name='query_type' onchange='LDViz.editor.updateQueryOptions()'></select>
                         </td>
                     </tr>
 
                     <tr id='period_form' >
-                        <td>Publication Period</td>
-                        <td>From <i class="far fa-copy"></i> 
-                            <select id='select_from_year' name='from_year'></select>
-                        </td>
-                        <td>To <i class="far fa-copy"></i> 
-                            <select id='select_to_year' name='to_year'></select>
+                        <td>Time Period (in years)</td>
+                        <td>From <br>
+                            <select id='select_from_year' name='from_year' style='width:400px'></select>
+                            <i class="far fa-copy" id="$beginYear"></i>
+                        </td> 
+                        <td>To <br>
+                            <select id='select_to_year' name='to_year' style='width:400px'></select>
+                            <i class="far fa-copy" id="$endYear"></i>
                         </td>
                     </tr>
 
                     <tr id='lab1_form'>
-                        <td id='lab1_title'>Institution <i class="far fa-copy"></i></td><td>
+                        <td id='lab1_title'>Institution </td><td>
                             <input id='input_lab1' name='query_lab1' style='width:400px' list='select_laboratory'>
                             <datalist id='select_laboratory'></datalist>
+                            <i class="far fa-copy" id="$lab1"></i>
                         </td>
                     </tr>
                     <tr id='lab2_form' style='display:none;'>
-                        <td>Institution 2 <i class="far fa-copy"></i></td><td>
+                        <td>Institution 2 <i class="far fa-copy" id="$lab2"></i></td><td>
                             <input id='input_lab2' name='query_lab2' style='width:400px' list='select_laboratory2'>
                             <datalist id='select_laboratory2'></datalist>
                         </td>
                     </tr>
                     <tr id='country_form' >
-                        <td>Country <i class="far fa-copy"></i></td><td>
+                        <td>Country </td>
+                        <td>
                             <!-- <input id='input_country' name='query_country' list='select_country'>
                             <datalist id='select_country' ></datalist> -->
-                            <select id="select_country" name="query_country" id="select_country"></select>
+                            <select id="select_country" name="query_country" id="select_country" style='width:400px'></select>
+                            <i class="far fa-copy" id="$country"></i>
                         </td>
                     </tr>
-                    <tr id='list_form' >
+                    <tr id='list_form' style="display: none;" >
                         <td>List of Authors <i class="far fa-copy"></i></td><td>
                             <textarea id='input_list' name='query_list_authors' style='width:400px'></textarea>
                         </td>

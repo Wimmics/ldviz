@@ -26,7 +26,7 @@ class Editor{
     }
 
     copyPrefixesToClipboard() {
-        let prefixes = getPrefixes()
+        let prefixes = LDViz.query.getPrefixes()
         copyToClipboard(prefixes.join('\n'))
     }
 
@@ -42,8 +42,8 @@ class Editor{
 
     // display the editor window with information regarding the selected query
     displayQuery(query, action) {
-        const collapsibleButton = document.getElementById('query-button');
-        collapsibleButton.style.display = 'block';
+        // const collapsibleButton = document.getElementById('query-button');
+        // collapsibleButton.style.display = 'block';
 
         if (action != 'newQuery') {
 
@@ -82,7 +82,7 @@ class Editor{
                 document.getElementById('select_to_year').value = params.period[1];
             }
 
-            this.updateQueryOptions()
+            // this.updateQueryOptions()
         }
 
         d3.selectAll('.edit_button').style('display', action == 'view' ? 'none' : 'block')
@@ -147,28 +147,9 @@ class Editor{
                 else if (this.className.includes('plus') && this.className.includes('entities')) return 'Click here to include a new Variable to your query' 
                 else if (this.className.includes('info-circle'))
                     return `To use the custom variables below, include the corresponding metavariable in your query (get it by clicking on <i class="far fa-copy"></i> next to the variable name)` 
-                else return 'Copy metavariable '+ getMetavariable(this) +' to clipboard'; 
+                else return 'Copy metavariable '+ this.id +' to clipboard'; 
             })
-            .on('click', function() { copyToClipboard(getMetavariable(this)); }) // copy metavariable
-
-        function getMetavariable(elt){
-            const variable = elt.parentNode.firstChild.textContent;
-            
-            if (variable.includes('Institution 2')) {
-                return '$lab2';
-            }
-            else if (variable.includes('Institution')) {
-                return '$lab1'; // depends on the query type
-            }else if (variable.includes('From')){
-                return '$beginYear';
-            }else if (variable.includes('To')){
-                return '$endYear';
-            }else if (variable.includes('Country')) {
-                return '$country'
-            } else if (variable.includes('List of Authors')) {
-                return '$authorsList'
-            }
-        }
+            .on('click', function() { copyToClipboard(this.id); }) // copy metavariable
     }
 
     setEndpointsList(){

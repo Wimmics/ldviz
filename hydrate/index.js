@@ -12242,7 +12242,6 @@ const libCava = function () {
                     if (_vValueConfigSort[_valueAttrSort].ascending)
                         return ascending(_vData[a].values[_valueAttrSort], _vData[b].values[_valueAttrSort]);
                     else
-                        console.log();
                         return descending(_vData[a].values[_valueAttrSort], _vData[b].values[_valueAttrSort]);
                 },
 
@@ -13211,7 +13210,6 @@ const libCava = function () {
                         dataEdges: []
                     }
                 };
-                console.log(normalNode);
                 // Include the passed node as argument
                 result.nodes.dataNodes.push({
                     id: normalNode.id,

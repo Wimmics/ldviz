@@ -514,8 +514,8 @@ _closeToolTip(){
 
         await this._setForceLayout()
 
-        this.setTTNormalNode(normalNodeTooltips(this.model.data, state.ATN_AuthorName, state.ATN_QtPublicacoes - 1000, state.headerTitle));
-        this.setTTNormalEdge(normalEdgeTooltips(this.model.data, state.ATN_AuthorName, [state.ATE_QtPublicacoes]));
+        this.setTTNormalNode(normalNodeTooltips(state.ATN_AuthorName, state.headerTitle));
+        this.setTTNormalEdge(normalEdgeTooltips(this.model.data, state.ATN_AuthorName, [state.ATE_QtPublicacoes, state.ATE_QtJournals, state.ATE_QtBooks, state.ATE_QtProceedings]));
     };
 
     async _setClusterScale() {
@@ -606,7 +606,7 @@ _closeToolTip(){
     qtItems(node) {
         let total = 0
         let index = state.ATN_QtPublicacoes - 1000;
-        for (let i = index; i < index + 3; i++) 
+        for (let i = index; i < index + 4; i++) 
             total += node.values[i]
 
         return total;
@@ -640,7 +640,7 @@ _closeToolTip(){
     /** This function will change the value of charge on force layout. This function will be called when adjust Charge slider in filter panel
     */
     @Method()
-    acChangeCharge(value) {
+    async acChangeCharge(value) {
         this._configLayout.charge = +value;
         this._forceLayout.force("charge", forceManyBody().strength(d => -this._configLayout.charge));
         // .strength((d) => { return - (this._chargeScale(d.qtNodes) + this._configLayout.charge); })
@@ -651,7 +651,7 @@ _closeToolTip(){
     /** This function will change the value of links distance on force layout. This function will be called when adjust LinkDistance slider in filter panel
     */
     @Method()
-    acChangeLinkDistance(value) {
+    async acChangeLinkDistance(value) {
         this._configLayout.linkDistance = +value;
         this._forceLayout.force("link", forceLink().links(this._graphData.edges).distance((d) => {
             return this._configLayout.linkDistance + this._linkDistanceScale(d.source[this._indexAttrSize]) + this._linkDistanceScale(d.target[this._indexAttrSize]);
@@ -674,7 +674,7 @@ _closeToolTip(){
     /** This function will remove hightlight effect on all of nodes and links. This function will be called when clear text inside text search
     */
     @Method()
-    resetHighSearch() {
+    async resetHighSearch() {
         this._graphElem.nodes.classed("NE-HighSearch", function (d) { return false });
     };
 
@@ -682,7 +682,7 @@ _closeToolTip(){
     /** This function will hightlight node and all related links by name of selected node. This function will be called when used text search in filter panel
     */
     @Method()
-    acSelectByName(nome) {
+    async acSelectByName(nome) {
 
         this._graphElem.nodes.each(function (d) {
             d.highSearch = false;

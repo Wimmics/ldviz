@@ -104,7 +104,7 @@ export class MgeDashboard {
   }
 
   @Method()
-  setDashboard(){
+  async setDashboard(){
     let key = 'data-' + state.indexQueryData;
     let data = state._data[key]
     if (typeof data !== "undefined") {  
@@ -177,16 +177,28 @@ export class MgeDashboard {
 
   @Method()
   async _addLinkAnnotation(viewParents, viewChild) {
-    let lines = [],conect,
+    let lines = [], connectingDot,
         centerViewChild = await viewChild.getCenter();
-    if (viewParents.length != 0){
+    
+    if (viewParents.length == 0) return { lines: [], conect: null, visible: true}
 
     for (let i = 0; i < viewParents.length; i++) {
       let viewParent = viewParents[i],
           line,
           centerViewParent = await viewParent.getCenter()
       if (typeof centerViewParent !== "undefined" &&  typeof centerViewChild !== "undefined"){
-          this._dashboardArea.svg.select("defs").append("marker").attr("id", "arrow-PA-" + await viewParent.idChart() + "-FA-" + await viewChild.idChart()).attr("class", "arrow PA-" + await viewParent.idChart() + " FA-" + await viewChild.idChart()).attr("markerWidth", 30).attr("markerHeight", 30).attr("orient", "auto").attr("refY", 2).attr("fill","#3383FF").attr("refX",140).attr("sourceX", centerViewParent.cx).attr("sourceY", centerViewParent.cy).attr("targetX", centerViewChild.cx).attr("targetY", centerViewChild.cy).append("path").attr("d", "M0,0 L4,2 0,4");
+          this._dashboardArea.svg.select("defs").append("marker").attr("id", "arrow-PA-" + await viewParent.idChart() + "-FA-" + await viewChild.idChart())
+            .attr("class", "arrow PA-" + await viewParent.idChart() + " FA-" + await viewChild.idChart()).attr("markerWidth", 30)
+            .attr("markerHeight", 30).attr("orient", "auto")
+            .attr("refY", 2)
+            .attr("fill","#3383FF")
+            .attr("refX",140)
+            .attr("sourceX", centerViewParent.cx)
+            .attr("sourceY", centerViewParent.cy)
+            .attr("targetX", centerViewChild.cx)
+            .attr("targetY", centerViewChild.cy)
+            .append("path")
+              .attr("d", "M0,0 L4,2 0,4");
 
           line = this._dashboardArea.svg.
               insert("line", ".DS-conect")
@@ -200,27 +212,27 @@ export class MgeDashboard {
       }
     }
      
-          conect = this._dashboardArea.svg.
-              append("rect")
-              .datum([{ x: centerViewChild.cx, y: centerViewChild.cy, viewChild: viewChild }])
-              .attr("class", "DS-conect " + await viewChild.idChart())
-              .attr("x", centerViewChild.cx - 6)
-              .attr("y", centerViewChild.cy - 6)
-              .attr("rx", d => viewChild.typeVis == "mge-query" ? 12 : 0)
-              .attr("ry", d => viewChild.typeVis == "mge-query" ? 12 : 0)
-              .attr("width", 12)
-              .attr("height", 12)
-              .style("fill", d => viewChild.typeVis == "mge-query" ? "rgb(222, 66, 91)" : null || viewChild.typeVis == "mge-annotation" ? "rgb(243, 153, 59)" : null)
-              .style("stroke", d => viewChild.typeVis == "mge-query" ? "rgb(222, 66, 91)" : null || viewChild.typeVis == "mge-annotation" ? "rgb(243, 153, 59)" : null)
-              .attr("transform", d => viewChild.typeVis == "mge-annotation" ? "rotate(45,0,0)" : null)
-              .on("click", ()  => {
-                  this.showView(viewChild)
-              })
-          conect.append("title").text(viewChild.titleView)
-          conect.call(this._dragConect);
-      }
+    connectingDot = this._dashboardArea.svg
+        .append("rect")
+        .datum([{ x: centerViewChild.cx, y: centerViewChild.cy, viewChild: viewChild }])
+        .attr("class", "DS-conect " + await viewChild.idChart())
+        .attr("x", centerViewChild.cx - 6)
+        .attr("y", centerViewChild.cy - 6)
+        .attr("rx", d => viewChild.typeVis == "mge-query" ? 12 : 0)
+        .attr("ry", d => viewChild.typeVis == "mge-query" ? 12 : 0)
+        .attr("width", 12)
+        .attr("height", 12)
+        .style("fill", d => viewChild.typeVis == "mge-query" ? "rgb(222, 66, 91)" : null || viewChild.typeVis == "mge-annotation" ? "rgb(243, 153, 59)" : null)
+        .style("stroke", d => viewChild.typeVis == "mge-query" ? "rgb(222, 66, 91)" : null || viewChild.typeVis == "mge-annotation" ? "rgb(243, 153, 59)" : null)
+        .attr("transform", d => viewChild.typeVis == "mge-annotation" ? "rotate(45,0,0)" : null)
+        .on("click", ()  => {
+            this.showView(viewChild)
+        })
+
+    connectingDot.append("title").text(viewChild.titleView)
+    connectingDot.call(this._dragConect);
      
-      return { lines: lines, conect: conect, visible: true };
+    return { lines: lines, conect: connectingDot, visible: true };
   }
 
 
@@ -229,8 +241,6 @@ export class MgeDashboard {
     let lines = [], conect,
       centerViewChild = await viewChild.getCenter();
 
-      
-      
       conect = this._dashboardArea.svg.
         append("rect")
         .datum([{ x: centerViewChild.cx, y: centerViewChild.cy, viewChild: viewChild }])
@@ -330,17 +340,10 @@ async closeView(view) {
           that.refreshLinks();
 
           function visibleChildren(node) {
-                  // let i;
-                  if (!node.children)
-                      return false;
-                  return node.children.some(d => d.link.visible)
-                      // for (i = 0; i < node.children.length; i++)
-                      //     //          if (node.children[i].hidden===false)
-                      //     if (node.children[i].link.visible)
-                      //         return true;
-                      // }
-                  // return false;
-              }
+            if (!node.children)
+                return false;
+            return node.children.some(d => d.link.visible)
+          }
         }
         
     }
@@ -514,7 +517,7 @@ async closeView(view) {
 };
 
   @Method()
-  refreshSvg () {
+  async refreshSvg () {
       this._dashboardArea.width = this._dashboardArea.div.node().scrollWidth;
       this._dashboardArea.height = this._dashboardArea.div.node().scrollHeight;
       this._dashboardArea.svg.attr("width", this._dashboardArea.width);
@@ -525,7 +528,7 @@ async closeView(view) {
     * It will be run when clicking re-run for new query in initial point
     */
   @Method()
-  resetDashboard(){
+  async resetDashboard(){
       selectAll(
           this.element.shadowRoot.querySelectorAll(
               'line, rect, mge-view[id-view]:not([id-view="chart-0"]):not([id-view="chart-history"])'
@@ -540,7 +543,7 @@ async closeView(view) {
 
     let _btnAnnotation = select("#annotationButton");
     _btnAnnotation.on("click", (event, d) => {
-      //console.log(state._historydata);
+     
       let idAnnotation = "annotation-"+state.indexAnnotation;
       this._annotationChart = _svg.append("mge-view")
         .attr("x", this.x + 600)
@@ -556,14 +559,12 @@ async closeView(view) {
       state.indexAnnotation++;
       
       this.refreshLinks();
-      //let link = this._addLink(this._annotationChart.element, this._annotationChart.node());'
       let link =this._addcube(this._annotationChart.node());
       this.addChart(0, {
         id: idAnnotation, title: idAnnotation, typeChart: "mge-annotation", hidden: false, link: link,
         x: this.x + 600, y: this.y, view: this._annotationChart.node()
       })
       
-      //console.log(this._treeCharts);
     });
   }
 

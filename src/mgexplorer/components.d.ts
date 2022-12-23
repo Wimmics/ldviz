@@ -1308,6 +1308,9 @@ declare namespace LocalJSX {
          */
         "height"?: number;
         "onIdevent"?: (event: CustomEvent<any>) => void;
+        /**
+          * Upon a click, it associates the object (rectangle or circle) to the current annotation
+         */
         "onTestevent"?: (event: CustomEvent<any>) => void;
         /**
           * represents the width of the Cluster chart

@@ -25,39 +25,33 @@ function _addIconeEdge(svgTooltip) {
 
 //---------- Public functions
 
-function normalNodeTooltips (data, indexAttrTitle, vIndexAttr, stAdjacent) {
-    let _data = data,
-        _indexAttrTitle = indexAttrTitle,    // Index of the attribute that will be printed in the tooltip title
-        _vIndexAttr = vIndexAttr,          // Vector with the index of the attributes that will be printed
-        _stAdjacent = stAdjacent,          // String representing the meaning of adjacent nodes
-        _divTooltip = null,
+/**
+ * 
+ * @param {*} indexAttrTitle Index of the attribute that will be printed in the tooltip title
+ * @param {*} stAdjacent meaning of adjacent nodes
+ * @returns 
+ */
+function normalNodeTooltips (indexAttrTitle, stAdjacent) {
+    let _divTooltip = null,
         _svgTooltip = null;
+
     let objNormal = {};
 
     objNormal.create = function (divTooltip, node, event) {
-        let y = 54,
-            height = 50,
-            width;
+        let height = 50,
+            width = 120;
 
-        width = 22 + node.labels[_indexAttrTitle].length * 7;
-
-        if (width < 90)
-            width = 90;
         _divTooltip = divTooltip;
         _svgTooltip = _divTooltip.append("svg").attr("width", width).attr("height", height);
         _svgTooltip.append("text")      // Title
             .attr("x", 5)
             .attr("y", 12)
-            .text(node.labels[_indexAttrTitle]);
+            .text(node.labels[indexAttrTitle]);
 
         _svgTooltip.append("text")    // n co-authors
             .attr("x", 5)
             .attr("y", 26)
-            .text(node.grau + " " + _stAdjacent);
-
-        // let totalPubs = 0
-        // for (let i = vIndexAttr; i < vIndexAttr + 3; i++) 
-        //     totalPubs += node.values[i]
+            .text(node.grau + " " + stAdjacent);
 
         _svgTooltip.append("text")    // total n publications
             .attr("x", 5)
@@ -106,13 +100,7 @@ function normalEdgeTooltips (data, indexAttrTitle, vIndexAttr) {
         widthSrc = 34 + attNodeSrc.length * 7;
         widthTgt = 22 + attNodeTgt.length * 7;
 
-        if (widthSrc > widthTgt)
-            width = widthSrc;
-        else
-            width = widthTgt;
-
-        if (width < 90)
-            width = 90;
+        width = Math.max(Math.max(widthSrc, widthTgt), 90)
 
         _divTooltip = divTooltip;
 

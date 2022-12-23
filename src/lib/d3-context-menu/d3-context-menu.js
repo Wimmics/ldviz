@@ -133,8 +133,6 @@
 				if (openCallback.bind(element)(data, index) === false) {
 					return;
 				}
-        
-				//console.log(this.parentNode.parentNode.parentNode);//.getBoundingClientRect());   Use this if you want to align your menu from the containing element, otherwise aligns towards center of window
 
 				// get position
 				var position = positionFactory.bind(element)(data, index);

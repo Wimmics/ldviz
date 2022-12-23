@@ -414,19 +414,10 @@ async function transform(data, q_type, stylesheet) {
         let qtCoauthor = coauthorSet ? coauthorSet.size : 0;            
         let qtEachType = docTypeMap.get(author);
         
-        // lb is a style info to specify graph node color in MG-Explorer/nodeEdge/js/nodeEdgeChart.js
-        // var lb = 1;
-        var style = null;
-        
-        // if (q_type && q_type == 2) {
-        //     lb = getLB(data, author);      
-        // }
-        // else if (q_type) {
-            style = stylesheet ? getFinalStyle(stylesheet, styleMap, author) : { color: defaultColor };
-        // }
-        
+        let style = stylesheet ? getFinalStyle(stylesheet, styleMap, author) : { color: defaultColor };
+       
         idMap.set(author, id);
-        var nodeInfo = getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style);
+        let nodeInfo = getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style);
         nodes.dataNodes.push(nodeInfo);
         id++;
 
@@ -482,42 +473,13 @@ async function transform(data, q_type, stylesheet) {
         "edge_number": edges.dataEdges.length,
         "data_type": 1 //lb
     }
-    // return [res1, res2, res3];
+    
     return {
         'mge': res2,
         'stats': res3
     }
-    // res1 : Résultat SPARQL en JSON
-    // res2 : Résultat de la transformation en JSON
-    // res3 : Informations supplémentaires (temps d'exécution, statistiques)
-}
-
-/**
- * Test author membership in lab in order to generate color style for display
- * TODO: clean (because it walks through the whole result set once again)
- * return 1 if author = n1
- * return 2 if author = n2
- * return 3 if author = n1 && author = n2 in two different results
- */
-// function getLB(data, author) {
-//     var isInLab1 = false;
-//     var isInLab2 = false;
-            
-//     for (var j = 0; j < data.length; j++) {
-//         if (getValue(data, j, "s") == author) {
-//             isInLab1 = true;
-//         }
-//         if (getValue(data, j, "o") == author) {
-//             isInLab2 = true;
-//         }
-//     }
-                        
-//     if (isInLab1 && isInLab2) lb = 3;
-//     else if (isInLab1) lb = 1;
-//     else if (isInLab2) lb = 2;
     
-//     return lb;
-// }
+}
 
 function getRes(items, nodes, edges) {
     return {
@@ -542,8 +504,7 @@ function getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style) {
     var not = "Not Informed";
     var nodeInfo = {
         "id": id, "idBD": id, "labels": [shortName, author, not, not, not], 
-        "values": [2004, 0, 0]
-            .concat(qtEachType)
+        "values": qtEachType.concat([2004, 0, 0])
             .concat([qtCoauthor, qtCoauthor, 0.1, 0.1, qtCoauthor / 2 + 1]),
         "images": null
     };
@@ -556,11 +517,9 @@ function getNodeInfo(id, shortName, author, qtEachType, qtCoauthor, style) {
 function nodeFormat() {
    var nodes = {
         "labelTitle": ["Short Name", "Author Name", "Category", "Research", "Area"],
-        "valueTitle": ["Year Last Pub", "Qt Research", "Qt Area"]
-            .concat(getTypeLabels())
+        "valueTitle": getTypeLabels().concat(["Year Last Pub", "Qt Research", "Qt Area"])
             .concat(["Connected Comp.", "Edge BetWeenness", "Closeness Centrality",
             "Betweenness Centrality", "Degree"]),
-            // "Qt Conference Papers", "Qt Journals", "Qt Books", "Qt Reports",,
         "imageTitle": null,
         "dataNodes": []
     };
@@ -572,7 +531,7 @@ function edgeFormat() {
     var edges = {
         "labelTitle": null,
         "valueTitle": getTypeLabels().concat(
-            ["2004", "English", "Portuguese", "Spanish", "German", "French",
+            ["Qt_Items", "English", "Portuguese", "Spanish", "German", "French",
             "Research N.I.", "Tolerancia a falhas", "Inteligencia Artificial", "Modelagem Conceitual e BD",
             "Comp. Grafica e P.I.", "Sistemas de Tempo Real", "Arquiteture e Proj. Sist. Comp.", "Microeletronica",
             "Redes de Computadores", "Proc.Paralelo e Distr.", "Metodos formais", "Fundamentos da Computacao", "Engenharia de Software",

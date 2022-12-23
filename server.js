@@ -218,7 +218,6 @@ app.post(prefix + '/saveQuery', async function (req, res) {
     let response = await data.saveQuery(req.body.query)
     
     if (response && response.message) {
-        console.log(response.message)
         res.sendStatus(500)
         return;
     }
@@ -235,7 +234,6 @@ app.post(prefix + '/editQuery', async function (req, res) {
     let response = await data.updateQuery(req.body)
 
     if (response && response.message) {
-        console.log(response.message)
         res.sendStatus(response.code)
         return;
     }
@@ -250,7 +248,6 @@ app.post(prefix + '/delete', async function (req, res) {
     let response = await data.deleteQuery(req.body.id)
 
     if (response && response.message) {
-        console.log(response.message)
         res.sendStatus(response.code)
         return;
     }
@@ -264,7 +261,6 @@ app.post(prefix + '/clearcache', async function (req, res) {
     let response = await cache.deleteFile(req.body.query)
 
     if (response && response.message) {
-        console.log(response.message)
         res.sendStatus(response.code)
         return;
     }
@@ -305,8 +301,6 @@ app.post(prefix + '/sparql', async function (req, res) {
             if (!result) {
                 result = await sparql.sendRequest(query.query, query.uri)
                 // Save request result in cache (for predefined queries only - query with id)
-                console.log(result)
-                console.log(result.status)
                 if (!result.status && query.id) await cache.saveFile(result, query)             
             }
 

@@ -323,7 +323,7 @@ export class MgeView {
    * Inputs are coordinates (x and y) of new center position
    */
   @Method()
-  setCenter (x, y) {
+  async setCenter (x, y) {
       this._center.cx = x;
       this._center.cy = y;
       this._position.x = this._center.cx - this._dimView.width / 2;
@@ -552,7 +552,7 @@ export class MgeView {
    * if input status is false, the content will be hidden
    */
   @Method()
-  setVisible(status){
+  async setVisible(status){
     if (status)
         this.cont.style.display = "block";
     else
@@ -565,7 +565,7 @@ export class MgeView {
    * Inputs are coordinates : x and y
    */
   @Method()
-  setPosition(x, y){
+  async setPosition(x, y){
       this.x = x;
       this.y = y;
   }
@@ -784,7 +784,6 @@ export class MgeView {
               this._contextMenu.showing = false;
               selectAll(this.element.shadowRoot.querySelectorAll(".DS-popup")).remove();
               d.fActionNode(clickedElem.datum(), parentId);
-              //console.log("here 2");
           })
           .append("label")
           .text(function (d) { return d.label; });

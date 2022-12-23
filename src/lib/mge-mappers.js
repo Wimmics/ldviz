@@ -210,6 +210,7 @@ function subGraph() {
         * Returns the graph in the ClusterVis format of the graph contained in the node of type Cluster
         */
     obj.clusterClusterVis = function (clusterNode, graphData) {
+
         let result = getClusterVisDataModel(graphData)
         // Includes all cluster node nodes
         clusterNode.cluster.forEach(node => result.nodes.dataNodes.push(getClusterVisNode(node)) )
@@ -222,8 +223,8 @@ function subGraph() {
         * Node and its adjacent ClusterVis
         */
     obj.normalClusterVis = function (normalNode, graphData) {
-        let result = getClusterVisDataModel(graphData)
 
+        let result = getClusterVisDataModel(graphData)
         
         // Include the selected node 
         result.nodes.dataNodes.push(getClusterVisNode(normalNode))
@@ -231,11 +232,23 @@ function subGraph() {
         graphData.edges.dataEdges.forEach(d => {
             if (d.src !== normalNode.idOrig && d.tgt !== normalNode.idOrig) return
             let index = d.src === normalNode.idOrig ? d.tgt : d.src
-            result.nodes.dataNodes.push(getClusterVisNode(graphData.nodes.dataNodes[index]))
+            let node = getClusterVisNode(graphData.nodes.dataNodes[index])
+            node.values = {...d.values}
+
+            result.nodes.dataNodes.push(node)
         });
 
+        
         // Includes only edges between selected nodes
-        _addEdges(result.nodes.dataNodes, result.edges.dataEdges, graphData.edges.dataEdges);
+        _addEdges(result.nodes.dataNodes, result.edges.dataEdges, graphData.edges.dataEdges)
+
+        // create clusters for each node
+        let idNodes = result.nodes.dataNodes.map(d => d.idOrig)
+        result.nodes.dataNodes.forEach(d => {
+            d.cluster = result.edges.dataEdges
+                .filter(e => e.src === idNodes.indexOf(d.idOrig) || e.tgt === idNodes.indexOf(d.idOrig))
+                .map(e => e.src === idNodes.indexOf(d.idOrig) ? e.target : e.source)
+        })
 
         return result;
     };
@@ -314,7 +327,8 @@ function subGraph() {
         })
 
         let idNodes = sourceNode.cluster.map(d => d.idOrig)
-        result.root.data.documents = graphData.items.filter(d => d.authors.every(a => idNodes.includes(a.id)))
+        idNodes.push(sourceNode.idOrig)
+        result.root.data.documents = graphData.items.filter(d => d.authors.some(a => a.id === sourceNode.idOrig) && d.authors.every(a => idNodes.includes(a.id)))
 
         result.root.data.documents.forEach((doc) => {
             doc.authors.forEach(author => {
@@ -369,7 +383,6 @@ function subGraph() {
         idClusterA = edge.source.idCluster;
         idClusterB = edge.target.idCluster;
 
-        // console.log("IDCLUSTER: " + idClusterA + " " + idClusterB);
 
         // Includes nodes belonging to distinct clusters connected by an edge
         for (i = 0; i < graphData.edges.qtEdges; i++) {
