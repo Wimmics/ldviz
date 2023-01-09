@@ -24,6 +24,7 @@
 
 .body {
     margin: 0 50px;
+    padding: 10px;
 }
 
 .queryconf {
@@ -85,10 +86,6 @@ footer {
 .f3 {
     float: right;
     text-align: right;
-}
-
-.people {
-    margin-left: 50px;
 }
 
 .div-login{
