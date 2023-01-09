@@ -7,38 +7,43 @@
     <title>LDViz</title>
 </head>
 
-<body class='body'>
-    <div class="header" style="text-align: left;">
-        <h1>Linked Data Visualizer: About</h1>
-        <%- include("ldviz/partials/header") %>
-    </div>
-
-    <div style="display:flex; justify-content: space-between" >
-        <div>
-            <embed src="/ldviz/images/Aline Menin-poster HCRES 2022.pdf" width="800px" height="1000px" />
+<body class='body' >
+    <div style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="header" style="text-align: left;">
+            <h1>Linked Data Visualizer</h1>
+            <%- include("ldviz/partials/header") %>
         </div>
-        <div style="padding:15px;">
-            <p>
-                This project support the visual exploration of linked data. You can use it to build, debug, and test SPARQL queries applied to the SPARQL endpoint of your choice. Further, you can visualize the results of your queries using the MGExplorer tool. The later is embedded in the queries management interface.
-            </p>
-        
-            <h3>Usage</h3>
-            <p>
-                This website consists of two main interfaces:
-                <ul>
-                    <li><b>A visualization dashboard:</b> <a href="http://dataviz.i3s.unice.fr/ldviz">http://dataviz.i3s.unice.fr/ldviz</a> <br>
-                        Here, domain users can visualize the results of queries previously defined by data experts.
-                    </li>
-                    <li>
-                        <b>LDViz:</b> <a href="http://dataviz.i3s.unice.fr/ldviz/query">http://dataviz.i3s.unice.fr/ldviz/query</a> <br>
-                        In this page, advanced users can generate and debug SPARQL queries applied to any SPARQL endpoint. Their results can be then explored by the general public through the Home page. <br> 
-                        For secutiry reasons, this page requires authentication. If you are interested in using this application, please contact us (see contact information below) and we will provide you authentication. 
-                    </li>
-                </ul>
-                Additionally, you can find <a href="/ldviz/hceres">here</a>  a demonstration of the tool using data from the HAL dataset to describe the co-authorship networks within the I3S laboratory.<br>
-                
-            </p>
 
+        <div style="display:flex; justify-content: space-between" >
+            <div>
+                <a href="/ldviz/images/Aline Menin-poster HCRES 2022.pdf" download><img src="/ldviz/images/Aline Menin-poster HCRES 2022.png" height="500px" /></a>
+            </div>
+            <div style="padding:15px;">
+                <p>
+                    This project support the visual exploration of linked data. You can use it to build, debug, and test SPARQL queries applied to the SPARQL endpoint of your choice. Further, you can visualize the results of your queries using the MGExplorer tool. The later is embedded in the queries management interface.
+                </p>
+            
+                <h3>Usage</h3>
+                <p>
+                    This website consists of two main interfaces:
+                    <ul>
+                        <li><b>A visualization dashboard:</b> <a href="http://dataviz.i3s.unice.fr/ldviz">http://dataviz.i3s.unice.fr/ldviz</a> <br>
+                            Here, domain users can visualize the results of queries previously defined by data experts.
+                        </li>
+                        <li>
+                            <b>LDViz:</b> <a href="http://dataviz.i3s.unice.fr/ldviz/query">http://dataviz.i3s.unice.fr/ldviz/query</a> <br>
+                            In this page, advanced users can generate and debug SPARQL queries applied to any SPARQL endpoint. Their results can be then explored by the general public through the Home page. <br> 
+                            For secutiry reasons, this page requires authentication. If you are interested in using this application, please contact us (see contact information below) and we will provide you authentication. 
+                        </li>
+                    </ul>
+                    Additionally, you can find <a href="/ldviz/hceres">here</a>  a demonstration of the tool using data from the HAL dataset to describe the co-authorship networks within the I3S laboratory.<br>
+                    
+                </p>
+            </div>
+        </div>
+        
+        
+        <div>
             <h3>Coverage Analysis</h3>
 
             <p>
@@ -55,24 +60,20 @@
                 <li>Anne Toulet, Franck Michel, Anna Bobasheva, Aline Menin, Sébastien Dupré, et al.. ISSA: Generic Pipeline, Knowledge Model and Visualization tools to Help Scientists Search and Make Sense of a Scientific Archive. ISWC 2022 - 21st International Semantic Web Conference, Oct 2022, Hangzhou, China. (<a href="https://dx.doi.org/10.1007/978-3-031-19433-7_38">10.1007/978-3-031-19433-7_38</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03807744">hal-03807744</a>)</li>
             </ul>
 
+            <h3>Contact information:</h3>
+            <ul class="people">
+                <li><a href="https://amenin.gitlab.io/">Aline Menin</a>, Associate Professor at Université Côte d'Azur (E-mail: aline.menin@univ-cotedazur.fr)</li>
+                <li><a href="https://www.i3s.unice.fr/~winckler/">Marco Winckler</a>, Full Professor at Université Cote d'Azur (E-mail: marco.winckler@univ-cotedazur.fr)</li>
+                <li><a href="http://www-sop.inria.fr/members/Fabien.Gandon/">Fabien Gandon</a>, Research Director at INRIA, Head of WIMMICS Team (E-mail: fabien.gandon@inria.fr)</li>
+                <li><a href="http://sparks.i3s.unice.fr/fmichel">Franck Michel</a>, Research Engineer at CNRS (E-mail: franck.michel@cnrs.fr)</li>
+                <li><a href="#">Pierre Maillot</a>, Postdoctoral Fellow at INRIA (E-mail: pierre.maillot@inria.fr)</li>
+                <li><a href="https://www.i3s.unice.fr/~faron/">Catherine Faron</a>, Full Professor at Université Côte d'Azur (E-mail: catherine.faron@univ-cotedazur.fr)</li>
+                <li><a href="https://www-sop.inria.fr/members/Olivier.Corby/">Olivier Corby</a>, Researcher at INRIA (E-mail: olivier.corby@inria.fr)</li>
+                <li><a href="http://www-sop.inria.fr/members/Alain.Giboin/">Alain Giboin</a>, Emeritous Researcher at INRIA (E-mail: alain.giboin@inria.fr)</li>
+                <li><a href="https://www.inf.ufrgs.br/site/docente/carla-maria-dal-sasso-freitas/">Carla Maria dal Sasso Freitas</a>, Full Professor at Federal University of Rio Grande do Sul (E-mail: carla@inf.ufrgs.br)</li>
+                <li>[blank]</li>
+            </ul>
         </div>
-    </div>
-    
-    
-
-    <div style="position:relative; bottom:25px;">
-        <h3>Contact information:</h3>
-        <ul class="people">
-            <li><a href="https://amenin.gitlab.io/">Aline Menin</a>, Associate Professor at Université Côte d'Azur (E-mail: aline.menin@univ-cotedazur.fr)</li>
-            <li><a href="https://www.i3s.unice.fr/~winckler/">Marco Winckler</a>, Full Professor at Université Cote d'Azur (E-mail: marco.winckler@univ-cotedazur.fr)</li>
-            <li><a href="http://www-sop.inria.fr/members/Fabien.Gandon/">Fabien Gandon</a>, Research Director at INRIA, Head of WIMMICS Team (E-mail: fabien.gandon@inria.fr)</li>
-            <li><a href="http://sparks.i3s.unice.fr/fmichel">Franck Michel</a>, Research Engineer at CNRS (E-mail: franck.michel@cnrs.fr)</li>
-            <li><a href="#">Pierre Maillot</a>, Postdoctoral Fellow at INRIA (E-mail: pierre.maillot@inria.fr)</li>
-            <li><a href="https://www.i3s.unice.fr/~faron/">Catherine Faron</a>, Full Professor at Université Côte d'Azur (E-mail: catherine.faron@univ-cotedazur.fr)</li>
-            <li><a href="https://www-sop.inria.fr/members/Olivier.Corby/">Olivier Corby</a>, Researcher at INRIA (E-mail: olivier.corby@inria.fr)</li>
-            <li><a href="http://www-sop.inria.fr/members/Alain.Giboin/">Alain Giboin</a>, Emeritous Researcher at INRIA (E-mail: alain.giboin@inria.fr)</li>
-            <li><a href="https://www.inf.ufrgs.br/site/docente/carla-maria-dal-sasso-freitas/">Carla Maria dal Sasso Freitas</a>, Full Professor at Federal University of Rio Grande do Sul (E-mail: carla@inf.ufrgs.br)</li>
-        </ul>
     </div>
 
     <footer>
