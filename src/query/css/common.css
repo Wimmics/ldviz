@@ -48,7 +48,10 @@ body {
     margin: 0 auto;
 } }
 
-
+.poster{
+    margin: auto;
+    width: 350px;
+}
 
 
 
