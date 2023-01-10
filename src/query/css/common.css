@@ -2,6 +2,8 @@
 .header {
     margin-bottom: 30px;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
 }
 
 .summary {
@@ -10,8 +12,6 @@
 }
 
 .logo {
-    position: absolute;
-    right: 10px;
     top: 10px;
 }
 .logo a {
@@ -22,9 +22,20 @@
     vertical-align: middle;
 }
 
-.body {
-    margin: 0 50px;
-    padding: 10px;
+body {
+    /* padding: 10px 300px 10px 300px; */
+    background-color: lightblue;
+}
+
+.inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: white;
+    width: 1000px;
+    margin: auto;
+    padding: 20px;
 }
 
 .queryconf {
@@ -64,12 +75,13 @@ footer {
     background: whitesmoke;
     bottom: 0;
     padding: 10px 20px 0 20px;
-    width: 100%;
-    display: inline-block;
+    width: 1000px;
+    /* display: inline-block; */
     z-index: 200;
     height: 40px;
-    position: fixed;
+    position: relative;
     left: 0;
+    margin: auto;
 }
 
 .f1,
