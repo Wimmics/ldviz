@@ -214,16 +214,20 @@ async function getResult(res, query, dataIndex) {
 * 
 */
 function getFormData(form) {
+
+    let content = form['query_content'] ? form['query_content'].value : null
     return {
-        'query': form['query_content'] ? form['query_content'].value : null,
+        'query': content,
         'name': form['query_name'] ? form['query_name'].value: null,
         'uri': form['query_endpoint'] ? form['query_endpoint'].value.trim() : null,
         'params': {
             "type": form['query_type'].value,
-            'lab': [ form['query_lab1'].value, form['query_lab2'].value ],
-            'country': form['query_country'].value,
-            'period': [+form['from_year'].value, +form['to_year'].value],
-            'variables': [form['custom_value1'].value, form['custom_value2'].value]
+            'lab': [ content && content.includes("$lab1") ? form['query_lab1'].value : '', 
+                content && content.includes("$lab2") ? form['query_lab2'].value : '' ],
+            'country': content && content.includes("$country") ? form['query_country'].value : '',
+            'period': [ content && content.includes("$beginYear") ? +form['from_year'].value : '', 
+                content && content.includes("$endYear") ? +form['to_year'].value : '' ],
+            'variables': [ form['custom_value1'].value, form['custom_value2'].value ]
         },
         'stylesheetActive': form['check_stylesheet'].checked,
         'stylesheet': form['stylesheet_content'].value.length > 0 ? JSON.parse(form['stylesheet_content'].value) : null

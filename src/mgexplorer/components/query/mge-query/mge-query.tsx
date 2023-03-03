@@ -114,30 +114,6 @@ export class MgeQuery {
   }
 
   /**
-   * update query options (lab, country, etc) according to the query type
-   */
-  updateQueryOptions(){
-      const queryType = +(this.element.querySelector('#select_query_type') as HTMLInputElement).value;
-      switch(queryType) {
-          case 1:
-              // document.getElementById('lab1_title').innerHTML = `Laboratory <i class="far fa-copy"></i>`;
-              select(this.element.querySelector('#lab2_form')).style.display = 'none';
-              select(this.element.querySelector('#country_form')).style.display = 'none';
-              break;
-          case 2:
-              select(this.element.querySelector('#lab2_form')).style.display = 'table-row';
-              select(this.element.querySelector('#country_form')).style.display = 'none';
-              break;
-          case 3:
-              // select(this.element.querySelector('lab1_title')).innerHTML = `Laboratory <i class="far fa-copy"></i>`;
-              select(this.element.querySelector('#lab2_form')).style.display = 'none';
-              select(this.element.querySelector('#country_form')).style.display = 'table-row';
-              break;
-      }
-      // this.updateFormMaxHeight()
-    }
-
-  /**
    * display the form with information regarding the selected query
    */
   displayQuery(query) {
@@ -204,8 +180,6 @@ export class MgeQuery {
           select(this.element.querySelector('#custom_value1')).node().style.display = 'none'
           select(this.element.querySelector('#custom_value2')).node().style.display = 'none'
         }
-
-        // this.updateQueryOptions()
 
       } else {
           this.disableButton()

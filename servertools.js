@@ -50,16 +50,16 @@ class Cache{
         let params = query.params;
 
         if (params) {
-            if (params.country && params.country.length) {
+            if (params.country && params.country.length && query.query.includes('$country')) {
                 filename += '_' + params.country
             } 
 
-            if (params.lab) 
+            if (params.lab && (query.query.includes('$lab1') || query.query.includes('$lab2'))) 
                 params.lab.forEach(lab => {
                     if (lab && lab.length) filename += '_' + lab
                 })
 
-            if (params.period)
+            if (params.period && (query.query.includes('$beginYear') || query.query.includes('$endYear')))
                 params.period.forEach(period => {
                     filename += '_' + period
                 })

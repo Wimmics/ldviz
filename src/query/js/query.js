@@ -46,15 +46,18 @@ class Query{
     getFormData(form) {
         const type = form['query_type'].value || 1
         
+        let content = form['query_content'].value
         const values = {
-            query: form['query_content'].value,
+            query: content,
             name: form['query_name'].value,
             uri: form['query_endpoint'].value.trim(),
             params: {
                 type: type,
-                period: [ +form['from_year'].value, +form['to_year'].value ],
-                lab: [ form['query_lab1'].value, form['query_lab2'].value ],
-                country: form['query_country'].value,
+                period: [ content.includes("$beginYear") ? +form['from_year'].value : '', 
+                        content.includes("$endYear") ? +form['to_year'].value : '' ],
+                lab: [ content.includes("$lab1") ? form['query_lab1'].value : '', 
+                    content.includes("$lab2") ? form['query_lab2'].value : '' ],
+                country: content.includes("$country") ? form['query_country'].value : '',
                 list_authors: form['query_list_authors'].value.split(',').map(d => `"${d.trim()}"`)
             }
         };
