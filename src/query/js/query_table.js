@@ -249,6 +249,16 @@ class QueryTable{
 
 
     processQuickPreview(queryObject) {
+        console.log("queryObject = ", queryObject)
+        // let url = LDViz.explorerPage +
+        //     '?query=' + encodeURIComponent(queryObject.query) +
+        //     '&url=' + queryObject.uri +
+        //     '&name=' + (queryObject.name.length ? queryObject.name : 'No name provided') +
+        //     '&email=' + LDViz.auth.user.email +
+        //     '&password=' + LDViz.auth.user.password;
+
+        // window.open(url)
+
         window.open(`${LDViz.explorerPage}?id=${queryObject.id}`)
         
         
@@ -289,6 +299,7 @@ class QueryTable{
      */
     clearQueryCache(query) {
 
+        console.log("query = ", query)
         fetch(LDViz.cacheRoute, {
             method:'POST',
             headers: {'Content-Type': 'application/json'},

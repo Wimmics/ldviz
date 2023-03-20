@@ -304,6 +304,7 @@ app.post(prefix + '/sparql', async function (req, res) {
                 if (!result.status && query.id) await cache.saveFile(result, query)             
             }
 
+            
             // send result back to client
             if (result.status) res.sendStatus(result.status)
             else res.send(result);

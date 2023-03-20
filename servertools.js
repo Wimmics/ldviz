@@ -274,7 +274,7 @@ class Data{
         let queries = await this.getQueries()        
         let paramdata = await this.getParameters()
         let stylesheet = await this.getGSS()
-    
+
         return { queryParams: queryParams, 
             params: paramdata, 
             queries: queries, 

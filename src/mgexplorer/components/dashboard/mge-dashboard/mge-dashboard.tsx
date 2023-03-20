@@ -75,6 +75,7 @@ export class MgeDashboard {
     state.queriesList = locals.queries;
     state._hceres = locals.hceres
 
+
     if (Object.keys(locals.queryParams).length) {
       this.showLoading()
       let queryData = null
@@ -92,6 +93,7 @@ export class MgeDashboard {
         
         if (locals.queryParams.name) this.showQueryTitle(locals.queryParams.name)
       }
+
       
       this.initComponent = state.views.nodelink;
       sendRequest(queryData, 0)

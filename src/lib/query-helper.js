@@ -47,7 +47,7 @@ function processQuery(form, query, dataIndex) {
         data.id = query.id
     }
 
-    tune(data)
+    
     sendRequest(data, dataIndex);
 }
 
@@ -55,8 +55,9 @@ function processQuery(form, query, dataIndex) {
   * This funtion will send the request to the server to get the data from completely SPARQL query
   * 
 */
-function sendRequest(values, dataIndex) {
+async function sendRequest(values, dataIndex) {
     
+    await tune(values)
 
     const url = "/ldviz/sparql"; // local server
     fetch(url, {
@@ -247,7 +248,9 @@ function getVariables(form) {
 /**
  * complete SPARQL query with data from HTML form such as year, lab, country
  */
-function tune(data) {
+async function tune(data) {
+    if (!data.params) return;
+
     let params = data.params;
 
     Object.keys(params).forEach((p) => {

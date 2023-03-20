@@ -480,6 +480,7 @@ function subGraph() {
         * Node and its adjacent MatrixGlyph
         */
     obj.normalMatrixGlyph = function (normalNode, graphData) {
+        console.log(normalNode)
 
         let result = getGlyphMatrixDataModel(graphData)
         result.nodes.dataNodes.push(getPaperListNode(normalNode))
