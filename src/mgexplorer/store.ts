@@ -79,7 +79,8 @@ const { state } = createStore({
 	selectedobj: null,
 	annotations: {},
 
-	_hceres: true
+	_static: true,
+	_app: null
 });
 
 export default state;

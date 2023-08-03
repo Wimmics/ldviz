@@ -5,7 +5,6 @@ import { scaleLinear, scaleOrdinal } from 'd3-scale';
 import { max } from 'd3-array'; import Model from 'model-js';
 import state from "../../../store"
 import { select } from 'd3-selection';
-import { Touchscreen } from 'puppeteer';
 
 import { sort, subGraph } from '../../../../lib/mge-mappers'
 

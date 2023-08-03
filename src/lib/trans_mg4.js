@@ -326,7 +326,7 @@ async function transform(data, q_type, stylesheet) {
     let typeCount = {};
 
     if (data.length > 0 && data[0].type) {
-        typeList = data.map(d => d.type.value)
+        typeList = data.map(d => d.type ? d.type.value : null).filter(d => d)
         typeList.forEach(d => {
             if (Object.keys(typeCount).includes(d)) typeCount[d] ++;
             else typeCount[d] = 1;

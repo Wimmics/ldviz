@@ -366,7 +366,7 @@ export class MgeQuery {
   }
 
   async initDatasetsList() {
-    let data = await fetch('/ldviz/hceres/filenames', { method: 'GET' })
+    let data = await fetch(`/ldviz/${state._app}/filenames`, { method: 'GET' })
       .then(async function(response){
           if(response.status >= 200 && response.status < 300){
               return await response.text().then(text => {
@@ -483,7 +483,7 @@ export class MgeQuery {
   */
   buildForm(){
 
-    if (state._hceres) this.setOfflineMode()
+    if (state._static) this.setOfflineMode()
 
     this._view = this._dashboard.shadowRoot.querySelector("[id-view='" + this.element.id + "']")
     select(this.element.querySelector("#clone")).on("click", () => this.cloneQuery() )
@@ -505,7 +505,7 @@ export class MgeQuery {
       
       this._indexDataset = Object.keys(state._data).length
 
-      if (state._hceres) {
+      if (state._static) {
         requestFile(this.query, this._indexDataset)
       } else {
         state._queries["data-"+this._indexDataset] = this.query

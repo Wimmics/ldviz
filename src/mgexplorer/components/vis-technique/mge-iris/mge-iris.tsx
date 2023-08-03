@@ -30,6 +30,9 @@ export class MgeIris {
   public _sort: any;
   private _subGraph: any;
 
+  private _helpTooltip = null;
+  private _itemTypes = [];
+
   /** The dataset name being used */
   @Prop({ mutable: true }) _irisPanel;  // represents the panel associated with the graph
   private _sortByText;
@@ -747,6 +750,9 @@ export class MgeIris {
             })
         })
 
+        this._itemTypes = this._dataVis.map(d => d.children).flat()
+        this._itemTypes = this._itemTypes.filter( (d,i) => this._itemTypes.findIndex(e => e.typeIndex === d.typeIndex && e.typeName === d.typeName) === i)
+        
     }
 
     @Method()
@@ -775,6 +781,24 @@ export class MgeIris {
         let _zoomListener = zoom().on("zoom", _chartZoom);
         _zoomListener.scaleExtent([0.9, 1.1]);
         _svg.call(_zoomListener);
+
+        let _helpContainer = divTag.append("div")
+            .attr("class", "helpContainer")
+            .on("mouseover", this._openToolTip.bind(this))
+            .on("mouseout", this._closeToolTip.bind(this));
+
+        _helpContainer.append("i")
+            .attr("class", "fas fa-palette")
+            .style("font-size", "20px");
+
+        this._helpTooltip = divTag.append("div")
+            .attr("class", "helpTooltip")
+            .style("display", "none");
+
+        this._helpTooltip.append("svg")
+            .attr("class", "HC-legend")
+            .attr("y", 1)
+            .attr("dy", ".71em")
 
         this._grpIris = _grpChart.append("g").attr("class", "IrisChart");
         this._grpIris.append("circle").attr("class", "IC-centroidBack");
@@ -824,7 +848,7 @@ export class MgeIris {
 
         //---------------------
         this.model.when(["data", "indexAttBar", "pMaxHeightBar"], (data, indexAttBar, pMaxHeightBar) => {
-            console.log("iris dat a= ", data)
+           
             let maxValue = max(data.children.data, d => sum(d.edge.values.filter( (e,i) => i < this._nbOfTypesDoc)))
             this._maxHeightBar = Math.floor(this.model.widthChart * pMaxHeightBar);
 
@@ -881,6 +905,8 @@ export class MgeIris {
                     .style("font-family", "Arial")
                     .style("font-size", "8px");
 
+                this._setLegend()
+
             } // End
         );
 
@@ -892,6 +918,36 @@ export class MgeIris {
             _grpChart.attr("transform", event.transform)
         }
   }
+
+    _setLegend() {
+
+        let legendSvg = this._helpTooltip.select("svg")
+
+        let legendGrp = legendSvg.selectAll('g')
+            .data(this._itemTypes)
+            .enter()
+                .append('g')
+
+        legendGrp.append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", d => this._colorsBars(d.typeIndex))
+            .attr("transform", (_,i) => "translate(10," + `${20 * i + 10}` + ")");
+
+        legendGrp.append("text")
+            .attr("transform", (_,i) => "translate(30," + `${20 * i + 10}` + ")")
+            .attr("y", "10")
+            .text(d => d.typeName || "No description provided")
+    }
+
+    _openToolTip(){
+        this._helpTooltip.style("display", "block");
+    }
+
+    _closeToolTip(){
+        this._helpTooltip.style("display", "none");
+
+    }
 
   buildChart(idDiv, svg){ 
     this.addIrisChart(idDiv, svg);

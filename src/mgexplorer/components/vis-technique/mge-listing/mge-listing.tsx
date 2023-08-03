@@ -31,6 +31,8 @@ export class MgeListing {
     private _dashboard;
     private _view;
     private _subGraph: any;
+    private _helpTooltip = null;
+    private _itemTypes = null;
 
     public selectedobj = {
         "view": "listing",
@@ -114,6 +116,9 @@ export class MgeListing {
         }
         
         this.model.data = _;
+
+        this._itemTypes = this.model.data.root.data.documents.map(d => d.type)
+        this._itemTypes = this._itemTypes.filter( (d,i) => this._itemTypes.findIndex(e => e.index === d.index) === i)
 
         this._view.height = this.model.box.height;
     };
@@ -199,6 +204,24 @@ export class MgeListing {
 
         _svg.attr("class", "PaperListView");
         this._grpPapersList = _grpChart.append("g").attr("class", "PapersListChart");
+
+        let _helpContainer = divTag.append("div")
+            .attr("class", "helpContainer")
+            .on("mouseover", this._openToolTip.bind(this))
+            .on("mouseout", this._closeToolTip.bind(this));
+
+        _helpContainer.append("i")
+            .attr("class", "fas fa-palette")
+            .style("font-size", "20px");
+
+        this._helpTooltip = divTag.append("div")
+            .attr("class", "helpTooltip")
+            .style("display", "none");
+
+        this._helpTooltip.append("svg")
+            .attr("class", "HC-legend")
+            .attr("y", 1)
+            .attr("dy", ".71em")
 
         //===================================================
         this.model.when(["box", "margin"], (box, margin) => {
@@ -345,12 +368,45 @@ export class MgeListing {
                         if (textlength > maxLenghtTitle) maxLenghtTitle = textlength;
                     })
                 _svg.attr("width", maxLenghtTitle + 100);
+
+                this._setLegend()
             
             } // End
         );
     }
 
     //--------------------------------- Private functions
+
+
+    _setLegend() {
+
+        let legendSvg = this._helpTooltip.select("svg")
+
+        let legendGrp = legendSvg.selectAll('g')
+            .data(this._itemTypes)
+            .enter()
+                .append('g')
+
+        legendGrp.append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", d => this._colorsRect(d.index))
+            .attr("transform", (_,i) => "translate(10," + `${20 * i + 10}` + ")");
+
+        legendGrp.append("text")
+            .attr("transform", (_,i) => "translate(30," + `${20 * i + 10}` + ")")
+            .attr("y", "10")
+            .text(d => d.label || "No description provided")
+    }
+
+    _openToolTip(){
+        this._helpTooltip.style("display", "block");
+    }
+    
+    _closeToolTip(){
+        this._helpTooltip.style("display", "none");
+    
+    }
 
     buildChart(div) {
 

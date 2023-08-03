@@ -99,52 +99,70 @@ app.get(prefix + '/', async function (req, res){
     res.render("pages/mgexplorer/index", result);
 })
 
-app.get(prefix + '/hceres', async function (req, res){
+app.get(prefix + '/:app', async function (req, res){
     await users.checkConnection(req)
     let result = await data.load(req)
-    result.hceres = true;
+    result.static = true;
+    result.app = req.params.app
+
     res.render("pages/mgexplorer/index", result);
 })
 
-app.get(prefix + "/hceres/filenames", async function(req, res) {
-    let filenames = fs.readdirSync("data/hceres/")
+app.get(prefix + "/:app/filenames", async function(req, res) {
+    let app = req.params.app
+    let filenames = fs.readdirSync(path.join(__dirname, `data/apps/${app}/`))
 
     let result = []
 
-    let people = await csv().fromFile("data/hceres/config/SPARKS_ID_HAL.csv")
-    people.forEach(p => {
-        if (!p.idHal.length) return;
-
-        let files = filenames.filter(f => f.includes(p.idHal))
-        
+    let files;
+    if (app === 'sparks-research-topics') {
+        files = filenames.filter(d => d.includes('.json'))
         files.forEach(f => {
             result.push({
-                name: `${p.Nom} ${p.Prenom}`,
-                idHal: p.idHal,
-                orcid: p.ORCID,
+                name: 'SPARKS',
+                idHal: null,
+                orcid: null,
                 filename: f
             })
         })
-    })
+    }
+    else {
+        let people = await csv().fromFile(path.join(__dirname, `data/apps/${app}/config/ID_HAL.csv`))
+        people.forEach(p => {
+            if (!p.idHal.length) return;
 
-    let sparks = filenames.filter(f => f.includes("SPARKS-"))
-    sparks.forEach(f => {
-        result.push({
-            name: "SPARKS",
-            idHal: "",
-            orcid: "",
-            filename: f
+            files = filenames.filter(f => f.includes(p.idHal))
+            
+            files.forEach(f => {
+                result.push({
+                    name: p.name || `${p.Nom} ${p.Prenom}`,
+                    idHal: p.idHal,
+                    orcid: p.ORCID,
+                    filename: f
+                })
+            })
         })
-    })
+
+        let total = filenames.filter(f => f.includes("total-"))
+        total.forEach(f => {
+            result.push({
+                name: app.toUpperCase(),
+                idHal: "",
+                orcid: "",
+                filename: f
+            })
+        })
+    }
        
 
     res.send(JSON.stringify(result))
 })
 
-app.get(prefix + "/hceres/data/:dataset", async function(req, res) {
+app.get(prefix + "/:app/data/:dataset", async function(req, res) {
     let result = {}
-    result.data = JSON.parse(fs.readFileSync('data/hceres/' + req.params.dataset))
-    result.stylesheet = JSON.parse(fs.readFileSync('data/hceres/config/stylesheet.json'))
+    result.data = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/${req.params.dataset}`))
+
+    result.stylesheet = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/config/stylesheet.json`))
 
     res.send(JSON.stringify(result))
 })

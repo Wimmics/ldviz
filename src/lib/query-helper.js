@@ -172,7 +172,7 @@ async function sendRequest(values, dataIndex) {
 }
 
 async function requestFile(data, dataIndex) {
-    let result = await fetch('/ldviz/hceres/data/' + data.filename, { method: 'GET' })
+    let result = await fetch(`/ldviz/${state._app}/data/${data.filename}`, { method: 'GET' })
         .then( async function(response){
         if(response.status >= 200 && response.status < 300){
             return await response.text().then(text => {
@@ -180,7 +180,6 @@ async function requestFile(data, dataIndex) {
             })}
         else return response
     })
-
 
     if (!result.data.length) 
         result = { message: `No publications found in the HAL database. Please verify that the publications are corrected associated to the idHal of the author (this search uses idHal=${data.idHal}).`}
@@ -201,7 +200,7 @@ async function getResult(res, query, dataIndex) {
             result.sparql = res
         }
         else {
-            result = await transform(res, 1, query) // for HCERES data -> query == stylesheet
+            result = await transform(res, 1, query) // for file data (hceres, i3s) -> query == stylesheet
         }
     }
 

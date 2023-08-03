@@ -73,7 +73,8 @@ export class MgeDashboard {
   async init (locals) {
     state.globalParams = locals.params;
     state.queriesList = locals.queries;
-    state._hceres = locals.hceres
+    state._static = locals.static
+    state._app = locals.app
 
 
     if (Object.keys(locals.queryParams).length) {

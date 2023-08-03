@@ -13,7 +13,6 @@ MGExplorer is a visualization tool based on the concept of chained views to supp
 | -------- | --------- |
 | @stencil/store| 1.4.1|
 | @types/jest| 26.0.21|
-| @types/puppeteer| 5.4.3|
 | jest| 26.6.3|
 | jest-cli| 26.6.3|
 | rollup-plugin-node-polyfills| 0.2.1|
@@ -39,7 +38,6 @@ MGExplorer is a visualization tool based on the concept of chained views to supp
 | morgan| 1.10.0|
 | nodemon| 2.0.12|
 | patch-package| 6.4.7|
-| puppeteer| 8.0.0|
 | requirejs| 2.3.6|
 | sweetalert2| 11.0.18|
 | tippy.js| 6.3.1|
