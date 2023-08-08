@@ -48,7 +48,6 @@
     "is-html": "^2.0.0",
     "jquery": "^3.6.0",
     "jquery-ui": "^1.13.2",
-    "JSONStream": "^1.3.5",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "model-js": "^0.2.5",
