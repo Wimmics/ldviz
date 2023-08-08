@@ -21,6 +21,7 @@ const _ = require('lodash');
 const { config } = require('process');
 
 const csv = require('csvtojson');
+const stream = require('stream');
 
 const servertools = require('./servertools');
 const { SPARQLRequest, Users, Cache, Data } = require('./servertools');
@@ -160,11 +161,12 @@ app.get(prefix + "/:app/filenames", async function(req, res) {
 
 app.get(prefix + "/:app/data/:dataset", async function(req, res) {
     let result = {}
+    
     result.data = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/${req.params.dataset}`))
 
     result.stylesheet = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/config/stylesheet.json`))
 
-    res.send(JSON.stringify(result))
+    stream.Readable.from(JSON.stringify(result)).pipe(res)
 })
 
 // LDViz about page 

@@ -56,6 +56,7 @@
     "node-fetch": "^2.6.7",
     "patch-package": "^6.4.7",
     "requirejs": "^2.3.6",
+    "stream": "^0.0.2",
     "sweetalert2": "^11.0.18",
     "valid-url": "^1.0.9",
     "xmlhttprequest": "^1.8.0"
