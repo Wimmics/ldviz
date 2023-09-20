@@ -172,7 +172,7 @@ async function sendRequest(values, dataIndex) {
 }
 
 async function requestFile(data, dataIndex) {
-    let result = await fetch(`/ldviz/${state._app}/data/${data.filename}`, { method: 'GET' })
+    let result = await fetch(`/ldviz/apps/${state._app}/data/${data.filename}`, { method: 'GET' })
         .then( async function(response){
         if(response.status >= 200 && response.status < 300){
             return await response.text().then(text => {
@@ -203,6 +203,8 @@ async function getResult(res, query, dataIndex) {
             result = await transform(res, 1, query) // for file data (hceres, i3s) -> query == stylesheet
         }
     }
+
+    console.log(result)
 
     saveData(result, dataIndex)
 }

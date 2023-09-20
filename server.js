@@ -100,7 +100,8 @@ app.get(prefix + '/', async function (req, res){
     res.render("pages/mgexplorer/index", result);
 })
 
-app.get(prefix + '/:app', async function (req, res){
+
+app.get(prefix + '/apps/:app', async function (req, res){
     await users.checkConnection(req)
     let result = await data.load(req)
     result.static = true;
@@ -109,7 +110,7 @@ app.get(prefix + '/:app', async function (req, res){
     res.render("pages/mgexplorer/index", result);
 })
 
-app.get(prefix + "/:app/filenames", async function(req, res) {
+app.get(prefix + "/apps/:app/filenames", async function(req, res) {
     let app = req.params.app
     let filenames = fs.readdirSync(path.join(__dirname, `data/apps/${app}/`))
 
@@ -159,7 +160,7 @@ app.get(prefix + "/:app/filenames", async function(req, res) {
     res.send(JSON.stringify(result))
 })
 
-app.get(prefix + "/:app/data/:dataset", async function(req, res) {
+app.get(prefix + "/apps/:app/data/:dataset", async function(req, res) {
     let result = {}
     
     result.data = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/${req.params.dataset}`))
@@ -167,7 +168,7 @@ app.get(prefix + "/:app/data/:dataset", async function(req, res) {
     result.stylesheet = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/config/stylesheet.json`))
 
     stream.Readable.from(JSON.stringify(result)).pipe(res)
-})
+}) 
 
 // LDViz about page 
 app.get(prefix + '/about', function (req, res) {

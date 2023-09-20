@@ -366,7 +366,7 @@ export class MgeQuery {
   }
 
   async initDatasetsList() {
-    let data = await fetch(`/ldviz/${state._app}/filenames`, { method: 'GET' })
+    let data = await fetch(`/ldviz/apps/${state._app}/filenames`, { method: 'GET' })
       .then(async function(response){
           if(response.status >= 200 && response.status < 300){
               return await response.text().then(text => {
@@ -554,7 +554,7 @@ export class MgeQuery {
       this.initLabList();
       this.initCountryList();
       this.initEndpointsList();
-      this.initDatasetsList();
+      if (state._app) this.initDatasetsList();
       this.buildForm();
   }
 
