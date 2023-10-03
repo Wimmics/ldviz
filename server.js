@@ -117,18 +117,7 @@ app.get(prefix + "/apps/:app/filenames", async function(req, res) {
     let result = []
 
     let files;
-    if (app === 'sparks-research-topics') {
-        files = filenames.filter(d => d.includes('.json'))
-        files.forEach(f => {
-            result.push({
-                name: 'SPARKS',
-                idHal: null,
-                orcid: null,
-                filename: f
-            })
-        })
-    }
-    else {
+    if (['hceres', 'i3s'].includes(app)) {
         let people = await csv().fromFile(path.join(__dirname, `data/apps/${app}/config/ID_HAL.csv`))
         people.forEach(p => {
             if (!p.idHal.length) return;
@@ -154,9 +143,18 @@ app.get(prefix + "/apps/:app/filenames", async function(req, res) {
                 filename: f
             })
         })
+    } else {
+        files = filenames.filter(d => d.includes('.json'))
+        files.forEach(f => {
+            result.push({
+                name: app,
+                idHal: null,
+                orcid: null,
+                filename: f
+            })
+        })
     }
-       
-
+    
     res.send(JSON.stringify(result))
 })
 
