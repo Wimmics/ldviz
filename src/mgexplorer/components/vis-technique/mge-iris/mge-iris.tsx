@@ -283,6 +283,25 @@ export class MgeIris {
         this.model.redraw += 1;
     };
 
+      //======== Actions Functions
+    @Method()
+    async acSortExecType () {
+        
+        this._vOrder.sort((a,b) => {
+            let valuesA = this.model.data.children.data[a].edge.values.slice(0).splice(0,4)
+            let valuesB = this.model.data.children.data[b].edge.values.slice(0).splice(0,4)
+            let indexA = valuesA.indexOf(max(valuesA))
+            let indexB = valuesB.indexOf(max(valuesB))
+
+            let labelA = this._itemTypes.find(d => d.typeIndex === indexA).typeName
+            let labelB = this._itemTypes.find(d => d.typeIndex === indexB).typeName
+            
+            return labelA.localeCompare(labelB)
+        })
+
+        this.model.redraw += 1;
+    };
+
     //---------------------
     @Method()
     async acSortExecAttribute (ascending) {

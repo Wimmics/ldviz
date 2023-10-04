@@ -96,6 +96,9 @@ export class MgePanel {
                 case 2:
                   await _that._chart.acSortExecAttribute(-1);
                   break;
+                case 3:
+                  await _that._chart.acSortExecType()
+                  break;
               }
           });
         }

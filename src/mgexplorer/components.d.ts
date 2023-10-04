@@ -610,6 +610,7 @@ export namespace Components {
         "_vOrder": any;
         "acSortExecAttribute": (ascending: any) => Promise<void>;
         "acSortExecText": () => Promise<void>;
+        "acSortExecType": () => Promise<void>;
         "addIrisChart": (idDiv: any, divTag: any) => Promise<void>;
         "dataVisToNode": (index: any) => Promise<any>;
         /**

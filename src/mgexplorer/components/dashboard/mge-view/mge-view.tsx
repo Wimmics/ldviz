@@ -507,6 +507,7 @@ export class MgeView {
                      .style("display", "none");
     this._filter = _filterDiv.node()
     
+
     this._filter.setChart(this._chart)
     if (![state.views.history.component, state.views.query.component, state.views.listing.component, state.views.annotation.component].includes(this.typeVis)){
       await this._chart.setPanel(this._filter)

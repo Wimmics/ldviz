@@ -68,6 +68,16 @@ Type: `Promise<void>`
 
 
 
+### `acSortExecType() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 ### `addIrisChart(idDiv: any, divTag: any) => Promise<void>`
 
 
