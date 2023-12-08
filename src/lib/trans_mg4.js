@@ -128,11 +128,12 @@ function getDocumentInformation(data, authorIdMap) {
         // then modify the access on the paper list and histogram charts
         if (! docMap.has(dc) ) {        
             let docType = transformType(elem.type.value)
-            docMap.set(dc, {"type": {'label': docType, 'index': Object.keys(types).indexOf(docType)}, 
+            docMap.set(dc, {
+                "type": {'label': docType, 'index': Object.keys(types).indexOf(docType)}, 
                 "date": elem.date ? transformDate(elem.date.value) : null, 
                 "title": elem.label ? elem.label.value : elem.p.value,
                 "authors": elem.author ? elem.author.value.split('--') : [], // if there is a list of authors, use it, otherwise fill out later with ?s and ?o info
-                "link": elem.url ? elem.url.value : dc,
+                "link": elem.url ? elem.url.value : "#",
                 "pmid": elem.pmid ? elem.pmid.value : null,
                 "authorList": elem.authorList ? elem.authorList.value.split('--').map(d => { return {label: d} }) : []
             })

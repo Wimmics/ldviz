@@ -223,7 +223,7 @@ function subGraph() {
         * Node and its adjacent ClusterVis
         */
     obj.normalClusterVis = function (normalNode, graphData) {
-
+        console.log("normalClusterVis() = ", normalNode)
         let result = getClusterVisDataModel(graphData)
         
         // Include the selected node 
@@ -249,6 +249,8 @@ function subGraph() {
                 .filter(e => e.src === idNodes.indexOf(d.idOrig) || e.tgt === idNodes.indexOf(d.idOrig))
                 .map(e => e.src === idNodes.indexOf(d.idOrig) ? e.target : e.source)
         })
+
+        console.log(result)
 
         return result;
     };
@@ -320,15 +322,19 @@ function subGraph() {
     obj.clusterPapersList = function (sourceNode, graphData) {
 
         let result = getPaperListDataModel(sourceNode, graphData.nodes, true)
+
         
         sourceNode.cluster.forEach(node => {
-            if (node.id !== sourceNode.id) 
+            if (node.idOrig !== sourceNode.idOrig) 
                 result.children.data.push(getPaperListNode(node))
         })
 
         let idNodes = sourceNode.cluster.map(d => d.idOrig)
         idNodes.push(sourceNode.idOrig)
-        result.root.data.documents = graphData.items.filter(d => d.authors.some(a => a.id === sourceNode.idOrig) && d.authors.every(a => idNodes.includes(a.id)))
+        console.log(graphData.items)
+        console.log(sourceNode, idNodes)
+        result.root.data.documents = graphData.items.filter(d => d.authors.some(a => a.id === sourceNode.idOrig) && idNodes.every(a => d.authors.some(x => x.id === a)))
+        //d.authors.every(a => idNodes.includes(a.id)))
 
         result.root.data.documents.forEach((doc) => {
             doc.authors.forEach(author => {

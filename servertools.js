@@ -50,16 +50,16 @@ class Cache{
         let params = query.params;
 
         if (params) {
-            if (params.country && params.country.length && query.query.includes('$country')) {
+            if (params.country && params.country.length) {
                 filename += '_' + params.country
             } 
 
-            if (params.lab && (query.query.includes('$lab1') || query.query.includes('$lab2'))) 
+            if (params.lab) 
                 params.lab.forEach(lab => {
                     if (lab && lab.length) filename += '_' + lab
                 })
 
-            if (params.period && (query.query.includes('$beginYear') || query.query.includes('$endYear')))
+            if (params.period)
                 params.period.forEach(period => {
                     filename += '_' + period
                 })
@@ -69,7 +69,7 @@ class Cache{
                     if (term && term.length) filename += '_' + term
                 })
         }
-
+        
         return path.join(__dirname, this.folder + filename + '.json')
     }
 

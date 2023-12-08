@@ -117,6 +117,7 @@ export class MgeListing {
         
         this.model.data = _;
 
+        console.log(this.model.data)
         this._itemTypes = this.model.data.root.data.documents.map(d => d.type)
         this._itemTypes = this._itemTypes.filter( (d,i) => this._itemTypes.findIndex(e => e.index === d.index) === i)
 

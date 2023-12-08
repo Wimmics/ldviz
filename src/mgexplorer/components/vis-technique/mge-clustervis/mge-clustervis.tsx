@@ -532,6 +532,7 @@ export class MgeClustervis {
             return parent;
         }
 
+        console.log('tree =', result)
         return result;
     }
 
