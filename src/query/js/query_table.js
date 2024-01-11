@@ -299,7 +299,6 @@ class QueryTable{
      */
     clearQueryCache(query) {
 
-        console.log("query = ", query)
         fetch(LDViz.cacheRoute, {
             method:'POST',
             headers: {'Content-Type': 'application/json'},

@@ -8,13 +8,22 @@ import { transform } from './trans_mg4'
 /**
 * Clear cache that stored from server
 */
-function clearQueryCache(query) {
+function clearQueryCache(form, query) {
+    let data = null;
+    if (form)  
+        data = getFormData(form);
+
+    if (query && query.params) {
+        data.params.prefixes = query.params.prefixes 
+        data.id = query.id
+    }
+
     // Send request
     let url = "/ldviz/clearcache";
     fetch(url, {
         method:'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ query: query })
+        body: JSON.stringify({ query: data })
     }).then(response => {
         toast("Cache cleared!")
     }).catch(error => {

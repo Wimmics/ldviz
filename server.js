@@ -277,6 +277,7 @@ app.post(prefix + '/delete', async function (req, res) {
 
 // Clear the cache of a query
 app.post(prefix + '/clearcache', async function (req, res) {
+ 
     let response = await cache.deleteFile(req.body.query)
 
     if (response && response.message) {

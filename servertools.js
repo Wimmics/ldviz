@@ -104,12 +104,13 @@ class Cache{
     }
 
     async deleteFile(query) {
+
         let filename = this.getFileName(query)
 
         if (fs.existsSync(filename)) {
             fs.unlink(filename, function (err) {
                 if (err) {
-                    return { message: "Error while deleting file " + cachefilename + " - " + err, code: 500 }
+                    return { message: "Error while deleting file " + filename + " - " + err, code: 500 }
                 } 
             })
         }

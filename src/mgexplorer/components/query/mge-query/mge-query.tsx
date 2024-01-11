@@ -230,15 +230,6 @@ export class MgeQuery {
         (this.element.querySelector('#form_query') as HTMLInputElement).dispatchEvent(new Event('change'));
   }
 
-  /**
-   * Event function when change the predefined query from the predefined query list input
-   * After changing query, the information regarding predefined query will be update on the form
-   */
-  // changeQuery(event, value){
-  //   this.query = value.length ?  state.queriesList.find(x => String(x.id) == value) : null;
-  //   this.displayQuery(this.query)
-  // }
-
   changeQuery() {
     let sel = select(this.element.querySelector('#form_query')).node()
     let value = sel.options[sel.selectedIndex].value
@@ -488,7 +479,7 @@ export class MgeQuery {
     this._view = this._dashboard.shadowRoot.querySelector("[id-view='" + this.element.id + "']")
     select(this.element.querySelector("#clone")).on("click", () => this.cloneQuery() )
 
-    select(this.element.querySelector("#clear-cache")).on("click", () => clearQueryCache(this.query) )
+    select(this.element.querySelector("#clear-cache")).on("click", () => clearQueryCache(this.form, this.query) )
 
     select(this.element.querySelector("#run")).on("click", () => {
       this.disableButton();

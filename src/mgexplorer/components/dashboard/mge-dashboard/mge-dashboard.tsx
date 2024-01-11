@@ -82,7 +82,7 @@ export class MgeDashboard {
       let queryData = null
       if (locals.queryParams.id) {
         queryData = locals.queries.find(d => d.id === +locals.queryParams.id)
-        queryData.query = queryData.params.prefixes.join('\n') + queryData.query;
+        queryData.query = queryData.params && queryData.params.prefixes ? queryData.params.prefixes.join('\n') + queryData.query : queryData.query;
         if (queryData.name) this.showQueryTitle(queryData.name)
       } else if (locals.queryParams.query) {
         queryData = {
@@ -95,6 +95,7 @@ export class MgeDashboard {
         if (locals.queryParams.name) this.showQueryTitle(locals.queryParams.name)
       }
 
+      console.log("query = ", queryData)
       
       this.initComponent = state.views.nodelink;
       sendRequest(queryData, 0)
