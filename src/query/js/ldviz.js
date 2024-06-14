@@ -1,7 +1,5 @@
 class LDViz{
     static init(locals){
-        // this.protocol = window.location.protocol +'//';
-        // this.hostname = window.location.host;
         this.action = locals.action
         this.urlQuery = locals.queryParams;
 

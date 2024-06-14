@@ -2,6 +2,8 @@ class Editor{
     constructor(gss, params) {
         this.gss = gss;
         this.params = params;
+
+        console.log(this.gss, this.params)
     }
 
     setStylesheet() {

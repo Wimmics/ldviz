@@ -12,13 +12,18 @@
 }
 
 .logo {
-    top: 10px;
+    display: flex;
+    justify-content: space-between;
+    width: 30%;
+    left: 33%;
+    position: relative;
 }
+
 .logo a {
     padding: 10px;
 }
 .logo img {
-    max-width: 80px;
+    height: 50px;
     vertical-align: middle;
 }
 
@@ -90,14 +95,9 @@ body {
 
 footer {
     background: whitesmoke;
-    bottom: 0;
     padding: 10px 20px 0 20px;
-    width: 100%;
-    display: inline-block;
-    z-index: 200;
-    height: 40px;
-    position: fixed;
-    left: 0;
+    width: 100vw;
+    height: 100px;
 }
 
 .f1,

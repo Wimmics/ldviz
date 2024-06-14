@@ -23,12 +23,19 @@ const { config } = require('process');
 const csv = require('csvtojson');
 const stream = require('stream');
 
-const servertools = require('./servertools');
-const { SPARQLRequest, Users, Cache, Data } = require('./servertools');
+
+/// custom servertools
+const { SPARQLRequest } = require("./servertools/sparql")
+const { Data } = require("./servertools/data")
+const { Cache } = require("./servertools/cache")
+const { Users } = require("./servertools/user")
+const utils = require("./servertools/utils") 
+
 const sparql = new SPARQLRequest()
 const users = new Users()
 const cache = new Cache()
 const data = new Data()
+//////////
 
 const prefix = '/ldviz'
 
@@ -76,9 +83,12 @@ app.post(prefix + '/login', async (req, res) => {
     let user = await users.get(email, password);
     if(user){
         req.session.user = user;
-        if (req.query.action) {
+        if (req.query.action) { // if the user is trying to log into a ldviz/query/ route such as edit or view, redirect after connection 
             res.redirect(prefix + '/query/' + req.query.action + '?queryId=' + req.query.queryId);
-        } else res.redirect(prefix + '/query');
+        } else if (Object.keys(req.query).length) { // if the user is trying to use any other page with query parameters, reconstruct the parameters and redirect it
+            res.redirect(prefix + utils.getQuery(req.query))
+        } 
+        else res.redirect(prefix + '/query'); // assumes that they are login in the /ldviz/query route (it needs to be generalized)
     }
     else {
         res.render('pages/login', { message: "Incorrect email or password" });
@@ -95,78 +105,16 @@ app.get(prefix + '/logout', (req, res) => {
 /////////// end login routes //////////////////////////
 
 app.get(prefix + '/', async function (req, res){
-    await users.checkConnection(req)
-    let result = await data.load(req)
-    res.render("pages/mgexplorer/index", result);
-})
-
-
-app.get(prefix + '/apps/:app', async function (req, res){
-    await users.checkConnection(req)
-    let result = await data.load(req)
-    result.static = true;
-    result.app = req.params.app
-
-    res.render("pages/mgexplorer/index", result);
-})
-
-app.get(prefix + "/apps/:app/filenames", async function(req, res) {
-    let app = req.params.app
-    let filenames = fs.readdirSync(path.join(__dirname, `data/apps/${app}/`))
-
-    let result = []
-
-    let files;
-    if (['hceres', 'i3s'].includes(app)) {
-        let people = await csv().fromFile(path.join(__dirname, `data/apps/${app}/config/ID_HAL.csv`))
-        people.forEach(p => {
-            if (!p.idHal.length) return;
-
-            files = filenames.filter(f => f.includes(p.idHal))
-            
-            files.forEach(f => {
-                result.push({
-                    name: p.name || `${p.Nom} ${p.Prenom}`,
-                    idHal: p.idHal,
-                    orcid: p.ORCID,
-                    filename: f
-                })
-            })
-        })
-
-        let total = filenames.filter(f => f.includes("total-"))
-        total.forEach(f => {
-            result.push({
-                name: app.toUpperCase(),
-                idHal: "",
-                orcid: "",
-                filename: f
-            })
-        })
-    } else {
-        files = filenames.filter(d => d.includes('.json'))
-        files.forEach(f => {
-            result.push({
-                name: app,
-                idHal: null,
-                orcid: null,
-                filename: f
-            })
-        })
+    
+    let connected = await users.checkConnection(req)
+    if(connected){
+        let result = await data.load(req)
+        res.render("pages/mgexplorer/index", result);
     }
-    
-    res.send(JSON.stringify(result))
+    else {
+        res.redirect(prefix + '/login' + utils.getQuery(req.query))
+    }   
 })
-
-app.get(prefix + "/apps/:app/data/:dataset", async function(req, res) {
-    let result = {}
-    
-    result.data = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/${req.params.dataset}`))
-
-    result.stylesheet = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/config/stylesheet.json`))
-
-    stream.Readable.from(JSON.stringify(result)).pipe(res)
-}) 
 
 // LDViz about page 
 app.get(prefix + '/about', function (req, res) {
@@ -184,7 +132,6 @@ app.get(prefix + '/analysis', function (req, res) {
 })
 
 app.get(prefix + '/query', async function (req, res) {
-    await users.checkConnection(req)
     res.render("pages/ldviz/index", await data.load(req));
 })
 
@@ -295,14 +242,14 @@ app.post(prefix + '/clearcache', async function (req, res) {
 app.post(prefix + '/saveAnnotation', function (req, res) {
     var path = "data/annotations/test.json";
     var data = req.body; // query content
-    servertools.update_file(path,data);
+    utils.update_file(path,data);
     res.sendStatus(200);
 })
 
 app.post(prefix + '/saveHistory', function (req, res) {
     var path = "data/history/history.json";
     var data = req.body; // query content
-    servertools.update_file(path,data);
+    utils.update_file(path,data);
     res.sendStatus(200);
 })
 
@@ -339,6 +286,76 @@ app.post(prefix + '/sparql', async function (req, res) {
         res.sendStatus(400)
     }
 })
+
+////////////////////////////////
+/// routes for offline data
+
+app.get(prefix + '/apps/:app', async function (req, res){
+    //await users.checkConnection(req)
+    let result = await data.load(req)
+    result.static = true;
+    result.app = req.params.app
+
+    res.render("pages/mgexplorer/index", result);
+})
+
+app.get(prefix + "/apps/:app/filenames", async function(req, res) {
+    let app = req.params.app
+    let filenames = fs.readdirSync(path.join(__dirname, `data/apps/${app}/`))
+
+    let result = []
+
+    let files;
+    if (['hceres', 'i3s'].includes(app)) {
+        let people = await csv().fromFile(path.join(__dirname, `data/apps/${app}/config/ID_HAL.csv`))
+        people.forEach(p => {
+            if (!p.idHal.length) return;
+
+            files = filenames.filter(f => f.includes(p.idHal))
+            
+            files.forEach(f => {
+                result.push({
+                    name: p.name || `${p.Nom} ${p.Prenom}`,
+                    idHal: p.idHal,
+                    orcid: p.ORCID,
+                    filename: f
+                })
+            })
+        })
+
+        let total = filenames.filter(f => f.includes("total-"))
+        total.forEach(f => {
+            result.push({
+                name: app.toUpperCase(),
+                idHal: "",
+                orcid: "",
+                filename: f
+            })
+        })
+    } else {
+        files = filenames.filter(d => d.includes('.json'))
+        files.forEach(f => {
+            result.push({
+                name: app,
+                idHal: null,
+                orcid: null,
+                filename: f
+            })
+        })
+    }
+    
+    res.send(JSON.stringify(result))
+})
+
+app.get(prefix + "/apps/:app/data/:dataset", async function(req, res) {
+    let result = {}
+    
+    result.data = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/${req.params.dataset}`))
+
+    result.stylesheet = JSON.parse(fs.readFileSync(`data/apps/${req.params.app}/config/stylesheet.json`))
+
+    stream.Readable.from(JSON.stringify(result)).pipe(res)
+}) 
 
 
 app.listen(port, () => { 

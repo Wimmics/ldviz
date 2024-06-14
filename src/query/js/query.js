@@ -193,10 +193,7 @@ class Query{
 
         let url = LDViz.explorerPage +
             '?query=' + encodeURIComponent(data.query) +
-            '&url=' + data.uri +
-            '&name=' + (data.name.length ? data.name : 'No name provided') +
-            '&email=' + LDViz.auth.user.email +
-            '&password=' + LDViz.auth.user.password;
+            '&url=' + data.uri
 
         if (data.stylesheetActive) 
             url += '&stylesheet=' + encodeURIComponent(JSON.stringify(data.stylesheet))
