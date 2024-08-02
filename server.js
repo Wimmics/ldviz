@@ -24,14 +24,23 @@ const _ = require('lodash');
 const https = require('https')
 
 //// Data tools ////
-const { Users, Data } = require('./servertools');
+const { Users, Data, SPARQLRequest } = require('./servertools');
 
 const users = new Users()
 const data = new Data()
+const sparql = new SPARQLRequest()
 
 const prefix = '/ldviz'
 
 const app = express()
+
+// Pour accepter les connexions cross-domain (CORS)
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+});
 
 app.use(express.json({limit: '50mb'}));
 
@@ -208,7 +217,24 @@ app.post(prefix + '/delete/:file', async function (req, res) {
     res.sendStatus(200);
 })
 
+// SPARQL request
+app.post(prefix + '/sparql', async function (req, res) {
+    
+    let data = req.body;
 
+    let result;
+    try {
+        result = await sparql.sendRequest(data.query, data.endpoint)    
+    } catch (e) {
+        console.log('error = ', e)
+        // send error back to client
+        res.sendStatus(400)
+    }
+
+    // send result back to client
+    if (result.status) res.sendStatus(result.status)
+    else res.send(result);
+})
 
 
 const port = 8040 // verify the availability of this port on the server

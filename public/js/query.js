@@ -181,16 +181,11 @@ class Query{
     async sendRequest(values) {
         await this.tune(values)
 
-        let url = values.endpoint + "?query=";
-        url = url + await this.prepare(values.query)
-
-        let headers = {
-            accept: "application/sparql-results+json"
-        }
-
-        let res = await fetch(url, 
-            { method: 'GET', headers: headers})
-        .then(async (response) => {
+        let res = await fetch(this.routes.sparql, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(values)
+        }).then(async (response) => {
             return await response.text();
         }).catch(error => {
             // console.log(error)
