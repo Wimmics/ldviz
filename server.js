@@ -62,9 +62,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({
     secret: "Your secret key",
-    resave: true,
-    saveUninitialized: true
+    resave: false, // Do not save session if unmodified
+    saveUninitialized: true, // Save uninitialized sessions
+    cookie: { 
+        maxAge: 30 * 60 * 1000, // 30 minutes
+        secure: false // Set to true if using HTTPS
+    }
 }));
+
+app.set('trust proxy', 1); // Trust the first proxy
 
 app.use(back());
 

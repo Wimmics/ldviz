@@ -9,12 +9,21 @@ class QueryTable{
     }
 
     set() {
-        this.queryIcons = [{'label': 'Visualize SPARQL Query Results', 'class': 'far fa-play-circle', 'value': 'visualize', 
+        this.queryIcons = [{'label': (d) => {
+          if (d.dataviz) {
+            let obj = this.getDatavizObj(d.dataviz)
+            return `Visualize results with ${obj.name}`
+          }  
+          return `No Visualization Associated`
+        }, 'class': 'far fa-play-circle', 'value': 'visualize', 
             'action': d => this.handleVisualizeQuery(d) },
+
             {'label': 'View Query', 'class': 'far fa-file-code', 'value': 'view', 
                 'action': d => this.queryTools.loadPage('view', d), auth: false },
+            
             {'label': 'Edit Query', 'class': 'far fa-edit', 'value': 'edit',
                 'action': d => this.queryTools.loadPage('edit', d), auth: true },
+            
             {'label': 'Clone Query', 'class': 'far fa-clone', 'value': 'clone', 
                 'action': d => this.queryTools.loadPage('clone', d), auth: true },
             // {'label': 'Lock/Unlock query', 'class': d => d.isLocked ? 'fas fa-lock' : 'fas fa-unlock', 'value': 'lock',
@@ -24,7 +33,7 @@ class QueryTable{
 
                 let obj = this.getDatavizObj(d.dataviz)
                 if (obj.getPublishRoute()) 
-                    return `${d.isPublished ? 'Remove' : 'Publish'} query at ${obj.getName()} dashboard.`
+                    return `${d.isPublished ? 'Remove from' : 'Publish on'} ${obj.getName()}.`
                 
                 return 'Not Applicable'
             }, 'class':  d => d.isPublished ? 'far fa-eye' : 'far fa-eye-slash', 'value': 'publish',
@@ -77,6 +86,7 @@ class QueryTable{
             let data = { ...d }
             data[attribute] = value
           
+            console.log("data = ", data)
             let res = await this.queryTools.saveQuery(data, dataviz.getPublishRoute())
             
             if (!res) return
