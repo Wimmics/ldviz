@@ -131,5 +131,5 @@ dist
 
 # Ignore sensitive data
 data/users.json
-data/queries.json
+data/queries*.json
 data/dataviz.json
