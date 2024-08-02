@@ -16,9 +16,12 @@ class Auth {
         let url = `${this.loginPage}?origin=${origin}`
         
         if (action && !['delete', 'publish'].includes(action)) {
-            location.href = url + '&action=' + action + '&queryId=' + query.id 
-        } else 
-            location.href = url
+            url += '&action=' + action
+            if (query) 
+                url += '&queryId=' + query.id 
+        } 
+            
+        location.href = url
     }
 
     logout() {

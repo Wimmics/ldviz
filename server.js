@@ -79,8 +79,10 @@ app.post(prefix + '/login', async (req, res) => {
     let user = await users.get(email, password);
     if(user){
         req.session.user = user;
-        if (req.query.action) {
+        if (req.query.action && req.query.queryId) {
             res.redirect(prefix + '/editor/' + req.query.action + '?queryId=' + req.query.queryId)
+        } else if (req.query.action) {
+            res.redirect(prefix + '/editor/' + req.query.action )
         } else if (req.query.origin) 
             res.redirect(prefix + '/' + req.query.origin)
         else res.redirect(prefix + '/')

@@ -14,13 +14,9 @@ class VisRegistration {
 
     set() {
 
-        document.querySelector('#collapseVisButton').addEventListener('click', () => {
-            if (!LDViz.auth.isConnected()) 
-                if ( confirm("Please login before proceeding!") )  {
-                    LDViz.auth.login('dataviz')
-                    return
-                }
-        })
+        // only authentified people can register new visualizations
+        if (!LDViz.auth.isConnected()) 
+            document.querySelector('#collapseVisButton').style.display = 'none'
 
         $('#collapseVisForm').on('shown.bs.collapse', function () {
             this.scrollIntoView({ behavior: "smooth" })

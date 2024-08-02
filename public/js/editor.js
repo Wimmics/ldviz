@@ -95,7 +95,7 @@ class Editor{
 
     // display the editor window with information regarding the selected query
     displayQuery(action) {
-        let data = this.query;
+        let data = this.query;        
 
         if (action != 'newQuery') {
 
