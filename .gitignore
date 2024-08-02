@@ -133,3 +133,5 @@ dist
 data/users.json
 data/queries*.json
 data/dataviz.json
+
+package-lock.json
