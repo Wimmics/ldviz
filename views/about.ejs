@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LDViz</title>
+
+    <%- include("partials/libs") %>
+    <link rel="stylesheet" type="text/css" href="/ldviz/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="/ldviz/css/query.css" />
+
+    <script src='/ldviz/js/utils.js'></script>
+    <script src='/ldviz/js/query.js'></script>
+    <script src='/ldviz/js/editor.js'></script>
+    <script src='/ldviz/js/results.js'></script>
+    <script src='/ldviz/js/query_table.js'></script>
+    <script src='/ldviz/js/ldviz.js'></script>
+    <script src='/ldviz/js/login.js'></script>
+    <script src="/ldviz/js/dataviz.js"></script>
+    <script src="/ldviz/js/visForm.js"></script>
+    
+</head>
+
+<body >
+    <%- include("partials/header") %>
+    <div class="page-content">
+        <div class="inner">
+
+            <div class="container-fluid jumbotron" >
+
+                <div class="row" >
+                    <div class="col d-flex justify-content-center">
+                   
+                        <img src="/ldviz/images/lod-cloud.jpg" width="70%" alt="Illustrative poster"/>
+             
+                    </div>
+                    
+                    <div class="col">
+
+                        <h1 class="display-4">LDViz</h1>
+                        <h3 class="display-6" >Linked Data Visualizer</h3>
+                        <br>
+
+                        <p class="lead"> Explore linked data with ease using our project! Build, debug, and test SPARQL queries on your chosen SPARQL endpoint. Visualize query results with a range of integrated tools, including MGExplorer, all within our user-friendly query management interface. Enhance your data exploration and gain valuable insights effortlessly!</p>
+                
+                        <p class="lead">See the complete list of available visualization tools <a href="/ldviz/dataviz">here</a></p>
+
+                        <div class="p-3 mb-2 bg-warning text-dark">If you are interested in using it, please contact us (see contact information below) and we will provide you authentication.</div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <h1 class="p-3 mb-2 bg-info display-4">Coverage Analysis</h1>
+            <div class="container-fluid font-weight-light">
+
+                <div class="p-3 mb-2 bg-success text-white">We evaluated our tool against <b>419 public SPARQL endpoints</b> to ensure broad compatibility and thorough coverage.</div>
+
+                <br>
+                <h3>SPARQL result set format</h3>
+
+                <p>Our application uses the data format proposed by the <a href="https://www.w3.org/TR/2013/REC-sparql11-results-json-20130321/">W3C Recommendation</a> to represent SPARQL select query results using JSON. The data format looks like the following: </p>
+
+<pre id="json-renderer">
+{
+    head: { 
+        link: [], vars: [ "s", "p", "o", "label", "type", "date" ] },
+    results: { 
+        distinct: false, 
+        ordered: true, 
+        bindings: [
+            {s: { type: "literal", xml:lang: "en", value: "Maximilian Schell" },
+            p: { type: "uri", value: http://dbpedia.org/resource/A_Bridge_Too_Far_(film)},
+            o: { type: "literal", xml:lang: "en", value: "Dirk Bogarde"},
+            label: { type: "literal", xml:lang: "en", value: "A Bridge Too Far (film)"},
+            type: { type: "literal", xml:lang: "en", value: "non-fiction" },
+            date: { type: "typed-literal", 
+            datatype: http://www.w3.org/2001/XMLSchema#date, 
+            value: "1977-06-15" }}
+        ] 
+    } 
+}
+</pre>
+    
+                <p>You find more about the format at <a href="https://www.w3.org/TR/2013/REC-sparql11-results-json-20130321/">https://www.w3.org/TR/2013/REC-sparql11-results-json-20130321/</a>.</p>
+                    
+                <br>
+                <h3>Tested SPARQL endpoints </h3>
+                <p>IndeGx is a framework designed to index public KGs that are available online through a SPARQL endpoint. The indexing process uses SPARQL queries to either extract the available metadata from a KG or to generate as much metadata as the endpoint allows it. The results of this indexing process are publicly available through a SPARQL endpoint at <a href="http://prod-dekalog.inria.fr/sparql">http://prod-dekalog.inria.fr/sparql</a>, from which we retrieved the list of endpoints using the query below:</p> 
+
+                <code>
+                    prefix index: &lt;http://ns.inria.fr/kg/index\#&gt;<br>
+                    prefix desc: &lt;http://www.w3.org/ns/sparql-service-description\#&gt; <br>
+                    SELECT DISTINCT ?endpointUrl where {  <br>
+                    &nbsp;    GRAPH ?g {  ?metadata index:curated ?dataset . <br>
+                    &nbsp;&nbsp;        ?dataset desc:endpoint ?endpointUrl .  <br>
+                    &nbsp;}  <br>
+                    } <br>
+                </code>
+
+                <br>
+                <div id="accordion">
+                    <div class="card">
+                      <div class="card-header" id="headingOne">
+                        <h5 class="mb-0">
+                          <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            List of SPARQL endpoints used in the analysis (click to reveal) <i class="fas fa-angle-down"></i>
+                          </button>
+                        </h5>
+                      </div>
+                  
+                      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                        <div class="card-body" style="height: 500px; overflow-y: scroll;">
+                            <ul class="list-group">
+                            <% for (let i = 0; i < locals.endpoints.length; i++) { %>
+                                    <li class="list-group-item"><a href="<%= locals.endpoints[i] %>" target="_blank"><%= locals.endpoints[i] %></a></li>
+                                <% } %>
+                            </ul>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+                <br>
+                <h3>Procedure</h3>
+                <p>We used a set of queries that support RDF graph/vocabulary inspection and RDF summarizations exploration, defined as follows.</p>
+                
+                <h4>RDF graph and vocabulary</h4>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        RDF graph <br><br>
+                        <code>
+                            select * where { ?s ?p ?o } 
+                        </code>
+                    </li>
+                    <li class="list-group-item list-group-item-dark">
+                        Hierarchy of classes <br><br>
+                        <code>
+                            prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;<br>
+                            select * where {  <br>
+                                &nbsp;    ?s ?p ?o <br>
+                                &nbsp;filter(?p = rdfs:subClassOf) <br>
+                            }
+                        </code>
+
+                    </li>
+                    <li class="list-group-item">
+                        Hierarchy of properties <br><br>
+                        <code>
+                            prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;<br>
+                            select * where { <br>
+                                &nbsp;?s ?p ?o <br>
+                                &nbsp;filter(?p = rdfs:subPropertyOf) <br>
+                            }
+                        </code>
+                    </li>
+                    <li class="list-group-item list-group-item-dark">
+                        Signature of properties <br><br>
+                        <code>
+                            prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;<br>
+                            select * where { <br>
+                                &nbsp;?s ?p ?o <br>
+                                &nbsp; filter(?p = rdfs:domain || ?p = rdfs:range)}  <br>
+                            }
+                        </code>
+                    </li>
+                </ul>
+    
+                <br>
+                <h4>RDF summarizations</h4>
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        Class paths <br><br>
+                        <code>
+                            select distinct ?s ?p ?o <br>
+                            where { <br>
+                                &nbsp;?a ?p ?b . ?a a ?s . ?b a ?o <br>
+                            } 
+                        </code>
+                    </li>
+                    <li class="list-group-item list-group-item-dark">
+                        Property paths <br><br>
+                        <code>
+                            prefix ldv: &lt;http://ldv.fr/path/&gt;<br>
+                            select distinct ?s (ldv: as ?p) ?o <br>
+                            where { <br>
+                                &nbsp; ?x ?s ?y . ?y ?o ?z . <br>
+                                &nbsp; filter (?s != ?o) <br>
+                            } 
+                        </code>
+                    </li>
+                    <li class="list-group-item">
+                        Paths of form "class &rarr; property &rarr; class" <br><br>
+                        <code>
+                            prefix ldv: &lt;http://ldv.fr/path/&gt;<br>
+                            select distinct ?s (ldv: as ?p) ?o <br>
+                            where { <br>
+                                &nbsp; { ?a ?b ?c. ?a a ?s . <br>
+                                    &nbsp;&nbsp;     bind (?b as ?o) } <br>
+                                    &nbsp; UNION <br>
+                                    &nbsp;  { ?a ?b ?c. ?c a ?s .  <br>
+                                        &nbsp;&nbsp;   bind (?b as ?o) } <br>
+                            }
+                        </code>
+                    </li>
+                </ul>
+    
+                <br>
+                <p> These queries are rather generic and can be applied to any SPARQL endpoint. The only specific vocabulary used by these queries is the RDF Schema, which provides a data modeling vocabulary for RDF data and would be therefore expected to appear in most RDF graphs. We limited each query to 10 solutions to speed up the process, as our goal was to inspect the resulting data format to check whether we could visualize it using LDViz; the actual data was not important for this analysis. A request would have mainly two possible outcomes:</p>
+                <ul>
+                    <li>
+                        In case of a successful request, we inspect the resulting data format to verify whether it matches the SPARQL JSON result set defined by W3C Recommendation. If the data does not match the expected format, we inspect it further to identify its format, which may sometimes be HTML or CSV, for instance.
+                    </li>
+                    <li>
+                        In case of a failed request, we inspect the error thrown to understand why we were unable to retrieve data from that particular endpoint.
+                    </li>
+                </ul>
+     
+                <br>
+                <h3>Results</h3>
+
+                <p>About 41.77% of the SPARQL endpoints returned a valid result set that could be explored using LDViz. We noticed that the queries seeking for class and property hierarchy, and signature of properties were slightly less successful than the remaining, where only about 38.19% of SPARQL endpoints returned a valid result set. Regarding the issues found while querying the SPARQL endpoints, we could identify 11 different reasons for why it cannot be explored using LDViz, described as follows:</p>
+
+                <ul class="list-group">
+                    <li class="list-group-item"> <b>HTML</b>: About 16.06% of the requests returned an HTML object, which may contain valid results from the SPARQL endpoint, but cannot be processed by the LDViz transformation engine. </li>
+                    <li class="list-group-item list-group-item-dark"><b>Service Not Found</b>: The SPARQL endpoint could not be found (request status 404 and 410). We encountered this issue in about 14.18% of requests.</li>
+                    <li class="list-group-item"><b>Service Unreachable</b>: This issue is identified when the connection is refused by the server (throwing the ECONNREFUSED error), or the protocol encountered an unrecoverable error for that endpoint (throwing the EPROTO error). On average, 7.06% of requests encountered this issue. We noticed that this issue appeared slightly more often for the SPARQL query recovering the RDF summarization through class paths then for the remaining, where we observed the issue in 8.59% of requests.  </li>
+                    <li class="list-group-item list-group-item-dark"> <b>Timeout</b>: About 6.27% of the requests encountered a timeout issue. This is due to the request response not being received within the default timeout of the fetch request, which is of about 300 seconds (request statuses 408 and 504) or the Virtuoso server estimating the query processing time to be longer than its established timeout of 400 seconds. </li>
+                    <li class="list-group-item"> <b>No results</b>: This issue means that the request returned a valid JSON object, but the \texttt{bindings} array was empty. In average, 4.30% of SPARQL endpoints did not provide results to our queries. However, once again, we observe that this number is higher for SPARQL queries seeking for the signature of properties, class, and property hierarchies, where we observe that about 8.35% of endpoints did not provide results against an average of only 1.25% of endpoints not providing results for the remaining queries. </li>
+                    <li class="list-group-item list-group-item-dark"> <b>Invalid Certificate</b>: The request could not be completed due to an invalid certificate on the SPARQL endpoint side. This issue was observed in about 3.10\% of requests, which correspond to 13 SPARQL endpoints. </li>
+                    <li class="list-group-item"> <b>CSV</b>: On average, 2.18% of the requests returned a string object which content follows a CSV format. The result set may contain valid data but cannot be processed by the LDViz transformation engine. </li>
+                    <li class="list-group-item list-group-item-dark"> <b>Bad Request</b>: The request could not be fulfilled due to bad syntax (request status 400). This error was thrown by 2.18% of requests, which correspond to 9 to 11 SPARQL endpoints. We could observe that the SPARQL queries seeking for the RDF graph and an RDF graph summarization through class paths were slightly less affected than the remaining. </li>
+                    <li class="list-group-item"> <b>Format Not Supported</b>: Requests for 6 different SPARQL endpoints have responded with this error (1.43% of requests), which means that the server can only generate a response that is not accepted by the client (status 406). </li>
+                    <li class="list-group-item list-group-item-dark"> <b>Access Unauthorized</b>: This issue encompasses the following request responses: the server refuses to respond (status 401 and 403), and authentication is required (status 407 and 511). We observed that three endpoints (0.95\% of requests -- 4 SPARQL endpoints) required authentication, which we could not provide. </li>
+                    <li class="list-group-item"> <b>Not W3C compliant</b>: The request responded with a JSON object that does not follow the JSON format specified by the W3C Recommendation. This issue was observed in 2 SPARQL endpoints (0.48%).</li>
+                </ul>
+
+                <p>The TreeMap graph below shows the distribution of different responses obtained while querying 419 SPARQL endpoints. The top level of the TreeMap graph contains seven rectangles each of which covers a specific query type (i.e Paths &rarr; Properties &rarr; Class, Class paths, Class hierarchy, RDF graph, property hierarchy, signature of properties, and properties path). These rectangles are further divided in smaller colored rectangles that summarize the results obtained per query type including SPARQL endpoints supported by LDViz and issues encountered while accessing the endpoints (e.g., Access Unauthorized, Service not found, etc.). The size of the rectangle encodes the number of results obtained for each query. </p>
+
+                <div id="treemap"></div>
+            </div>
+
+            <h1 class="p-3 mb-2 bg-info display-4">Related Publications</h1>
+            <div class="container-fluid font-weight-light">
+                <ul class="list-group">
+                    <li class="list-group-item">Aline Menin, Pierre Maillot, Catherine Faron, Olivier Corby, Carla Maria Dal Sasso Freitas, et al.. LDViz: a tool to assist the multidimensional exploration of SPARQL endpoints. Web Information Systems and Technologies : 16th International Conference, WEBIST 2020, November 3-5, 2020, and 17th International Conference, WEBIST 2021, October 26–28, 2021, Virtual Events, Revised Selected Papers, LNBIP - 469, Springer, pp.149-173, 2023, LNBIP - Lecture Notes in Business Information Processing, 978-3-031-24196-3. ⟨<a href="https://link.springer.com/book/10.1007/978-3-031-24197-0">10.1007/978-3-031-24197-0</a>⟩.  (<a href="https://hal.archives-ouvertes.fr/hal-03929913">hal-03929913</a>)</li>
+                    <li class="list-group-item list-group-item-dark">Aline Menin, Minh Nhat Do, Carla Dal Sasso Freitas, Olivier Corby, Catherine Faron Zucker, et al.. Using Chained Views and Follow-up Queries to Assist the Visual Exploration of the Web of Big Linked Data. International Journal of Human-Computer Interaction, 2022. (<a href="https://hal.archives-ouvertes.fr/hal-03518845">hal-03518845</a>)</li>
+                    <li class="list-group-item">Aline Menin, Catherine Faron Zucker, Olivier Corby, Carla Dal Sasso Freitas, Fabien Gandon, et al.. From Linked Data Querying to Visual Search: Towards a Visualization Pipeline for LOD Exploration. International Conference on Web Information Systems and Technologies (WEBIST), Oct 2021, Online Streaming, France. (<a href="https://dx.doi.org/10.5220/0010654600003058">10.5220/0010654600003058</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03404572">hal-03404572</a>)</li>
+                    <li class="list-group-item list-group-item-dark">Aline Menin, Ricardo Cava, Carla Dal Sasso Freitas, Olivier Corby, Marco Winckler. Towards a Visual Approach for Representing Analytical Provenance in Exploration Processes. IV 2021 - 25th International Conference Information Visualisation, Jul 2021, Melbourne / Virtual, Australia. (<a href="https://dx.doi.org/10.1109/IV53921.2021.00014">10.1109/IV53921.2021.00014</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03292172">hal-03292172</a>)</li>
+                    <li class="list-group-item">Maroua Tikat, Aline Menin, Michel Buffa, Marco Winckler. Engineering Annotations to Support Analytical Provenance in Visual Exploration Processes. ICWE 2022 - 22nd International Conference of Web Engineering, Jul 2022, Bari, Italy. pp.1-16, (<a href="https://dx.doi.org/10.1007/978-3-031-09917-5_14">10.1007/978-3-031-09917-5_14</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03779349">hal-03779349</a>)</li>
+                    <li class="list-group-item list-group-item-dark">Anne Toulet, Franck Michel, Anna Bobasheva, Aline Menin, Sébastien Dupré, et al.. ISSA: Generic Pipeline, Knowledge Model and Visualization tools to Help Scientists Search and Make Sense of a Scientific Archive. ISWC 2022 - 21st International Semantic Web Conference, Oct 2022, Hangzhou, China. (<a href="https://dx.doi.org/10.1007/978-3-031-19433-7_38">10.1007/978-3-031-19433-7_38</a>). (<a href="https://hal.archives-ouvertes.fr/hal-03807744">hal-03807744</a>)</li>
+                </ul>
+            </div>
+
+            <h1 class="p-3 mb-2 bg-info display-4" style="margin-top: 10px;">Contact</h1>
+            <div class="container-fluid font-weight-light">
+                <ul class="list-group">
+                    <li class="list-group-item"><a href="https://amenin.gitlab.io/">Aline Menin</a>, Associate Professor at Université Côte d'Azur (E-mail: <a href="mailto:aline.menin@inria.fr"> aline.menin@inria.fr</a>)</li>
+                    <li class="list-group-item"><a href="https://www.i3s.unice.fr/~winckler/">Marco Winckler</a>, Full Professor at Université Cote d'Azur (E-mail: <a href="mailto:marco.winckler@inria.fr">marco.winckler@inria.fr</a>)</li>               
+                </ul>
+    
+                <p>*This work is developed by the Wimmics team at the Centre Inria, University Côte d'Azur. It results from collaborative efforts involving several researchers and students.</p>
+            </div>
+        </div>
+    </div>
+
+<%- include("partials/footer") %>
+    
+</body>
+
+<script>
+    window.addEventListener('load', function() {
+        document.querySelector("#home").classList.add('active')
+
+        let locals = <%- JSON.stringify(locals) %>;
+        LDViz.init(locals)
+
+        let data = <%- JSON.stringify(result) %>;
+
+    let margin = {top: 10, right: 10, bottom: 50, left: 10},
+        width = window.innerWidth * .9 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    let svg = d3.select("#treemap")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+    let nestedData = d3.nest()
+        .key(d => d.queryTitle)
+        .entries(data)
+
+    let hierarchy = nestedData.map(d => {
+        return {
+            'name': d.key,
+            'children': d.values.map(d => { return { name: d.issue, value: d.count }})
+        }
+    })
+    
+    // Give the data to this cluster layout:
+    var root = d3.hierarchy({ children: hierarchy }).sum(function(d){ return d.value}) // Here the size of each leave is given in the 'value' field in input data
+
+    // Then d3.treemap computes the position of each element of the hierarchy
+    d3.treemap()
+        .size([width, height])
+        .paddingTop(28)
+        .paddingRight(7)
+        .paddingInner(3)      // Padding between each rectangle
+        (root)
+
+    // prepare a color scale
+    var color = d3.scaleOrdinal()
+        .domain(["boss1", "boss2", "boss3"])
+        .range([ "#402D54", "#D18975", "#8FD175"])
+
+    // And a opacity scale
+    var opacity = d3.scaleLinear()
+        .domain([10, 30])
+        .range([.5,1])
+
+    // use this information to add rectangles:
+    svg.selectAll("rect")
+        .data(root.leaves())
+        .enter()
+        .append("rect")
+        .attr('x', function (d) { return d.x0; })
+        .attr('y', function (d) { return d.y0; })
+        .attr('width', function (d) { return d.x1 - d.x0; })
+        .attr('height', function (d) { return d.y1 - d.y0; })
+        .style("stroke", "black")
+        .style("fill", function(d){ return color(d.parent.data.name)} )
+        .style("opacity", function(d){ return opacity(d.data.value)})
+        .append('title')
+        .text(d => `Query ${d.parent.data.name}\n${d.data.name}: ${d.data.value} SPARQL endpoints`)
+
+    // and to add the text labels
+    svg.selectAll("text")
+        .data(root.leaves())
+        .enter()
+        .append("text")
+        .attr("x", function(d){ return d.x0+2})    // +10 to adjust position (more right)
+        .attr("y", function(d){ return d.y0+20})    // +20 to adjust position (lower)
+        .text(d => d.data.name)
+        .attr("font-size", "12px")
+        .attr("fill", "white")
+        .call(text =>
+            text.style("display", function(d, idx) {
+                let thiswidth = this.getComputedTextLength()
+                
+                let element = svg.selectAll('rect').filter(e => e.data.name === d.data.name && e.parent.data.name === d.parent.data.name).node()
+                
+                let rect = element.getBoundingClientRect();
+               
+                if (thiswidth > rect.width) return "none";
+                return "block";
+            })
+        )
+
+
+    // and to add the text labels
+    svg.selectAll("vals")
+        .data(root.leaves())
+        .enter()
+        .append("text")
+        .attr("x", function(d){ return d.x0+5})    // +10 to adjust position (more right)
+        .attr("y", function(d){ return d.y0+35})    // +20 to adjust position (lower)
+        .text(function(d){ return d.data.value })
+        .attr("font-size", "11px")
+        .attr("fill", "white")
+        .call(text =>
+            text.style("display", function(d, idx) {
+                let thiswidth = this.getComputedTextLength()
+                
+                let element = svg.selectAll('rect').filter(e => e.data.name === d.data.name && e.parent.data.name === d.parent.data.name).node()
+                let sibling = svg.selectAll('text').filter((e,i) => i !== idx && e.data.name === d.data.name && e.parent.name === d.parent.name).node()
+                
+                let parentwidth = d.x1 - d.x0,
+                    parentheight = d.y1 - d.y0;
+               
+                if (thiswidth > parentwidth || d.x0 > d.parent.x0 + parentwidth || 
+                    d.y0 + 35 > d.parent.y0 + parentheight || sibling.style.display === 'none') return "none";
+                return "block";
+            })
+        )
+
+
+    // Add title for the 3 groups
+    svg.selectAll("titles")
+        .data(root.descendants().filter(function(d){return d.depth==1}))
+        .enter()
+        .append("text")
+        .attr("x", function(d){ return d.x0})
+        .attr("y", function(d){ return d.y0+21})
+        .text(function(d){ return d.data.name })
+        .attr("font-size", "19px")
+        .attr("fill",  function(d){ return color(d.data.name)} )
+    })
+</script>
+
+
+</html>

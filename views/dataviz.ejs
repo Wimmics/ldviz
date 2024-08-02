@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LDViz</title>
+
+    <%- include("partials/libs") %>
+
+    <link rel="stylesheet" type="text/css" href="/ldviz/css/common.css" />
+    <link rel="stylesheet" type="text/css" href="/ldviz/css/query.css" />
+
+    <script src="/ldviz/js/dataviz.js"></script>
+    <script src="/ldviz/js/visForm.js"></script>
+    <script src="/ldviz/js/DatavizCatalogue.js"></script>
+    <script src="/ldviz/js/utils.js"></script>   
+    
+    <script src='/ldviz/js/query.js'></script>
+    <script src='/ldviz/js/editor.js'></script>
+    <script src='/ldviz/js/results.js'></script>
+    <script src='/ldviz/js/query_table.js'></script>
+    <script src='/ldviz/js/ldviz.js'></script>
+    <script src='/ldviz/js/login.js'></script>
+    
+</head>
+
+<body >
+    <%- include("partials/header") %>
+    <div class="page-content">
+        <div class="inner">
+         
+            <div class="content">
+
+                <section id="section1">
+                    <div class="row">
+                        <h2>Visualization Tools</h2>
+                        <label style="margin-left: 74%;">
+                            <button class="btn btn-primary" id="collapseVisButton" type="button" data-toggle="collapse" data-target="#collapseVisForm" aria-expanded="false" aria-controls="collapseVisForm">Register new visualization</button>
+                        </label>
+                    </div>
+                    <hr>
+
+                    <div class="row" style="gap: 10px;" id="viz-container">
+                        <!--  Listing of existing visualizations -->
+                    </div>
+
+                    <!-- Form to register a new visualization -->
+                    <div class="form-group" style="margin-top: 20px;" >
+
+                        
+
+                        <div class="collapse" id="collapseVisForm">
+                            <hr>
+                            <h3>Visualization Tool Registration Form</h3>
+                            
+                            <div class="card card-body" style="background-color: #ddd;">
+                               
+                                <form id="vis-registration-form" class="needs-validation">
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input id="viz-name" name="viz-name" class="form-control" placeholder="Give a name to the visualization tool" required/>
+                                        <div class="invalid-feedback">Please provide a name.</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea id="viz-desc" name="viz-desc" class="form-control" placeholder="Give a description to the visualization tool" ></textarea>
+                                    </div>
+
+                                    
+
+                                    <div class="mb-3">
+                                        <label for="formFile" class="form-label">Image</label>
+                                        <input class="form-control" type="file" id="viz-image" placeholder="Provide an illustrative image of your visualization tool">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>URL</label>
+                                        <input id="viz-url" name="viz-url" class="form-control" placeholder="The address of the visualization tool" required/>
+                                        <div class="invalid-feedback">Please provide a url.</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="dropdown">
+                                            <button class="btn btn-light dropdown-toggle" type="button" aria-haspopup="true"
+                                                id="queryParametersDropdownButton" data-toggle="dropdown" aria-expanded="false">
+                                                URL Parameters <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="What query parameters are necessary to launch the visualization (e.g. sparql query, endpoint)?"></i>   </button>
+                                                
+                                            <div class="dropdown-menu" aria-labelledby="queryParametersDropdownButton" id="query-param-list">
+                                                <!-- Dropdown items will be populated dynamically -->
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+
+                                    
+
+                                    <div class="form-group" id="queryParameters">
+                                        <!-- Entered values will be dynamically displayed here -->
+                                    </div>
+
+                    
+
+                                    <div class="form-group" >
+                                        <p id="url-preview"></p>
+                                        <!-- A preview of the url will be dynamically displayed here -->
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="tune-url" id="tune-url">
+                                            <label class="form-check-label" for="tune-url">Tune URL to launch visualization</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>API Route to Publish Queries </label>
+                                        <input class="form-control" name="api-route" id="api-route"  placeholder="Enter your API route here"/>
+                                    </div>
+
+                                    <hr>
+                                    <h3>About the SPARQL Query</h3>
+
+                                    <label>Variables <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="What variables should the user provide to the visualization?"></i></label>
+
+                                    <div class="card" style="padding: 10px;" id="query-variables-form">
+                                        
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" class="form-control" id="variable-name" name="variable-name" placeholder="?variableName" >
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <textarea type="text" class="form-control" id="variable-desc" name="variable-desc" style="min-height: 200px;" placeholder="Description of variable (what does it mean in the visualization?)" ></textarea>
+                                            
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="mandatory" id="mandatory-variable">
+                                                <label class="form-check-label" for="mandatory-variable">Mandatory</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-primary" id="add-variable-button">Add</button>
+                                        </div>
+
+                                        <div class="form-group" id="queryVariables">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th scope="col">Name</th>
+                                                        <th scope="col">Description</th>
+                                                        <th scope="col">Mandatory</th>
+                                                        <th scope="col"></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody id="tbody-variables">
+                                                        <tr id="table-placeholder">
+                                                            <td colspan="4" style="text-align: center;" >New variables will be displayed here</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <label>Query Template </label>
+                                        <textarea id="viz-query-template" name="viz-query-template" class="form-control"></textarea>
+                                    </div>
+
+                                    <hr>
+
+                                    <h3>Custom Visual Mapping 
+                                        <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="If the visualization supports a custom stylesheet, please provide a template and an explanation on its usage."></i>
+                                    </h3>
+
+                                    <div class="form-group">
+                                        <label>Template</label>
+                                        <textarea id="viz-stylesheet-template" name="viz-stylesheet-template" class="form-control" style="min-height: 200px;"></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Usage</label>
+                                        <textarea id="viz-stylesheet-doc" name="viz-stylesheet-doc" class="form-control" style="min-height: 200px;"></textarea>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="form-row" style="gap: 10px;">
+                                        <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" id="save-server">Submit</button>
+                                    </div>
+                                </form>
+                            </div> 
+                        </div>
+
+                    </div>
+                </section>
+                
+            </div>
+        </body>
+        </html>
+        
+        </div>
+    </div>
+
+<%- include("partials/footer") %>
+    
+</body>
+
+<script>
+    window.addEventListener('load', function() {
+        
+        document.querySelector("#dataviz").classList.add('active')
+
+        $(function () { 
+            $('[data-toggle="tooltip"]').tooltip() 
+        })
+        
+        let locals = <%- JSON.stringify(locals) %>;
+        LDViz.init(locals)
+
+        let catalogue = new DatavizCatalogue(locals)
+        catalogue.set()
+
+        
+    })
+</script>
+
+
+</html>

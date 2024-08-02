@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        
+        <%- include("partials/libs") %>
+
+         <!-- ldviz css -->
+         <link rel="stylesheet" type="text/css" href="/ldviz/css/common.css" />
+         <link rel="stylesheet" type="text/css" href="/ldviz/css/query.css" />
+         <link rel="stylesheet" type="text/css" href="/ldviz/css/spinner.css" />
+
+        <!-- ldviz js -->
+        <script src='/ldviz/js/utils.js'></script>
+        <script src='/ldviz/js/query.js'></script>
+        <script src='/ldviz/js/editor.js'></script>
+        <script src='/ldviz/js/results.js'></script>
+        <script src='/ldviz/js/query_table.js'></script>
+        <script src='/ldviz/js/ldviz.js'></script>
+        <script src='/ldviz/js/login.js'></script>
+        <script src="/ldviz/js/dataviz.js"></script>
+        <script src="/ldviz/js/visForm.js"></script>
+
+
+        <script src="/ldviz/js/tests.js"></script>
+
+        <title>LDViz</title>
+    </head>
+
+    <body>
+        <%- include("partials/header") %>
+
+        <div class="page-content">
+            <div id="query_listDiv" style="display:none;">
+                <div class="content">
+            
+                    <!-- new query button -->
+                    <div class="queries-control-panel"> 
+                        <div id="filters-form">
+                            <form name='filter_form' id='filter_form'>
+
+                                <div class="form-group">
+                                    <label>Filter queries by</label>
+                                    <div class="form-row" style="gap: 10px;">
+                                        <div class="dropdown">
+                                            <button class="btn btn-light dropdown-toggle filter-button" type="button"
+                                                id="filterEndpointsDropdownButton" data-toggle="dropdown" aria-expanded="false">SPARQL Endpoint</button>
+                                            <ul class="dropdown-menu" aria-labelledby="filterEndpointsDropdownButton" id="filter-endpoints">
+                                                <!-- Dropdown items will be populated dynamically -->
+                                            </ul>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light dropdown-toggle filter-button" type="button"
+                                                id="filterDatavizDropdownButton" data-toggle="dropdown" aria-expanded="false">Visualization Tool</button>
+                                            <ul class="dropdown-menu" aria-labelledby="filterDatavizDropdownButton" id="filter-dataviz">
+                                                <!-- Dropdown items will be populated dynamically -->
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+
+                                <div id="selectedFiltersSection" style="display: none;">
+                                    <div class="form-group" >
+                                        <label>Selected filters</label>
+                                        <div class="form-row" id="selectedFilters" >
+                                            <!-- Entered values will be dynamically displayed here -->
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="form-group">
+                                        <label>Search for</label>
+                                        <input id='filter-name' name='filter_name' type="text" class="form-control" placeholder="Type the query name here..."></input>
+                                    </div>
+                                </div>   
+                            </form>
+                        </div>
+                        
+                    </div>
+                    <hr>
+                    <!-- list of queries (filled later) -->
+                    <div id="queries-list" style="overflow-y: scroll; overflow-x: hidden;"> 
+                        <ul id="queries-ul"></ul>
+                        <div style="left: 35%; text-anchor: middle; position: relative;" id="empty-queries-list">Please select a SPARQL endpoint or a Visualization Tool to start.</div>
+                    </div>
+                    <hr>
+                    <button type="button" class="btn btn-primary newQueryButton" >New Query</button>
+                </div>
+            </div>
+            
+            <!-- editor space -->
+            <div id="tab" class="collapsibleContent">
+                <div class="content">
+                    <form name='query_form' id='query_form'>
+
+                        <!-- query parameters -->
+                        <div class="form-group">
+                            <label>Query title</label>
+                            <input id="form_queryTitle" class="form-control query-input" type="text" name="query_name" placeholder="Description of your query" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>SPARQL endpoint</label>
+                            <input id="form_sparqlEndpoint" class="form-control query-input" type="text" name="query_endpoint" placeholder="The address of your SPARQL endpoint" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Visualization tool</label>
+                            <select id='data_vis' class="form-control"  name='data_vis'></select>
+                        </div>
+
+                        
+
+                        <hr>
+
+                        <h3>Custom query variables 
+                                <i class="fas fa-info-circle query-icon" data-toggle="tooltip" data-placement="top" title="To use the custom variables below, include the corresponding metavariable in your query. It will be further replaced dynamically by the value entered here."></i>
+                        </h3>
+
+                        <div class="form-group">
+                            <label>Time period (in years)</label>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                  <label>From <i class="far fa-copy clipboard query-icon" id="$beginYear" data-toggle="tooltip" data-placement="top" title="Copy $beginYear to clipboard" ></i></label> 
+                                  <select id='select_from_year' class="form-control time-select" name='from_year' ></select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                  <label>To <i class="far fa-copy clipboard query-icon" id="$endYear" data-toggle="tooltip" data-placement="top" title="Copy $endYear to clipboard"></i></label>
+                                  <select id='select_to_year' class="form-control time-select"  name='to_year'></select>
+                                </div>
+                              </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Country <i class="far fa-copy clipboard query-icon" id="$country" data-toggle="tooltip" data-placement="top" title="Copy $country to clipboard"></i></label>
+                            <select id="select_country" class="form-control" name="query_country"  ></select>        
+                        </div>
+
+                        <div class="form-group">
+                            <label>Institutions (Temporary Solution)</label>
+                            <div class="form-row">
+                                <div class="col-md-4 mb-2">
+                                    <label>Institution #1 <i class="far fa-copy clipboard query-icon" id="$lab1" data-toggle="tooltip" data-placement="top" title="Copy $lab1 to clipboard"></i></label>
+                                    <select id="select_lab1" class="form-control" name="query_lab1"  ></select>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label>Institution #2 <i class="far fa-copy clipboard query-icon" id="$lab2" data-toggle="tooltip" data-placement="top" title="Copy $lab2 to clipboard"></i></label>
+                                    <select id="select_lab2" class="form-control" name="query_lab2"  ></select>
+                                </div>
+                            </div>
+                                   
+                        </div>
+
+                        <div class="form-group">
+                            <label>Values <i class="far fa-copy clipboard query-icon" id="$values" data-toggle="tooltip" data-placement="top" title="Copy $values to clipboard"></i></label>
+                            <div class="form-row">
+                                <div class="col-md-4 mb-2">
+                                    <input class="form-control query-input" id="input_value" >
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <button type="button" class="btn btn-primary" id="add-value-button">Add</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row" id="selectedValues">
+                                <!-- Entered values will be dynamically displayed here -->
+                            </div>
+                        </div>
+
+                        <hr>
+                        
+                        <h3>SPARQL query</h3>
+                        
+                        <!-- text area to type the query -->
+                        <div class="form-group" >
+                            <textarea id="form_sparqlQuery"  rows="30" cols="120" name="query_content"
+                                style="overflow-y: scroll; font-family: sans-serif;font-size:16px;"></textarea> 
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <div class="form-row">
+                                <button type="button" class="btn btn-primary" id="preview-results">Run query</button>
+                                <div id="loading-results" style="display: none; margin-left: 10px;">
+                                    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                                </div>
+                                <button type="button" class="btn btn-secondary" id="hide-results" style="display: none; margin-left: 10px;">Hide Results</button>
+                            </div>
+                            
+                            <div style="position: relative; top: 10px; display: none; height: 500px; overflow-y: scroll; width: 100%; background-color: white;" id="query-results">
+                                <pre id="json-renderer" ></pre>
+                                <div id="html-renderer"></div>
+                            </div>
+                            
+                        </div>
+
+                        <hr>
+
+                        <div id="stylesheetContainer" style="display: none;">
+                            <h3>Stylesheet  <i class="fas fa-info-circle"></i></h3> 
+                
+                            <div class="form-group">  
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="withStylesheet">
+                                    <label class="form-check-label">Apply stylesheet to the visualization</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <textarea rows="30" cols="100" id="stylesheet" name="stylesheet"
+                                    style="overflow-y: scroll; font-family: sans-serif;font-size:16px;" class="stylesheet" ></textarea>
+                            </div>
+
+                            <hr>
+                        </div>
+                        
+                        <!-- buttons for visualizing and exporting query results -->
+                        <section>
+                            
+                            <div class='query_buttons'>
+                                <button type='button' class="btn btn-secondary" id='preview_button'>Open Visualization</button>
+                                <button type="button" class="btn btn-secondary" id="export-results">Export Query Results</button>
+                                <button type="button" class="btn btn-secondary" id="export_sparqlquery">Export Query</button>
+                                <button type="button" class="btn btn-danger edit_button" id='cancel_button'>Close</button>
+                                <button type="button" class="btn btn-primary edit_button"  id='save_button'>Save and Close</button>
+                            </div>
+                        </section>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+
+        <%- include("partials/footer") %>
+    </body>
+
+</html>
+<script>
+
+    window.addEventListener('load', function() {
+        $(function () { $('[data-toggle="tooltip"]').tooltip() })
+
+        document.querySelector("#editor").classList.add('active')
+
+        let locals = <%- JSON.stringify(locals) %>;
+        LDViz.init(locals)
+        LDViz.displayEditor()
+    })
+
+</script>

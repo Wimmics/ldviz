@@ -1,42 +1,3 @@
-dist/
-www/
-loader/
-data/cache/**
-data/apps/**
-
-data/users.json
-data/queries.json
-data/url_test.txt
-
-data/annotations/**
-data/history/**
-
-
-*~
-*.sw[mnpcod]
-*.log
-*.lock
-*.tmp
-*.tmp.*
-log.txt
-*.sublime-project
-*.sublime-workspace
-
-.stencil/
-.idea/
-.vscode/
-.sass-cache/
-.versions/
-$RECYCLE.BIN/
-
-/build/
-/scripts/build/
-
-.DS_Store
-Thumbs.db
-UserInterfaceState.xcuserstate
-.env
-
 # Logs
 logs
 *.log
@@ -168,4 +129,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-package-lock.json
+# Ignore sensitive data
+data/users.json
+data/queries.json
+data/dataviz.json
