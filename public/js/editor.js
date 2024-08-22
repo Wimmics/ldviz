@@ -236,7 +236,7 @@ class Editor{
      */
     async editQuery(data) { 
 
-        if (confirm('Are you sure you want to SAVE your changes?')) {
+        //if (confirm('Are you sure you want to SAVE your changes?')) {
             let values = {}
             values = await this.getQueryData()
             values.isPublished = data.isPublished;
@@ -246,7 +246,7 @@ class Editor{
             values.id = data.id || data;
 
             this.queryTools.editOnServer(values)
-        }
+        //}
     }
 
     addValue() {

@@ -43,39 +43,26 @@
                                 <div class="form-group">
                                     <label>Filter queries by</label>
                                     <div class="form-row" style="gap: 10px;">
-                                        <div class="dropdown">
-                                            <button class="btn btn-light dropdown-toggle filter-button" type="button"
-                                                id="filterEndpointsDropdownButton" data-toggle="dropdown" aria-expanded="false">SPARQL Endpoint</button>
-                                            <ul class="dropdown-menu" aria-labelledby="filterEndpointsDropdownButton" id="filter-endpoints">
-                                                <!-- Dropdown items will be populated dynamically -->
-                                            </ul>
+                                        <div class="col">
+                                            <input id="input-endpoint" list="endpoint-datalist" name="input-endpoint" placeholder="Select an endpoint" class="form-control"></input>
+                                            <datalist id="endpoint-datalist"></datalist>
                                         </div>
-                                        <div class="dropdown">
-                                            <button class="btn btn-light dropdown-toggle filter-button" type="button"
-                                                id="filterDatavizDropdownButton" data-toggle="dropdown" aria-expanded="false">Visualization Tool</button>
-                                            <ul class="dropdown-menu" aria-labelledby="filterDatavizDropdownButton" id="filter-dataviz">
-                                                <!-- Dropdown items will be populated dynamically -->
-                                            </ul>
+
+                                        <div class="col">
+                                            <input id="input-dataviz" list="dataviz-datalist" name="input-dataviz" placeholder="Select a dataviz" class="form-control"></input>
+                                            <datalist id="dataviz-datalist"></datalist>
                                         </div>
+                                        <div class="col form-inline" style="gap: 10px;">
+                                            <label>Search for</label>
+                                            <input id='filter-name' name='filter_name' type="text" class="form-control" placeholder="Type the query name here..."></input>
+                                            <button type="button"  class="btn btn-secondary form-control" id="clear-filters">Clear filters</button>
+                                        </div>
+                                        
                                     </div>
                                     
                                 </div>
 
-                                <div id="selectedFiltersSection" style="display: none;">
-                                    <div class="form-group" >
-                                        <label>Selected filters</label>
-                                        <div class="form-row" id="selectedFilters" >
-                                            <!-- Entered values will be dynamically displayed here -->
-                                        </div>
-                                    </div>
-
-                                    <hr>
-
-                                    <div class="form-group">
-                                        <label>Search for</label>
-                                        <input id='filter-name' name='filter_name' type="text" class="form-control" placeholder="Type the query name here..."></input>
-                                    </div>
-                                </div>   
+                                
                             </form>
                         </div>
                         

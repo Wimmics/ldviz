@@ -119,6 +119,23 @@ class Query{
         return response
     }
 
+    saveQuery(data, route) {
+        // Send request
+        let response = fetch(route || this.routes.save, {
+            method:'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        }).then(response => {
+            if (route) return true
+            else location.href = this.pages.home
+        }).catch(error => {
+            // console.log(error);
+            alert(error)
+        })
+
+        return response
+    }
+
     /**
      * Deletes a query from the query list
      * Asks for the user confirmation before sending the request
@@ -146,22 +163,7 @@ class Query{
         }
     }
 
-    saveQuery(data, route) {
-        // Send request
-        let response = fetch(route || this.routes.save, {
-            method:'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        }).then(response => {
-            if (route) return true
-            else location.href = this.pages.home
-        }).catch(error => {
-            // console.log(error);
-            alert(error)
-        })
-
-        return response
-    }
+ 
 
 
     async prepare(query) {

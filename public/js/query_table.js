@@ -3,12 +3,12 @@ class QueryTable{
         this.queriesList = queries;
         this.existingQuery = existingQuery;
         this.dataviz = dataviz
-        this.filters = []
+        this.filters = {}
 
         this.queryTools = new Query()
     }
 
-    set() {
+    async set() {
         this.queryIcons = [{'label': (d) => {
           if (d.dataviz) {
             let obj = this.getDatavizObj(d.dataviz)
@@ -44,10 +44,11 @@ class QueryTable{
         ]
 
         const _this = this
-        document.querySelector("#filter-name").addEventListener("input", function() { _this.setQueryList(this.value) })
+       
 
-        this.restoreFilters()
-        this.setFilters()
+        await this.setFilters()
+        await this.restoreFilters()
+        this.setQueryList()
     }
 
 
@@ -86,7 +87,6 @@ class QueryTable{
             let data = { ...d }
             data[attribute] = value
           
-            console.log("data = ", data)
             let res = await this.queryTools.saveQuery(data, dataviz.getPublishRoute())
             
             if (!res) return
@@ -111,18 +111,23 @@ class QueryTable{
     /// --------------------------------------------------
     // methods to manage the visual aspect of the table
 
-    setQueryList(search){
+    setQueryList(){
         
-        let filterValues = this.filters.map(d => d.value)
-        let displayedQueries = this.queriesList.filter(d => filterValues.includes(d.endpoint) || filterValues.includes(d.dataviz))
-
-        if (search) {
-            displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(search))
-        } else {
-            search = document.getElementById('filter-name').value
-            if (search.length) 
-                displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(search))
+        //let filterValues = this.filters.map(d => d.value)
+        //let displayedQueries = this.queriesList.filter(d => filterValues.includes(d.endpoint) && filterValues.includes(d.dataviz))
+        let displayedQueries = this.queriesList.filter(d => d.endpoint.length) // in case there are empty endpoints
+        console.log(displayedQueries)
+        if (this.filters.endpoint) {
+            displayedQueries = displayedQueries.filter(d => d.endpoint === this.filters.endpoint)
+        } 
+        if (this.filters.dataviz) {
+            displayedQueries = displayedQueries.filter(d => d.dataviz === this.filters.dataviz)
         }
+
+
+        if (this.filters.search) {
+            displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(this.filters.search))
+        } 
 
         const div = d3.select('div#queries-list')
             .style('height', displayedQueries.length == 0 ? '20px' : '260px')
@@ -200,85 +205,93 @@ class QueryTable{
             .attrs(attrs)
     }
 
-    saveFilters() {
-        window.sessionStorage.setItem('filters', JSON.stringify(this.filters))
-    }
+    
 
     getDatavizObj(id) {
         return new DataViz(this.dataviz.find(d => d.id.toString() === id))
     }
 
-    setFilters(){
-        let endpoints = this.queriesList.map(d => d.endpoint)
-        endpoints = endpoints.filter((d,i) => endpoints.indexOf(d) === i)
-        endpoints = endpoints.map(d => ({ value: d, label: d }))
+    async setFilters(){
+        const _this = this;
 
-        this.setSelect('#filter-endpoints', endpoints)
+        let endpoints = this.queriesList.map(d => d.endpoint)
+
+        endpoints = endpoints.filter((d,i) => endpoints.indexOf(d) === i && d.length)
+        endpoints = endpoints.map(d => ({ filter: 'endpoint', value: d, label: d, comparable: d.split('//')[1] }))
+        endpoints = endpoints.sort( (a,b) => a.comparable.localeCompare(b.comparable) )
+
+        this.setSelect('endpoint', endpoints)
 
         let dataviz = this.queriesList.map(d => d.dataviz)
         dataviz = dataviz.filter((d,i) => d && dataviz.indexOf(d) === i)
-        dataviz = dataviz.map(d => ( { value: d, label: this.getDatavizObj(d).getName() } ))
+        dataviz = dataviz.map(d => ( { filter: 'dataviz', value: d, label: this.getDatavizObj(d).getName() } ))
 
-        this.setSelect("#filter-dataviz", dataviz)
+        this.setSelect("dataviz", dataviz)
+
+        document.querySelector("#filter-name").addEventListener("input", function() { 
+            _this.filters.search = this.value
+            _this.saveFilters()
+            _this.setQueryList() 
+        })
+
+        document.querySelector("#clear-filters").addEventListener('click', () => this.clearFilters())
     }
 
     setSelect(selector, data) {
-        d3.select(selector)
-            .selectAll('li')
+        const _this = this
+
+        d3.select(`#${selector}-datalist`)
+            .selectAll('option')
             .data(data)
             .enter()
-                .append('li')
+                .append('option')
                 .style('cursor', 'pointer')
                 .text(d => d.label)
-                .on('click', d => this.addFilter(d))
+                .property('selected', d => this.filters[d.filter] ? d.value === this.filters[d.filter] : false)
+                
+                
+        d3.select(`#input-${selector}`).on('input', function(d) { // TODO: continue from here
+            let value = this.value
+
+            let selectedData = data.find(d => d.label === value)
+            if (!selectedData) 
+                _this.filters[selector] = null
+            else 
+                _this.filters[selector] = selectedData.value
+            
+            _this.saveFilters() // save to local storage
+            _this.setQueryList() // refresh queries list
+        })
     }  
 
-    addFilter(data) {
-        const _this = this;
+    async restoreFilters() {
+        console.log(window.sessionStorage)
+        this.filters = window.sessionStorage.filters ? JSON.parse(window.sessionStorage.filters) : {}
 
-        document.querySelector("#selectedFiltersSection").style.display = "block" // display the appropriate section
+        if (this.filters.endpoint)
+            document.querySelector('#input-endpoint').value = this.filters.endpoint
+    
+        if (this.filters.dataviz)
+            document.querySelector('#input-dataviz').value = this.getDatavizObj(this.filters.dataviz).getName()
 
-        let valuesContainer = document.querySelector("#selectedFilters")
-
-        const valueElement = document.createElement('div')
-        valueElement.classList.add('selected-filter')
-        valueElement.classList.add("selected")
-        
-        valueElement.innerHTML = `${data.label} 
-            <i class="fas fa-times query-icon" data-toggle="tooltip" data-placement="top" title="Delete" style="margin-left:5px;"></i>`
-
-        valueElement.querySelector('.fa-times').addEventListener('click', function() { 
-            _this.removeFilter(data)
-            this.parentNode.remove()
-            document.querySelector('.tooltip').remove()
-        })
-
-        valuesContainer.appendChild(valueElement)
-
-        this.filters.push(data)
-
-        this.saveFilters()
-        this.setQueryList()
-
-        // activate the tooltips
-        $(function () { $('[data-toggle="tooltip"]').tooltip() })
+        if (this.filters.search)
+            document.querySelector('#filter-name').value = this.filters.search
         
     }
 
-    removeFilter(value) {
-        this.filters = this.filters.filter(d => d !== value)
+    saveFilters() {
+        window.sessionStorage.setItem('filters', JSON.stringify(this.filters))
+    }
+
+    clearFilters() {
+        Object.keys(this.filters).forEach(key => this.filters[key] = null)
+        
+        document.querySelector("#input-endpoint").value = null
+        document.querySelector("#input-dataviz").value = null
+        document.querySelector("#filter-name").value = null
 
         this.saveFilters()
         this.setQueryList()
-
-        if (!this.filters.length)
-            document.querySelector("#selectedFiltersSection").style.display = 'none'
-    }
-
-    restoreFilters() {
-        let savedFilters = window.sessionStorage.filters ? JSON.parse(window.sessionStorage.filters) : null
-
-        if (savedFilters) savedFilters.forEach(d => this.addFilter(d))
     }
 
     // ----------------------------------------------
