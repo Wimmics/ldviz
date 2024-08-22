@@ -182,13 +182,29 @@ app.post(prefix + '/upload', (req, res) => {
     res.sendStatus(200);
 });
 
-// Save new data on disk (e.g. query, viz)
-app.post(prefix + '/writedata/:file', async function (req, res) {
+/**
+ * Manages queries or dataviz on disk
+ * @param action The action to be performed : "add" new data, "edit" existing data, or "delete" a data record
+ * @param file The json file to be modified: queries or dataviz
+ */
+app.post(prefix + '/:action/:file', async function (req, res) {
    
-    let response = await data.addToFile(req.body, req.params.file)
-    
+    console.log(req.params.action, req.params.file)
+    let response;
+    switch(req.params.action) {
+        case 'add':
+            response = await data.addToFile(req.body, req.params.file)
+            break;
+        case 'edit':
+            response = await data.update(req.body, req.params.file)
+            break;
+        case 'delete':
+            response = await data.delete(req.body.id, req.params.file)
+            break;
+    }
+
     if (response && response.message) {
-        res.sendStatus(500)
+        res.sendStatus(response.code)
         return;
     }
     res.sendStatus(200);
@@ -199,31 +215,31 @@ app.post(prefix + '/writedata/:file', async function (req, res) {
  * Find the edited query and REPLACE it in the file of query list
  * If the query is published, find the edited query and REPLACE it in the file of PUBLISHED query list
  **/
-app.post(prefix + '/editdata/:file', async function (req, res) { 
+// app.post(prefix + '/editdata/:file', async function (req, res) { 
 
-    let response = await data.update(req.body, req.params.file)
+//     let response = await data.update(req.body, req.params.file)
 
-    if (response && response.message) {
-        res.sendStatus(response.code)
-        return;
-    }
-    res.sendStatus(200);
-})
+//     if (response && response.message) {
+//         res.sendStatus(response.code)
+//         return;
+//     }
+//     res.sendStatus(200);
+// })
 
 /**
  * Delete an existing query 
  * Find the query and DELETE it from the file of query list
  **/
-app.post(prefix + '/delete/:file', async function (req, res) {
-    let response = await data.delete(req.body.id, req.params.file)
+// app.post(prefix + '/delete/:file', async function (req, res) {
+//     let response = await data.delete(req.body.id, req.params.file)
 
-    if (response && response.message) {
-        res.sendStatus(response.code)
-        return;
-    }
+//     if (response && response.message) {
+//         res.sendStatus(response.code)
+//         return;
+//     }
 
-    res.sendStatus(200);
-})
+//     res.sendStatus(200);
+// })
 
 // SPARQL request
 app.post(prefix + '/sparql', async function (req, res) {

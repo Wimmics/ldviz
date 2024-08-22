@@ -5,7 +5,6 @@ class Auth {
         this.loginPage = '/ldviz/login'
         this.logoutRoute = '/ldviz/logout'
 
-        // document.querySelector("#login").addEventListener("click", () => this.login())
     }
 
     setUser(user) {

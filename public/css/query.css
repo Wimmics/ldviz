@@ -269,11 +269,7 @@ i {
 
 .query_buttons{
     display: flex;
-    justify-content: space-between;
-    gap: 5px;
-    pad: 2px;
-    width: 50%;
-    left: 50%;
+    gap: 10px;
     position: relative;
 }
 

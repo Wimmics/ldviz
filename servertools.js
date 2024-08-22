@@ -104,12 +104,9 @@ class Data{
         const index = json.queries.findIndex(d => d.id === data.id)
 
         if (index > -1) {
-            if (data.editType === 'content') {
-                delete data.editType;
-                json.queries.splice(index, 1, data); 
-            } else json.queries[index][data.editType] = data[data.editType];  // publish and locked attributes
+            json.queries.splice(index, 1, data); 
         } else {
-            return { message: "No query with id " + data.id + " found", code: 404}
+            return { message: "The query " + data.name + " could not be updated.", code: 404}
         }
 
         let filename = path.join(__dirname, this.filename[file])

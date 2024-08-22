@@ -6,9 +6,9 @@ class LDViz{
 
         this.locals = locals
 
-        this.queryTable = new QueryTable(locals.queries, locals.existingQuery, locals.dataviz)
-        this.query = new Query(locals.queryParams, locals.params)
-        this.editor = new Editor(locals.stylesheet, locals.params, locals.existingQuery, locals.dataviz)
+        // this.queryTable = new QueryTable(locals.queries, locals.existingQuery, locals.dataviz)
+        //this.queryTools = new Query(locals.queryParams, locals.params)
+        this.editor = new Editor(locals.stylesheet, locals.params, locals.existingQuery, locals.dataviz, locals.queries)
         
         this.auth = new Auth(locals.user)
         this.auth.setLoginButton()
@@ -41,9 +41,29 @@ class LDViz{
                 this.auth.login('editor', this.action, this.queryTable.existingQuery)
         } 
         
-        document.getElementById('query_listDiv').style.display = 'block';
         
-        this.queryTable.set()
+        
+        // this.queryTable.set()
+    }
+
+    static displayNotification(content) {
+
+        let toast = document.createElement('div')
+        toast.innerHTML = `<div class="toast notification" role="alert" aria-live="assertive" aria-atomic="true">
+                <div>${content}</div>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>`
+
+        toast.querySelector("button").addEventListener('click', function() {
+            this.parentNode.remove()
+        })
+
+        setTimeout(() => toast.remove(), 10000)
+
+        let container = document.querySelector("#notification-container")
+        container.appendChild(toast)    
     }
 
 }

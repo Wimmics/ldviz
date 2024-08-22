@@ -1,16 +1,19 @@
 class Editor{
-    constructor(gss, params, query, dataviz) {
+    constructor(gss, params, query, dataviz, queries) {
         this.gss = gss // default stylesheet (for new queries)
         this.params = params // default values for the query fields, such as institution
         this.query = query // existing query, when on mode edit, view or clone
         this.dataviz = dataviz // list of visualization tools registered in the application (server side)
+        this.queriesList = queries; // list of queries registered in the application (server side)
 
         this.queryTools = new Query()
         this.results = new Results()
 
+        this.filters = {}
+
     }
 
-    set() {
+    async set() {
         const _this = this;
 
         // Syntax highlight on the textareas using CodeMirror
@@ -25,6 +28,7 @@ class Editor{
         this.setSelect("#data_vis", this.dataviz)
         this.setTimePeriodsList()
 
+        document.getElementById('query_listDiv').style.display = 'block'; // list of queries
 
         document.querySelector("#preview_button").addEventListener('click', () => this.openVisualization())
         document.querySelector("#preview-results").addEventListener("click", () => this.displayResults())
@@ -36,61 +40,226 @@ class Editor{
         document.querySelector(".newQueryButton").addEventListener("click", () => this.queryTools.newQuery())
 
         d3.selectAll(".clipboard").on('click', function() { copyToClipboard(this.id) })
+
+        this.queryIcons = [{'label': (d) => {
+            if (d.dataviz) {
+              let obj = this.getDatavizObj(d.dataviz)
+              return `Visualize results with ${obj.name}`
+            }  
+            return `No Visualization Associated`
+          }, 'class': 'far fa-play-circle', 'value': 'visualize', 
+              'action': d => this.visualizeQueryResults(d) },
+  
+              {'label': 'View Query', 'class': 'far fa-file-code', 'value': 'view', 
+                  'action': d => this.queryTools.loadPage('view', d), auth: false },
+              
+              {'label': 'Edit Query', 'class': 'far fa-edit', 'value': 'edit',
+                  'action': d => this.queryTools.loadPage('edit', d), auth: true },
+              
+              {'label': 'Clone Query', 'class': 'far fa-clone', 'value': 'clone', 
+                  'action': d => this.queryTools.loadPage('clone', d), auth: true },
+              {'label': (d) => {
+                  if (!d.dataviz) return 'Not Applicable'
+  
+                  let obj = this.getDatavizObj(d.dataviz)
+                  if (obj.getPublishRoute()) 
+                      return `${d.isPublished ? 'Remove from' : 'Publish on'} ${obj.getName()}.`
+                  
+                  return 'Not Applicable'
+              }, 'class':  d => d.isPublished ? 'far fa-eye' : 'far fa-eye-slash', 'value': 'publish',
+                  'action': (d) => this.publishQuery(d, 'isPublished', !d.isPublished), auth: true },
+  
+              {'label': 'Delete Query', 'class': 'far fa-trash-alt', 'value': 'delete',
+                  'action': d => this.deleteQuery(d), auth: true }
+          ]
+  
+          await this.setFilters()
+          await this.restoreFilters()
+          this.setQueryList()
     }
 
-    toggleStylesheet(selectedDataviz) {
-        let dataviz = new DataViz(this.dataviz.find(d => d.id.toString() === selectedDataviz))
+    /// --------------------------------------------------
+    // methods to manage the visual aspect of the table
 
-        if (dataviz.getParamKeys().includes('stylesheet')) { // the visualization supports stylesheet
-            document.querySelector("#stylesheetContainer").style.display = "block" // display before including the data
-            this.jsonCodeMirror.setValue(dataviz.getStylesheetTemplate())
-
-            this.updateFormHeight()
-        } else {
-            document.querySelector("#stylesheetContainer").style.display = "none" // display before including the data
+    setQueryList(){
+        
+        let displayedQueries = this.queriesList.filter(d => d.endpoint.length) // in case there are empty endpoints
+        
+        if (this.filters.endpoint) {
+            displayedQueries = displayedQueries.filter(d => d.endpoint === this.filters.endpoint)
+        } 
+        if (this.filters.dataviz) {
+            displayedQueries = displayedQueries.filter(d => d.dataviz === this.filters.dataviz)
         }
-    }
 
-    async displayResults() {
 
-        let loading = document.querySelector("#loading-results")
-        loading.style.display = "block"
+        if (this.filters.search) {
+            displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(this.filters.search))
+        } 
 
-        let data = await this.getQuery()
-        let response = await this.queryTools.sendRequest(data)
-        let results;
-        try {
-            results = JSON.parse(response)
-            document.querySelector("#query-results").style.display = 'block'
-            document.querySelector("#hide-results").style.display = 'block'
+        const div = d3.select('div#queries-list')
+            .style('height', displayedQueries.length == 0 ? '20px' : '260px')
 
-            this.results.writeResults(results, results[1] === 'html')
-
-            this.updateFormHeight()
-        } catch(e) {
-            console.log("error = ", e)
-            alert(response)
+        if (displayedQueries.length == 0) {
+            div.select('#empty-queries-list').style('display', 'block')
+            div.select('ul#queries-ul').style('display', 'none')
+            return;
         }
 
-        loading.style.display = "none"
-    }
+        div.select('#empty-queries-list').style('display', 'none')
+        
+        const ul = div.select('ul#queries-ul')
+            .style('display', 'block')
+        
+        const itemOnMouseOver = function() { d3.select(this).style('background', '#ccc') }
+        const itemOnMouseOut = function() { d3.select(this).style('background', 'none') }
 
-    toggleResults() {
-        let resultsContainer = document.querySelector("#query-results")
-        let button = document.querySelector("#hide-results")
+        let fontWeight = d => this.existingQuery && this.existingQuery.id === d.id ? 'bold' : 'normal';
 
-        if (resultsContainer.style.display === "block") {
-            resultsContainer.style.display = 'none'
-            button.textContent = 'Show Results'
-        } else {
-            resultsContainer.style.display = 'block'
-            button.textContent = 'Hide Results'
+        ul.selectAll('li')
+            .data(displayedQueries)
+            .join(
+                enter => enter.append('li')
+                    .call(li => li.append('tspan')
+                        .style('display', 'inline-block')
+                        .style('width', '85%')
+                        .style('font-weight', fontWeight)
+                        .text(d => d.name)),
+                update => update.call(li => li.select('tspan')
+                    .text(d => d.name)
+                    .style('font-weight', fontWeight)),
+                exit => exit.remove()
+            )
+            .on('mouseover', itemOnMouseOver)
+            .on('mouseout', itemOnMouseOut)
+
+        const iconClass = function(d){
+            const query = d3.select(this.parentNode).datum()
+            return 'query-icon ' + (typeof d.class === 'string' ? d.class : d.class(query))
         }
+
+        const iconTooltip = function(d) {
+            const query = d3.select(this.parentNode).datum()
+            return typeof d.label === 'string' ? d.label : d.label(query)
+        }
+
+        const iconOnClick = function(d) {
+            const query = d3.select(this.parentNode).datum()
+            if (d.auth && !LDViz.auth.isConnected()) 
+                if ( confirm("Please login before proceeding!") )  {
+                    LDViz.auth.login('editor', d.value, query)
+                    return
+                }
+
+            d.action(query)
+        }
+
+        let attrs = {
+            'class': iconClass,
+            'data-toggle': 'tooltip',
+            'data-placement': 'top',
+            'data-original-title': iconTooltip,
+            'title': iconTooltip
+        }
+
+        ul.selectAll('li').selectAll('i')
+            .data(this.queryIcons)
+            .join(
+                enter => enter.append('i'),
+                update => update,
+                exit => exit.remove()
+            )
+            .on('click', iconOnClick)
+            .attrs(attrs)
     }
 
-    async exportQuery() {
-        let data = await this.getQuery()
-        this.results.exportSparqlQuery(data.query)
+    
+
+    getDatavizObj(id) {
+        return new DataViz(this.dataviz.find(d => d.id.toString() === id))
+    }
+
+    async setFilters(){
+        const _this = this;
+
+        let endpoints = this.queriesList.map(d => d.endpoint)
+
+        endpoints = endpoints.filter((d,i) => endpoints.indexOf(d) === i && d.length)
+        endpoints = endpoints.map(d => ({ filter: 'endpoint', value: d, label: d, comparable: d.split('//')[1] }))
+        endpoints = endpoints.sort( (a,b) => a.comparable.localeCompare(b.comparable) )
+
+        this.setDatalist('endpoint', endpoints)
+
+        let dataviz = this.queriesList.map(d => d.dataviz)
+        dataviz = dataviz.filter((d,i) => d && dataviz.indexOf(d) === i)
+        dataviz = dataviz.map(d => ( { filter: 'dataviz', value: d, label: this.getDatavizObj(d).getName() } ))
+
+        this.setDatalist("dataviz", dataviz)
+
+        document.querySelector("#filter-name").addEventListener("input", function() { 
+            _this.filters.search = this.value
+            _this.saveFilters()
+            _this.setQueryList() 
+        })
+
+        document.querySelector("#clear-filters").addEventListener('click', () => this.clearFilters())
+    }
+
+    setDatalist(selector, data) {
+        const _this = this
+
+        d3.select(`#${selector}-datalist`)
+            .selectAll('option')
+            .data(data)
+            .enter()
+                .append('option')
+                .style('cursor', 'pointer')
+                .text(d => d.label)
+                .property('selected', d => this.filters[d.filter] ? d.value === this.filters[d.filter] : false)
+                
+                
+        d3.select(`#input-${selector}`).on('input', function(d) { 
+            let value = this.value
+
+            let selectedData = data.find(d => d.label === value)
+            if (!selectedData) 
+                _this.filters[selector] = null
+            else 
+                _this.filters[selector] = selectedData.value
+            
+            _this.saveFilters() // save to local storage
+            _this.setQueryList() // refresh queries list
+        })
+    }  
+
+    async restoreFilters() {
+        console.log(window.sessionStorage)
+        this.filters = window.sessionStorage.filters ? JSON.parse(window.sessionStorage.filters) : {}
+
+        if (this.filters.endpoint)
+            document.querySelector('#input-endpoint').value = this.filters.endpoint
+    
+        if (this.filters.dataviz)
+            document.querySelector('#input-dataviz').value = this.getDatavizObj(this.filters.dataviz).getName()
+
+        if (this.filters.search)
+            document.querySelector('#filter-name').value = this.filters.search
+        
+    }
+
+    saveFilters() {
+        window.sessionStorage.setItem('filters', JSON.stringify(this.filters))
+    }
+
+    clearFilters() {
+        Object.keys(this.filters).forEach(key => this.filters[key] = null)
+        
+        document.querySelector("#input-endpoint").value = null
+        document.querySelector("#input-dataviz").value = null
+        document.querySelector("#filter-name").value = null
+
+        this.saveFilters()
+        this.setQueryList()
     }
 
     // display the editor window with information regarding the selected query
@@ -207,46 +376,11 @@ class Editor{
         formDiv.style.maxHeight = formDiv.scrollHeight + "px";
     }
 
-    /**
-     * Cancels changes and redirect on the index
-     * Asks for the user confirmation before making the redirection
-     */
-    cancelChanges() {
-        if (confirm("Are you sure that you want to DISCARD all changes?")) {
-            location.href = this.queryTools.loadPage('home')
-        }
-    }
-
-    async saveQuery() {
-
-        // Get form values
-        const values = await this.getQueryData()
-        values.id = new Date().getTime();
-
-        // values.isLocked = true;
-        values.isPublished = false;
-
-        this.queryTools.saveQuery(values)
-    }
-
-    /**
-     * Edit a query in the server
-     * Asks for the user confirmation before making the request (edit published and locked status, or query content)
-     * Redirect to the index when successful
-     */
-    async editQuery(data) { 
-
-        //if (confirm('Are you sure you want to SAVE your changes?')) {
-            let values = {}
-            values = await this.getQueryData()
-            values.isPublished = data.isPublished;
-            values.isLocked = data.isLocked;
-            values.editType = 'content';
-
-            values.id = data.id || data;
-
-            this.queryTools.editOnServer(values)
-        //}
+    
+    
+    getQueryValue(queryId, attribute) {
+        const query = this.queriesList.filter(d => d.id == queryId)[0];
+        return query[attribute]
     }
 
     addValue() {
@@ -296,6 +430,165 @@ class Editor{
 
         this.queryTools.goToVisualization(data, dataviz)
     }
+
+    /**
+     * Cancels changes and redirect on the index
+     * Asks for the user confirmation before making the redirection
+     */
+    cancelChanges() {
+        if (confirm("Are you sure that you want to DISCARD all changes?")) {
+            location.href = this.queryTools.loadPage('home')
+        }
+    }
+
+    async saveQuery() {
+
+        // Get form values
+        const values = await this.getQueryData()
+        values.id = new Date().getTime();
+
+        values.isPublished = false;
+
+        
+        let res = await this.queryTools.sendToServer(values, 'add')
+
+        if (res) {
+            this.queriesList.push(values) // add the new query to the list on the client side
+            this.setQueryList()
+            LDViz.displayNotification(`The query "${values.name}" was registered.`)
+        }
+    }
+
+    /**
+     * Edit a query in the server
+     * Asks for the user confirmation before making the request (edit published and locked status, or query content)
+     * Redirect to the index when successful
+     */
+    async editQuery(data) { 
+
+        let values = {}
+        values = await this.getQueryData()
+        values.isPublished = data.isPublished;
+        values.isLocked = data.isLocked;
+       
+        values.id = data.id
+
+        let res = this.queryTools.sendToServer(values, 'edit')
+        if (res) {
+            let index = this.queriesList.findIndex(d => d.id === values.id)
+            this.queriesList.splice(index, 1, values) // replace the modified query on the client side
+            this.setQueryList() // update the queries list
+            
+            LDViz.displayNotification(`Your modifications to query "${values.name}" were registered.`)
+        }
+    }
+
+    async deleteQuery(data) {
+        if (confirm("Are you sure you want to delete this query? It can still be used in the visualization tool, but further modifications won't be possible.")) {
+            let res = await this.queryTools.sendToServer(data, 'delete')
+            
+            if (res) {
+                this.queriesList = this.queriesList.filter(d => d.id !== data.id)
+                let tooltip = document.querySelector('.tooltip')
+                if (tooltip) tooltip.remove()
+                this.setQueryList()
+                
+                LDViz.displayNotification(`The query "${data.name}" was deleted.`)
+            }
+        }
+    }
+
+    async publishQuery(d, attribute, value) {
+        if (!d.dataviz) return
+
+        let dataviz = this.getDatavizObj(d.dataviz)
+        if (!dataviz.getPublishRoute())
+            return
+
+      
+        let data = { ...d }
+        data[attribute] = value
+        
+        let res = await this.queryTools.sendToServer(data, dataviz.getPublishRoute())
+        
+        if (!res) return
+
+        res = await this.queryTools.sendToServer(data)
+
+        if (!res) return
+
+        this.queriesList.forEach(e => {
+            if (e.id == d.id) {
+                e[attribute] = value;
+            }
+        })
+
+        this.setQueryList()
+    
+    }
+
+    visualizeQueryResults(data) {
+        let dataviz = this.dataviz.find(d => d.id.toString() === data.dataviz)
+
+        this.queryTools.goToVisualization(data, dataviz)
+    }
+
+    toggleStylesheet(selectedDataviz) {
+        let dataviz = new DataViz(this.dataviz.find(d => d.id.toString() === selectedDataviz))
+
+        if (dataviz.getParamKeys().includes('stylesheet')) { // the visualization supports stylesheet
+            document.querySelector("#stylesheetContainer").style.display = "block" // display before including the data
+            this.jsonCodeMirror.setValue(dataviz.getStylesheetTemplate())
+
+            this.updateFormHeight()
+        } else {
+            document.querySelector("#stylesheetContainer").style.display = "none" // display before including the data
+        }
+    }
+
+    async displayResults() {
+
+        let loading = document.querySelector("#loading-results")
+        loading.style.display = "block"
+
+        let data = await this.getQuery()
+        let response = await this.queryTools.sendRequest(data)
+        let results;
+        try {
+            results = JSON.parse(response)
+            document.querySelector("#query-results").style.display = 'block'
+            document.querySelector("#hide-results").style.display = 'block'
+
+            this.results.writeResults(results, results[1] === 'html')
+
+            this.updateFormHeight()
+        } catch(e) {
+            console.log("error = ", e)
+            alert(response)
+        }
+
+        loading.style.display = "none"
+    }
+
+    toggleResults() {
+        let resultsContainer = document.querySelector("#query-results")
+        let button = document.querySelector("#hide-results")
+
+        if (resultsContainer.style.display === "block") {
+            resultsContainer.style.display = 'none'
+            button.textContent = 'Show Results'
+        } else {
+            resultsContainer.style.display = 'block'
+            button.textContent = 'Hide Results'
+        }
+    }
+
+    async exportQuery() {
+        let data = await this.getQuery()
+        this.results.exportSparqlQuery(data.query)
+    }
+
+    //////////////////////////// end of query actions //////////////
 
     async getQuery() {
         let queryData = await this.getQueryData()

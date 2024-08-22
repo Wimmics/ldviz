@@ -1,9 +1,5 @@
 class Query{
     constructor(){
-        // this.params = params
-
-        // this.txtHistory = new window.UndoRedojs(5)
-
 
         this.pages = {
             home: '/ldviz/editor',
@@ -15,9 +11,9 @@ class Query{
         }
 
         this.routes = {
-            delete: '/ldviz/delete/queries',
-            save: "/ldviz/writedata/queries",
-            edit: "/ldviz/editdata/queries",
+            //delete: '/ldviz/delete/queries',
+            save: "/ldviz/:action/queries",
+            //edit: "/ldviz/editdata/queries",
             sparql: "/ldviz/sparql"
         }
 
@@ -100,72 +96,28 @@ class Query{
         window.open(dataviz.getPopulatedUrl())
     }  
 
-    async editOnServer(data) {
-        let response = await fetch(this.routes.edit, {
-            method:'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        }).then(response => {
-            if (data.editType == 'content')
-                location.href = this.pages.home
-            else {
-                //this.updateQueries(data.id, data.editType, data[data.editType])
-                return true
-            }
-        }).catch(error => {
-            alert(error)
-            // console.log(error);
-        })
-        return response
-    }
-
-    saveQuery(data, route) {
+    sendToServer(data, action, route) {
+        
+        let url = route || this.routes.save.replace(/:action/g, action)
+        
         // Send request
-        let response = fetch(route || this.routes.save, {
+        let response = fetch(url, {
             method:'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         }).then(response => {
-            if (route) return true
-            else location.href = this.pages.home
+            if (response.status >= 200 && response.status < 300)
+                return true
+            return response
         }).catch(error => {
             // console.log(error);
             alert(error)
         })
 
         return response
-    }
-
-    /**
-     * Deletes a query from the query list
-     * Asks for the user confirmation before sending the request
-     * Reload the page when successful
-     */
-    deleteQuery(query) {
-        // if (query.isLocked) {
-        //     alert('The query is locked. You cannot delete it!')
-        //     return;
-        // }
-        // else 
-        if (confirm("You are about to delete the query from the list (and the main page if published)!\nDo you want to proceed?")) {
-
-            // Send request
-            fetch(this.routes.delete, {
-                method:'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: query.id })
-            }).then(response => {
-                location.href = this.pages.home
-            }).catch(error => {
-                alert(error)
-                // console.log(error);
-            });
-        }
     }
 
  
-
-
     async prepare(query) {
         query = encodeURIComponent(query);
         query = query.replace(/\%20/g, "+");
