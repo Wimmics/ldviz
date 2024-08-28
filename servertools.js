@@ -168,26 +168,30 @@ class SPARQLRequest{ // not being used for now
         return query;
     }
     
-    async sendRequest(query, uri){
-        let url = uri + "?query=";
-        url = url + this.prepare(query); 
+    async sendRequest(query, endpoint){
+        let url = endpoint + "?query=" + this.prepare(query); 
 
-        return await fetch(url, { 
-            method: 'GET',  
-            headers: { 'Accept': "application/sparql-results+json" } 
-        })
-        
-        // let result = await fetch(url, { method: 'GET', 
-        //     headers: headers
-        // }).then(async function(response){
-         
-        //   if(response.status >= 200 && response.status < 300){
-        //     return await response.text().then(data => {
-        //       return data
-        //   })}
-        //   else return response
-        // })
-        // return result
+        try {
+            let response = await fetch(url, { 
+                method: 'GET',  
+                headers: { 'Accept': "application/sparql-results+json" } 
+            })
+
+            if (response.ok) {
+                try {
+                    return await response.json();
+                } catch (e) {
+                    return { message: "An error occurred while processing the response.\nPlease try again later." }
+                }
+            } else return { message: `Request failed with status: ${response.statusText}.\nPlease try again later.`}
+
+        } catch(error) { // network error
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                return { message: 'Network error: Failed to fetch the resource.\nCheck the browser console for more information.' }
+            } else {
+                return { message: `An error occurred: ${error.message}` }
+            }
+        }
     }
 
 }

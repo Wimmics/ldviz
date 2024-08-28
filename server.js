@@ -219,33 +219,8 @@ app.post(prefix + '/:action/:file', async function (req, res) {
 })
 
 // SPARQL request
-app.post(prefix + '/sparql', async function (req, res) { // not being used for now, querying the endpoint on client side
-    
-    let data = req.body;
-
-    try {
-        let response = await sparql.sendRequest(data.query, data.endpoint)  
-        
-        console.log(response)
-        if (!response.ok) {
-            // Return the fetch error status and statusText to the client
-            res.status(response.status).json({
-              error: response.statusText,
-            })
-        } else {
-            let result = await response.json()
-            // send result back to client
-            res.send(result)
-        }
-        
-    } catch (e) {
-        console.log('error = ', e)
-        // send error back to client
-        res.status(500).json({
-            error: 'Internal Server Error',
-            details: e.message,
-        })
-    }
+app.post(prefix + '/sparql', async function (req, res) { 
+    res.send(await sparql.sendRequest(req.body.query, req.body.endpoint))
 })
 
 

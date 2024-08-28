@@ -24,7 +24,7 @@ class Query{
     * complete SPARQL query with data from HTML form such as year, lab, country
     */
     async tune(data) {
-        console.log("tune() = ", data)
+       
         let params = data.params;
 
         Object.keys(params).forEach(function(p) {
@@ -148,33 +148,21 @@ class Query{
     // **/
     async sendRequest(values) {
         await this.tune(values)
-        
-        let url = values.endpoint + "?query=" + await this.prepare(values.query)
-        let response = await fetch(url, {
-            method: "GET",
-            mode: url.startsWith("https") ? "cors" : "no-cors",
-            //mode: "no-cors", // For testing
-            headers: {
-                "Content-Type": "application/json", 
-                'Accept': "application/sparql-results+json"
-            }
-        })
 
-        if (response.ok) {
-            try {
-                return await response.json();
-            } catch (e) {
-                alert("An error occurred while processing the response.\nPlease try again later.");
-            }
-        } else {
-            if (response.type === 'opaque') {
-                alert("We encountered a problem with the request, but the exact issue could not be identified due to CORS policy restrictions.\nFor more details, please check the browser console.");
-            } else {
-                alert(`Request failed with status: ${response.statusText}.\nPlease try again later.`);
-            }
+        let response = await fetch(this.routes.sparql, {
+                method: 'POST',
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(values)
+            })
+
+        let data = await response.json()
+
+        if (data.message) {
+            alert(data.message)
+            return
         }
-
-        return;
+        
+        return data
     }
 
     displayResults(data) {
