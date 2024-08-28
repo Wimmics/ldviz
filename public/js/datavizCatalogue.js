@@ -150,6 +150,7 @@ class DatavizCatalogue {
             }
 
             // Access restrain, if the person connected does not have the rights to modify the visualizations
+            
             if (await this.auth.isConnected()) {
             
                 const hr = document.createElement("hr")
