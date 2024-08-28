@@ -5,6 +5,8 @@ class DatavizCatalogue {
         this.visForm = new VisRegistration()
 
         this.home = "/ldviz/dataviz"
+
+        this.auth = new Auth()
     }
 
     set() {
@@ -19,7 +21,7 @@ class DatavizCatalogue {
     displayVisualizations() {
         const cardsContainer = document.querySelector("#viz-container")
 
-        this.dataviz.forEach((d,i) => {
+        this.dataviz.forEach(async (d,i) => {
             const dataviz = new DataViz(d)
 
             const card = document.createElement('div')
@@ -148,7 +150,7 @@ class DatavizCatalogue {
             }
 
             // Access restrain, if the person connected does not have the rights to modify the visualizations
-            if (LDViz.auth.isConnected()) {
+            if (await this.auth.isConnected()) {
             
                 const hr = document.createElement("hr")
                 card.appendChild(hr)

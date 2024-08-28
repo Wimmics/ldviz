@@ -24,6 +24,7 @@ class Query{
     * complete SPARQL query with data from HTML form such as year, lab, country
     */
     async tune(data) {
+        console.log("tune() = ", data)
         let params = data.params;
 
         Object.keys(params).forEach(function(p) {
@@ -48,6 +49,15 @@ class Query{
                 params[p].forEach((v,i) => {
                     data.query = data.query.replaceAll('$value'+(i+1), v)
                 })
+
+                if (data.stylesheet) {
+                   
+                    let string = JSON.stringify(data.stylesheet)
+                    params[p].forEach((v,i) => {
+                        string = string.replaceAll('$value'+(i+1), v)
+                    })
+                    data.stylesheet = JSON.parse(string)
+                }
             } else if (p == 'prefixes'){
                 params[p].forEach(pre => {
                     data.query = pre + '\n' + data.query;
@@ -55,6 +65,8 @@ class Query{
             } else if (p == 'list_authors') {
                 data.query = data.query.replaceAll('$authorsList', params[p])
             }
+
+            
         });
     }
 
@@ -96,25 +108,27 @@ class Query{
         window.open(dataviz.getPopulatedUrl())
     }  
 
-    sendToServer(data, action, route) {
+    async sendToServer(data, action, route) {
         
         let url = route || this.routes.save.replace(/:action/g, action)
         
         // Send request
-        let response = fetch(url, {
-            method:'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        }).then(response => {
-            if (response.status >= 200 && response.status < 300)
+        try {
+            let response = await fetch(url, {
+                method:'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data) })
+        
+            if (response.ok) {
                 return true
-            return response
-        }).catch(error => {
-            // console.log(error);
+            } else {
+                alert(`Request failed with status: ${response.statusText}.\nPlease try again later.`);
+                return false
+            }
+        } catch(error) {
             alert(error)
-        })
-
-        return response
+            return false
+        }
     }
 
  
@@ -134,19 +148,33 @@ class Query{
     // **/
     async sendRequest(values) {
         await this.tune(values)
+        
+        let url = values.endpoint + "?query=" + await this.prepare(values.query)
+        let response = await fetch(url, {
+            method: "GET",
+            mode: url.startsWith("https") ? "cors" : "no-cors",
+            //mode: "no-cors", // For testing
+            headers: {
+                "Content-Type": "application/json", 
+                'Accept': "application/sparql-results+json"
+            }
+        })
 
-        let res = await fetch(this.routes.sparql, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(values)
-        }).then(async (response) => {
-            return await response.text();
-        }).catch(error => {
-            // console.log(error)
-            alert(error);
-        });
+        if (response.ok) {
+            try {
+                return await response.json();
+            } catch (e) {
+                alert("An error occurred while processing the response.\nPlease try again later.");
+            }
+        } else {
+            if (response.type === 'opaque') {
+                alert("We encountered a problem with the request, but the exact issue could not be identified due to CORS policy restrictions.\nFor more details, please check the browser console.");
+            } else {
+                alert(`Request failed with status: ${response.statusText}.\nPlease try again later.`);
+            }
+        }
 
-        return res
+        return;
     }
 
     displayResults(data) {
@@ -169,6 +197,7 @@ class Query{
 
 
     loadPage(page, query) {
+        console.log(page, query, this.pages[page] + (query ? query.id : ''))
         location.href = this.pages[page] + (query ? query.id : '')
     }
     

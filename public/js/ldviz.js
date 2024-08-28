@@ -8,10 +8,7 @@ class LDViz{
 
         // this.queryTable = new QueryTable(locals.queries, locals.existingQuery, locals.dataviz)
         //this.queryTools = new Query(locals.queryParams, locals.params)
-        this.editor = new Editor(locals.stylesheet, locals.params, locals.existingQuery, locals.dataviz, locals.queries)
-        
-        this.auth = new Auth(locals.user)
-        this.auth.setLoginButton()
+        this.editor = new Editor(locals)
 
         this.results = new Results()
     }
@@ -28,18 +25,19 @@ class LDViz{
     }
 
     static displayEditor() {
-        this.auth.setLoginButton()
+        //this.auth.setLoginButton()
 
         this.editor.set()
+        this.editor.displayQuery()
 
-        setTabAction(document.getElementById('form_sparqlQuery')) // for using tabs inside textarea
+        //setTabAction(document.getElementById('form_sparqlQuery')) // for using tabs inside textarea
         
-        if (this.action) {
-            if (this.auth.user || this.action === "view")
-                this.editor.displayQuery(this.action)
-            else if (confirm('Please login to continue') ) 
-                this.auth.login('editor', this.action, this.queryTable.existingQuery)
-        } 
+        // if (this.action) {
+        //     if (this.auth.user || this.action === "view")
+        //         this.editor.displayQuery(this.action)
+        //     else if (confirm('Please login to continue') ) 
+        //         this.auth.login('editor', this.action, this.queryTable.existingQuery)
+        // } 
         
         
         

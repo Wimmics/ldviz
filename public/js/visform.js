@@ -10,12 +10,14 @@ class VisRegistration {
         }
 
         this.data;
+
+        this.auth = new Auth()
     }
 
     set() {
 
         // only authentified people can register new visualizations
-        if (!LDViz.auth.isConnected()) 
+        if (!this.auth.isConnected()) 
             document.querySelector('#collapseVisButton').style.display = 'none'
 
         $('#collapseVisForm').on('shown.bs.collapse', function () {

@@ -149,14 +149,13 @@ class Data{
         return { queryParams: queryParams, 
             params: paramdata, 
             queries: queries, 
-            stylesheet: stylesheet, 
-            user: req.session.user || null,
+            stylesheet: stylesheet,
             dataviz: dataviz
         }
     }
 }
 
-class SPARQLRequest{
+class SPARQLRequest{ // not being used for now
     constructor() {
 
     }
@@ -173,19 +172,22 @@ class SPARQLRequest{
         let url = uri + "?query=";
         url = url + this.prepare(query); 
 
-        let headers = {
-            accept: "application/sparql-results+json"
-        }
-        
-        let result = await fetch(url, { method: 'GET', headers: headers}).then(async function(response){
-         
-          if(response.status >= 200 && response.status < 300){
-            return await response.text().then(data => {
-              return data
-          })}
-          else return response
+        return await fetch(url, { 
+            method: 'GET',  
+            headers: { 'Accept': "application/sparql-results+json" } 
         })
-        return result
+        
+        // let result = await fetch(url, { method: 'GET', 
+        //     headers: headers
+        // }).then(async function(response){
+         
+        //   if(response.status >= 200 && response.status < 300){
+        //     return await response.text().then(data => {
+        //       return data
+        //   })}
+        //   else return response
+        // })
+        // return result
     }
 
 }

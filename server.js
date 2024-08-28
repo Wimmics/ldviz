@@ -85,9 +85,9 @@ app.post(prefix + '/login', async (req, res) => {
     let user = await users.get(email, password);
     if(user){
         req.session.user = user;
-        if (req.query.action && req.query.queryId) {
+        if (req.query.action && req.query.queryId) { // edit
             res.redirect(prefix + '/editor/' + req.query.action + '?queryId=' + req.query.queryId)
-        } else if (req.query.action) {
+        } else if (req.query.action) { // new query
             res.redirect(prefix + '/editor/' + req.query.action )
         } else if (req.query.origin) 
             res.redirect(prefix + '/' + req.query.origin)
@@ -105,6 +105,14 @@ app.get(prefix + '/logout', (req, res) => {
     res.redirect('/ldviz');  
 })
 
+// Assuming you're using Express.js
+app.get(prefix + '/is-connected', (req, res) => {
+    if (req.session.user)
+        res.status(200).send('User is connected')
+    else res.status(404).send("User is not connected")
+})
+
+
 /////////// end login routes //////////////////////////
 
 
@@ -112,7 +120,7 @@ app.get(prefix + '/logout', (req, res) => {
 
 // home page
 app.get(prefix + '/', async function (req, res) {
-    await users.checkConnection(req) // TODO: uncomment to deploy
+    await users.checkConnection(req) 
 
     let endpoints = fs.readFileSync('data/analysis/endpoints.json')
     endpoints = JSON.parse(endpoints)
@@ -210,54 +218,34 @@ app.post(prefix + '/:action/:file', async function (req, res) {
     res.sendStatus(200);
 })
 
-/**
- * Edit an existing query
- * Find the edited query and REPLACE it in the file of query list
- * If the query is published, find the edited query and REPLACE it in the file of PUBLISHED query list
- **/
-// app.post(prefix + '/editdata/:file', async function (req, res) { 
-
-//     let response = await data.update(req.body, req.params.file)
-
-//     if (response && response.message) {
-//         res.sendStatus(response.code)
-//         return;
-//     }
-//     res.sendStatus(200);
-// })
-
-/**
- * Delete an existing query 
- * Find the query and DELETE it from the file of query list
- **/
-// app.post(prefix + '/delete/:file', async function (req, res) {
-//     let response = await data.delete(req.body.id, req.params.file)
-
-//     if (response && response.message) {
-//         res.sendStatus(response.code)
-//         return;
-//     }
-
-//     res.sendStatus(200);
-// })
-
 // SPARQL request
-app.post(prefix + '/sparql', async function (req, res) {
+app.post(prefix + '/sparql', async function (req, res) { // not being used for now, querying the endpoint on client side
     
     let data = req.body;
 
-    let result;
     try {
-        result = await sparql.sendRequest(data.query, data.endpoint)    
+        let response = await sparql.sendRequest(data.query, data.endpoint)  
+        
+        console.log(response)
+        if (!response.ok) {
+            // Return the fetch error status and statusText to the client
+            res.status(response.status).json({
+              error: response.statusText,
+            })
+        } else {
+            let result = await response.json()
+            // send result back to client
+            res.send(result)
+        }
+        
     } catch (e) {
         console.log('error = ', e)
         // send error back to client
-        res.sendStatus(400)
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: e.message,
+        })
     }
-
-    // send result back to client
-    if (result.status) res.sendStatus(result.status)
-    else res.send(result);
 })
 
 

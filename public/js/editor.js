@@ -1,15 +1,20 @@
 class Editor{
-    constructor(gss, params, query, dataviz, queries) {
-        this.gss = gss // default stylesheet (for new queries)
-        this.params = params // default values for the query fields, such as institution
-        this.query = query // existing query, when on mode edit, view or clone
-        this.dataviz = dataviz // list of visualization tools registered in the application (server side)
-        this.queriesList = queries; // list of queries registered in the application (server side)
+    constructor(locals) {
+        console.log(locals)
+        this.gss = locals.stylesheet // default stylesheet (for new queries)
+        this.params = locals.params // default values for the query fields, such as institution
+        this.query = locals.existingQuery // existing query, when on mode edit, view or clone
+        this.dataviz = locals.dataviz // list of visualization tools registered in the application (server side)
+        this.queriesList = locals.queries // list of queries registered in the application (server side)
+        this.action = locals.action
 
         this.queryTools = new Query()
         this.results = new Results()
 
         this.filters = {}
+
+        this.auth = new Auth()
+        this.auth.setLoginButton()
 
     }
 
@@ -41,36 +46,61 @@ class Editor{
 
         d3.selectAll(".clipboard").on('click', function() { copyToClipboard(this.id) })
 
-        this.queryIcons = [{'label': (d) => {
-            if (d.dataviz) {
-              let obj = this.getDatavizObj(d.dataviz)
-              return `Visualize results with ${obj.name}`
-            }  
-            return `No Visualization Associated`
-          }, 'class': 'far fa-play-circle', 'value': 'visualize', 
+        this.queryIcons = [
+            {'label': (d) => {
+                if (d.dataviz) {
+                    let obj = this.getDatavizObj(d.dataviz)
+                    if (obj.getPublishRoute()) 
+                        return d.isPublished ? `Remove from ${obj.getName()}` : 'Not Applicable'
+                }
+                
+                return 'No Associated Dataviz'
+            }, 'class': 'fas fa-eraser', 'value': 'delete-dataviz',
+                    'action': d =>this.publishQuery(d.id, 'isPublished', false), auth: true },
+
+            {'label': (d) => {
+
+                if (d.dataviz) {
+                    let obj = this.getDatavizObj(d.dataviz)
+                    if (obj.getPublishRoute()) 
+                        return `Upload to ${obj.getName()}.`
+                }
+                
+                return 'No Associated Dataviz'
+            }, 'class':  'fas fa-upload', 'value': 'publish',
+                'action': (d) => this.publishQuery(d.id, 'isPublished', true), auth: true },
+
+            
+            {'label': d => {
+                if (!d.dataviz) return 'No Associated Dataviz'
+
+                let obj = this.getDatavizObj(d.dataviz)     
+                return `${d.isPublished ? 'Available' : 'Not available'} on ${obj.name}`
+            }, 
+            'class': d => d.isPublished ? 'far fa-eye' : 'far fa-eye-slash', 'value': 'upload-status'},
+            
+            {'label': 'Delete Query', 'class': 'far fa-trash-alt', 'value': 'delete',
+                'action': d => this.deleteQuery(d), auth: true },
+
+            {'label': 'Clone Query', 'class': 'far fa-clone', 'value': 'clone', 
+                'action': d => this.queryTools.loadPage('clone', d), auth: true },
+
+            {'label': 'Edit Query', 'class': 'far fa-edit', 'value': 'edit',
+                'action': d => this.queryTools.loadPage('edit', d), auth: true },
+
+            {'label': 'View Query', 'class': 'far fa-file-code', 'value': 'view', 
+                'action': d => this.queryTools.loadPage('view', d), auth: false },
+        
+            {'label': (d) => {
+                if (d.dataviz) {
+                let obj = this.getDatavizObj(d.dataviz)
+                return `Visualize results with ${obj.name}`
+                }  
+                return `No Visualization Associated`
+            }, 'class': 'far fa-play-circle', 'value': 'visualize', 
               'action': d => this.visualizeQueryResults(d) },
-  
-              {'label': 'View Query', 'class': 'far fa-file-code', 'value': 'view', 
-                  'action': d => this.queryTools.loadPage('view', d), auth: false },
-              
-              {'label': 'Edit Query', 'class': 'far fa-edit', 'value': 'edit',
-                  'action': d => this.queryTools.loadPage('edit', d), auth: true },
-              
-              {'label': 'Clone Query', 'class': 'far fa-clone', 'value': 'clone', 
-                  'action': d => this.queryTools.loadPage('clone', d), auth: true },
-              {'label': (d) => {
-                  if (!d.dataviz) return 'Not Applicable'
-  
-                  let obj = this.getDatavizObj(d.dataviz)
-                  if (obj.getPublishRoute()) 
-                      return `${d.isPublished ? 'Remove from' : 'Publish on'} ${obj.getName()}.`
-                  
-                  return 'Not Applicable'
-              }, 'class':  d => d.isPublished ? 'far fa-eye' : 'far fa-eye-slash', 'value': 'publish',
-                  'action': (d) => this.publishQuery(d, 'isPublished', !d.isPublished), auth: true },
-  
-              {'label': 'Delete Query', 'class': 'far fa-trash-alt', 'value': 'delete',
-                  'action': d => this.deleteQuery(d), auth: true }
+
+            
           ]
   
           await this.setFilters()
@@ -83,6 +113,8 @@ class Editor{
 
     setQueryList(){
         
+        // recover valid queries based on current filters ////
+
         let displayedQueries = this.queriesList.filter(d => d.endpoint.length) // in case there are empty endpoints
         
         if (this.filters.endpoint) {
@@ -91,11 +123,11 @@ class Editor{
         if (this.filters.dataviz) {
             displayedQueries = displayedQueries.filter(d => d.dataviz === this.filters.dataviz)
         }
-
-
         if (this.filters.search) {
             displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(this.filters.search))
         } 
+
+        //////
 
         const div = d3.select('div#queries-list')
             .style('height', displayedQueries.length == 0 ? '20px' : '260px')
@@ -110,21 +142,32 @@ class Editor{
         
         const ul = div.select('ul#queries-ul')
             .style('display', 'block')
+            .style('padding-inline-end', '40px')
         
         const itemOnMouseOver = function() { d3.select(this).style('background', '#ccc') }
         const itemOnMouseOut = function() { d3.select(this).style('background', 'none') }
 
-        let fontWeight = d => this.existingQuery && this.existingQuery.id === d.id ? 'bold' : 'normal';
+        let fontWeight = d => this.query && this.query.id === d.id ? 'bold' : 'normal';
 
         ul.selectAll('li')
             .data(displayedQueries)
             .join(
                 enter => enter.append('li')
+                    .styles({
+                        display: 'flex',
+                        'justify-content': 'space-between'
+                    })
                     .call(li => li.append('tspan')
-                        .style('display', 'inline-block')
-                        .style('width', '85%')
+                        .style('width', '75%')
                         .style('font-weight', fontWeight)
-                        .text(d => d.name)),
+                        .text(d => d.name))
+                    .call(li => li.append('div')
+                        .styles({
+                            'width': '25%',
+                            'display': 'flex',
+                            'flex-direction': 'row-reverse',
+                            'justifiy-content': 'space-between'
+                        })),
                 update => update.call(li => li.select('tspan')
                     .text(d => d.name)
                     .style('font-weight', fontWeight)),
@@ -133,6 +176,7 @@ class Editor{
             .on('mouseover', itemOnMouseOver)
             .on('mouseout', itemOnMouseOut)
 
+        const _this = this;
         const iconClass = function(d){
             const query = d3.select(this.parentNode).datum()
             return 'query-icon ' + (typeof d.class === 'string' ? d.class : d.class(query))
@@ -143,15 +187,19 @@ class Editor{
             return typeof d.label === 'string' ? d.label : d.label(query)
         }
 
-        const iconOnClick = function(d) {
+        const iconOnClick = async function(d) {
             const query = d3.select(this.parentNode).datum()
-            if (d.auth && !LDViz.auth.isConnected()) 
-                if ( confirm("Please login before proceeding!") )  {
-                    LDViz.auth.login('editor', d.value, query)
-                    return
-                }
+            if (d.auth) {
+                if (!await _this.auth.isConnected()) {
+                    if ( confirm("Please login before proceeding!") )  {
+                        _this.auth.login('editor', d.value, query)
+                        return
+                    }
+                } else d.action(query)
+            } else if (!d.auth) 
+                d.action(query)
 
-            d.action(query)
+            
         }
 
         let attrs = {
@@ -162,7 +210,10 @@ class Editor{
             'title': iconTooltip
         }
 
-        ul.selectAll('li').selectAll('i')
+        let iconsContainer = ul.selectAll('li')
+            .selectAll('div')
+        
+        let icons = iconsContainer.selectAll('i')
             .data(this.queryIcons)
             .join(
                 enter => enter.append('i'),
@@ -171,6 +222,15 @@ class Editor{
             )
             .on('click', iconOnClick)
             .attrs(attrs)
+
+        icons.filter(d => d.value === 'delete')
+            .styles({
+                'padding-right': '20px',
+                'border-right': 'solid 1px'
+            })
+
+        icons.filter(d => d.value === 'upload-status')
+            .style("margin-left", '20px')
     }
 
     
@@ -233,7 +293,7 @@ class Editor{
     }  
 
     async restoreFilters() {
-        console.log(window.sessionStorage)
+       
         this.filters = window.sessionStorage.filters ? JSON.parse(window.sessionStorage.filters) : {}
 
         if (this.filters.endpoint)
@@ -262,11 +322,26 @@ class Editor{
         this.setQueryList()
     }
 
-    // display the editor window with information regarding the selected query
-    displayQuery(action) {
-        let data = this.query;        
+    async checkConnection() {
+        console.log(this.action)
+        if (this.action === "view") return;
 
-        if (action != 'newQuery') {
+        if (this.action) {
+            if (!await this.auth.isConnected())
+                if (confirm('Please login to continue') ) 
+                    this.auth.login('editor', this.action, this.query)
+        } 
+    }
+
+    // display the editor window with information regarding the selected query
+    async displayQuery() {
+        let data = this.query;     
+        
+        if (!this.query) return
+        
+        await this.checkConnection()
+
+        if (this.action != 'newQuery') {
 
             document.querySelector('#form_queryTitle').value = data.name
             document.querySelector('#form_sparqlEndpoint').value = data.endpoint
@@ -307,24 +382,24 @@ class Editor{
             }
         }
 
-        if (action != 'edit') {
+        if (this.action != 'edit') {
             document.querySelector('#cancel_button').addEventListener('click', () =>  this.queryTools.loadPage('home'))
         }
         
-        if (['newQuery', 'clone'].includes(action)) {
+        if (['newQuery', 'clone'].includes(this.action)) {
             document.getElementById('save_button').addEventListener('click', () => this.saveQuery())
         }
 
-        if (action == 'clone') {
+        if (this.action == 'clone') {
             document.getElementById('form_queryTitle').value = 'Copy of ' + data.name;
-        } else if (action == 'edit') {
+        } else if (this.action == 'edit') {
             document.querySelector('#save_button').addEventListener('click', () => this.editQuery(data))
             document.querySelector('#cancel_button').addEventListener('click', () => {
                 if (confirm("Are you sure? Your changes will be lost!")) {
                     this.queryTools.loadPage('home')
                 }
             } )
-        } else if (action == 'view') {
+        } else if (this.action == 'view') {
             // document.querySelector('#cancel_button').addEventListener('click', () =>  this.queryTools.loadPage('home'))
             document.querySelector('#save_button').style.display = 'none';
             
@@ -334,7 +409,7 @@ class Editor{
 
             this.sparqlCodeMirror.options.readOnly = true
             this.jsonCodeMirror.options.readOnly = true
-        } else if (action === "newQuery") {
+        } else if (this.action === "newQuery") {
             //testGetQueryData()
             // default stylesheet for new queries
             this.jsonCodeMirror.setValue(JSON.stringify(this.gss, undefined, 4))
@@ -498,30 +573,37 @@ class Editor{
         }
     }
 
-    async publishQuery(d, attribute, value) {
-        if (!d.dataviz) return
+    async publishQuery(id, attribute, value) {
+        let d = this.queriesList.find(e => e.id === id)
+
+        if (!d || !d.dataviz) return
 
         let dataviz = this.getDatavizObj(d.dataviz)
+        console.log(dataviz)
+        
         if (!dataviz.getPublishRoute())
             return
 
-      
-        let data = { ...d }
-        data[attribute] = value
-        
-        let res = await this.queryTools.sendToServer(data, dataviz.getPublishRoute())
+        d[attribute] = value
+        console.log("data = ", d)
+
+        // save the query on the visualization's server
+        let res = await this.queryTools.sendToServer(d, null, dataviz.getPublishRoute())
         
         if (!res) return
 
-        res = await this.queryTools.sendToServer(data)
+        // update query on the server
+        res = await this.queryTools.sendToServer(d, 'edit')
 
         if (!res) return
 
-        this.queriesList.forEach(e => {
-            if (e.id == d.id) {
-                e[attribute] = value;
-            }
-        })
+        // this.queriesList.forEach(e => {
+        //     if (e.id == id) {
+        //         e[attribute] = value;
+        //     }
+        // })
+
+        LDViz.displayNotification(`The query "${d.name}" was ${value ? 'uploaded to' : 'removed from'} ${dataviz.getName()}.`)
 
         this.setQueryList()
     
@@ -552,19 +634,16 @@ class Editor{
         loading.style.display = "block"
 
         let data = await this.getQuery()
-        let response = await this.queryTools.sendRequest(data)
-        let results;
-        try {
-            results = JSON.parse(response)
+        let results = await this.queryTools.sendRequest(data)
+        
+        if (results) {
+
             document.querySelector("#query-results").style.display = 'block'
             document.querySelector("#hide-results").style.display = 'block'
 
             this.results.writeResults(results, results[1] === 'html')
 
             this.updateFormHeight()
-        } catch(e) {
-            console.log("error = ", e)
-            alert(response)
         }
 
         loading.style.display = "none"
@@ -618,6 +697,8 @@ class Editor{
             stylesheetActive: stylesheetActive,
             stylesheet: stylesheetActive ? JSON.parse(this.jsonCodeMirror.getValue()) : null
         }
+
+        console.log("new data = ", values)
                 
         return values;
     }

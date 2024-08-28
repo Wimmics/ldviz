@@ -13,7 +13,7 @@
     <body>
         <%- include("partials/header") %>
 
-        <div class="page-content">
+        <div class="page-content" style="background-color: cadetblue;">
             <div class="login">
                 <div class="login-screen">
                     <div class="app-title">
@@ -40,6 +40,7 @@
         let href = window.location.href
         let origin = window.location.origin
         href = href.replace(`${origin}`, '')
+        console.log(href)
 
         document.getElementById('login_form').action = href
 
