@@ -46,62 +46,74 @@ class Editor{
 
         d3.selectAll(".clipboard").on('click', function() { copyToClipboard(this.id) })
 
-        this.queryIcons = [
-            {'label': (d) => {
-                if (d.dataviz) {
-                    let obj = this.getDatavizObj(d.dataviz)
-                    if (obj.getPublishRoute()) 
-                        return d.isPublished ? `Remove from ${obj.getName()}` : 'Not Applicable'
-                }
-                
-                return 'No Associated Dataviz'
-            }, 'class': 'fas fa-eraser', 'value': 'delete-dataviz',
-                    'action': d =>this.publishQuery(d.id, 'isPublished', false), auth: true },
-
-            {'label': (d) => {
-
-                if (d.dataviz) {
-                    let obj = this.getDatavizObj(d.dataviz)
-                    if (obj.getPublishRoute()) 
-                        return `Upload to ${obj.getName()}.`
-                }
-                
-                return 'No Associated Dataviz'
-            }, 'class':  'fas fa-upload', 'value': 'publish',
-                'action': (d) => this.publishQuery(d.id, 'isPublished', true), auth: true },
-
-            
+        this.datavizIcons = [
             {'label': d => {
                 if (!d.dataviz) return 'No Associated Dataviz'
 
                 let obj = this.getDatavizObj(d.dataviz)     
                 return `${d.isPublished ? 'Available' : 'Not available'} on ${obj.name}`
             }, 
-            'class': d => d.isPublished ? 'far fa-eye' : 'far fa-eye-slash', 'value': 'upload-status'},
+            'class': d => d.isPublished ? 'far fa-eye' : 'far fa-eye-slash', 'value': 'upload-status'} ,
             
-            {'label': 'Delete Query', 'class': 'far fa-trash-alt', 'value': 'delete',
-                'action': d => this.deleteQuery(d), auth: true },
+            {'label': (d) => {
 
-            {'label': 'Clone Query', 'class': 'far fa-clone', 'value': 'clone', 
-                'action': d => this.queryTools.loadPage('clone', d), auth: true },
+                if (d.dataviz) {
+                    let obj = this.getDatavizObj(d.dataviz)
+                    if (obj.getPublishRoute()) 
+                        return `Upload to ${obj.getName()}.`
+                    else return 'Not Applicable'
+                } 
+                
+                return 'No Associated Dataviz'
+            }, 'class':  'fas fa-upload', 'value': 'publish',
+                'action': (d) => this.publishQuery(d.id, 'isPublished', true), auth: true },
 
-            {'label': 'Edit Query', 'class': 'far fa-edit', 'value': 'edit',
-                'action': d => this.queryTools.loadPage('edit', d), auth: true },
+            {'label': (d) => {
+                if (d.dataviz) {
+                    let obj = this.getDatavizObj(d.dataviz)
+                    if (obj.getPublishRoute()) 
+                        return d.isPublished ? `Remove from ${obj.getName()}` : 'Nothing to remove'
+                    else return 'Not Applicable'
+                }
+                
+                return 'No Associated Dataviz'
+            }, 'class': 'fas fa-eraser', 'value': 'delete-dataviz',
+                    'action': d =>this.publishQuery(d.id, 'isPublished', false), auth: true }
+            ]
+            
+            
+        this.queryIcons = [
+            
 
-            {'label': 'View Query', 'class': 'far fa-file-code', 'value': 'view', 
-                'action': d => this.queryTools.loadPage('view', d), auth: false },
-        
             {'label': (d) => {
                 if (d.dataviz) {
                 let obj = this.getDatavizObj(d.dataviz)
-                return `Visualize results with ${obj.name}`
+                    return `Visualize results with ${obj.name}`
                 }  
                 return `No Visualization Associated`
             }, 'class': 'far fa-play-circle', 'value': 'visualize', 
               'action': d => this.visualizeQueryResults(d) },
+            
+            
+            {'label': 'View Query', 'class': 'far fa-file-code', 'value': 'view', 
+                'action': d => this.queryTools.loadPage('view', d), auth: false },
+        
 
+              {'label': 'Edit Query', 'class': 'far fa-edit', 'value': 'edit',
+                'action': d => this.queryTools.loadPage('edit', d), auth: true },
+
+
+              {'label': 'Clone Query', 'class': 'far fa-clone', 'value': 'clone', 
+                'action': d => this.cloneQuery(d.id), auth: true },
+
+              {'label': 'Delete Query', 'class': 'far fa-trash-alt', 'value': 'delete',
+                'action': d => this.deleteQuery(d.id), auth: true },
             
           ]
+
+          // pagination settings
+          this.rowsPerPage = 10
+          this.currentPage = 1
   
           await this.setFilters()
           await this.restoreFilters()
@@ -111,71 +123,14 @@ class Editor{
     /// --------------------------------------------------
     // methods to manage the visual aspect of the table
 
-    setQueryList(){
+    displayTable(data) {
+
+        const start = (this.currentPage - 1) * this.rowsPerPage;
+        const end = start + this.rowsPerPage;
+        const paginatedData = data.slice(start, end);
+
+        const table = d3.select('table.queries-table')
         
-        // recover valid queries based on current filters ////
-
-        let displayedQueries = this.queriesList.filter(d => d.endpoint.length) // in case there are empty endpoints
-        
-        if (this.filters.endpoint) {
-            displayedQueries = displayedQueries.filter(d => d.endpoint === this.filters.endpoint)
-        } 
-        if (this.filters.dataviz) {
-            displayedQueries = displayedQueries.filter(d => d.dataviz === this.filters.dataviz)
-        }
-        if (this.filters.search) {
-            displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(this.filters.search))
-        } 
-
-        //////
-
-        const div = d3.select('div#queries-list')
-            .style('height', displayedQueries.length == 0 ? '20px' : '260px')
-
-        if (displayedQueries.length == 0) {
-            div.select('#empty-queries-list').style('display', 'block')
-            div.select('ul#queries-ul').style('display', 'none')
-            return;
-        }
-
-        div.select('#empty-queries-list').style('display', 'none')
-        
-        const ul = div.select('ul#queries-ul')
-            .style('display', 'block')
-            .style('padding-inline-end', '40px')
-        
-        const itemOnMouseOver = function() { d3.select(this).style('background', '#ccc') }
-        const itemOnMouseOut = function() { d3.select(this).style('background', 'none') }
-
-        let fontWeight = d => this.query && this.query.id === d.id ? 'bold' : 'normal';
-
-        ul.selectAll('li')
-            .data(displayedQueries)
-            .join(
-                enter => enter.append('li')
-                    .styles({
-                        display: 'flex',
-                        'justify-content': 'space-between'
-                    })
-                    .call(li => li.append('tspan')
-                        .style('width', '75%')
-                        .style('font-weight', fontWeight)
-                        .text(d => d.name))
-                    .call(li => li.append('div')
-                        .styles({
-                            'width': '25%',
-                            'display': 'flex',
-                            'flex-direction': 'row-reverse',
-                            'justifiy-content': 'space-between'
-                        })),
-                update => update.call(li => li.select('tspan')
-                    .text(d => d.name)
-                    .style('font-weight', fontWeight)),
-                exit => exit.remove()
-            )
-            .on('mouseover', itemOnMouseOver)
-            .on('mouseout', itemOnMouseOut)
-
         const _this = this;
         const iconClass = function(d){
             const query = d3.select(this.parentNode).datum()
@@ -210,27 +165,174 @@ class Editor{
             'title': iconTooltip
         }
 
-        let iconsContainer = ul.selectAll('li')
-            .selectAll('div')
-        
-        let icons = iconsContainer.selectAll('i')
+    
+        let tr = table.select('#table-body')
+            .selectAll('tr')
+            .data(paginatedData)
+            .join(
+                enter => enter.append('tr')
+                    .call(tr => tr.append('td').classed('query-title', true))
+                    .call(tr => tr.append("td").classed('query-actions query', true))
+                    .call(tr => tr.append('td').classed('query-actions dataviz', true)),
+                update => update,
+                exit => exit.remove()
+            )
+
+        tr.call(tr => tr.select('.query-title')
+            .text(d => d.name) 
+            .style('font-weight', d => this.query && this.query.id === d.id ? 'bold' : 'normal')
+        )
+
+        tr.call(tr => tr.select(".query")
+            .selectAll('i')
             .data(this.queryIcons)
             .join(
                 enter => enter.append('i'),
                 update => update,
                 exit => exit.remove()
             )
-            .on('click', iconOnClick)
             .attrs(attrs)
+            .on('click', iconOnClick)
+            .style('cursor', 'pointer')
+        )
 
-        icons.filter(d => d.value === 'delete')
-            .styles({
-                'padding-right': '20px',
-                'border-right': 'solid 1px'
-            })
+        tr.call(tr => tr.select('.dataviz')
+            .selectAll('i')
+            .data(this.datavizIcons)
+            .join(
+                enter => enter.append('i'),
+                update => update,
+                exit => exit.remove()
+            )
+            .attrs(attrs)
+            .on('click', iconOnClick)
+            .style('cursor', d => d.value === "upload-status" ? 'normal' : 'pointer')
+        )
 
-        icons.filter(d => d.value === 'upload-status')
-            .style("margin-left", '20px')
+        this.updatePagination(data)
+    }
+
+    // Function to update pagination controls
+    updatePagination(data) {
+        const totalPages = Math.ceil(data.length / this.rowsPerPage);
+
+        const paginationControls = document.getElementById('pagination-controls');
+        paginationControls.innerHTML = '';
+
+        // Previous button
+        const prevButton = document.createElement('li');
+        prevButton.className = `page-item ${this.currentPage === 1 ? 'disabled' : ''}`;
+        prevButton.innerHTML = '<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>';
+        prevButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.displayTable(data)
+            }
+        });
+        paginationControls.appendChild(prevButton);
+
+        // Page number buttons
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === this.currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.currentPage = i
+                this.displayTable(data)
+            });
+            paginationControls.appendChild(li);
+        }
+
+        // Next button
+        const nextButton = document.createElement('li');
+        nextButton.className = `page-item ${this.currentPage === totalPages ? 'disabled' : ''}`;
+        nextButton.innerHTML = '<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>';
+        nextButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.currentPage < totalPages) {
+                this.currentPage++
+                this.displayTable(data)
+            }
+        });
+        paginationControls.appendChild(nextButton);
+    }
+
+    setQueryList(){
+        
+        // recover valid queries based on current filters ////
+
+        let displayedQueries = this.queriesList.filter(d => d.endpoint.length) // in case there are empty endpoints
+        
+        if (this.filters.endpoint) {
+            displayedQueries = displayedQueries.filter(d => d.endpoint === this.filters.endpoint)
+        } 
+        if (this.filters.dataviz) {
+            displayedQueries = displayedQueries.filter(d => d.dataviz === this.filters.dataviz)
+        }
+        if (this.filters.search) {
+            displayedQueries = displayedQueries.filter(d => d.name.toLowerCase().includes(this.filters.search))
+        } 
+
+        //////
+
+        // Function to display the data in the table
+        
+        this.displayTable(displayedQueries)
+        
+
+
+        // ul.selectAll('li')
+        //     .data(displayedQueries)
+        //     .join(
+        //         enter => enter.append('li')
+        //             .styles({
+        //                 display: 'flex',
+        //                 'justify-content': 'space-between'
+        //             })
+        //             .call(li => li.append('tspan')
+        //                 .style('width', '75%')
+        //                 .style('font-weight', fontWeight)
+        //                 .text(d => d.name))
+        //             .call(li => li.append('div')
+        //                 .styles({
+        //                     'width': '25%',
+        //                     'display': 'flex',
+        //                     'flex-direction': 'row-reverse',
+        //                     'justifiy-content': 'space-between'
+        //                 })),
+        //         update => update.call(li => li.select('tspan')
+        //             .text(d => d.name)
+        //             .style('font-weight', fontWeight)),
+        //         exit => exit.remove()
+        //     )
+        //     .on('mouseover', itemOnMouseOver)
+        //     .on('mouseout', itemOnMouseOut)
+
+        
+
+        // let iconsContainer = ul.selectAll('li')
+        //     .selectAll('div')
+        
+        // let icons = iconsContainer.selectAll('i')
+        //     .data(this.queryIcons)
+        //     .join(
+        //         enter => enter.append('i'),
+        //         update => update,
+        //         exit => exit.remove()
+        //     )
+        //     .on('click', iconOnClick)
+        //     .attrs(attrs)
+
+        // icons.filter(d => d.value === 'delete')
+        //     .styles({
+        //         'padding-right': '20px',
+        //         'border-right': 'solid 1px'
+        //     })
+
+        // icons.filter(d => d.value === 'upload-status')
+        //     .style("margin-left", '20px')
     }
 
     
@@ -352,11 +454,12 @@ class Editor{
 
             this.sparqlCodeMirror.setValue(data.query)
 
+            document.querySelector("#stylesheetContainer").style.display = "block" // display before including the data
             if (data.stylesheet) {
-                document.querySelector("#stylesheetContainer").style.display = "block" // display before including the data
                 document.querySelector("#withStylesheet").checked = data.stylesheetActive;
                 this.jsonCodeMirror.setValue(JSON.stringify(data.stylesheet, undefined, 4))
-            } else {
+            } else { // display a default stylesheet
+                document.querySelector("#withStylesheet").checked = false
                 this.jsonCodeMirror.setValue(JSON.stringify(this.gss, undefined, 4))
             }
 
@@ -409,11 +512,13 @@ class Editor{
 
             this.sparqlCodeMirror.options.readOnly = true
             this.jsonCodeMirror.options.readOnly = true
-        } else if (this.action === "newQuery") {
-            //testGetQueryData()
-            // default stylesheet for new queries
-            this.jsonCodeMirror.setValue(JSON.stringify(this.gss, undefined, 4))
-        }
+        } 
+        
+        // else if (this.action === "newQuery") {
+        //     //testGetQueryData()
+        //     // default stylesheet for new queries
+        //     this.jsonCodeMirror.setValue(JSON.stringify(this.gss, undefined, 4))
+        // }
 
         this.updateFormHeight()
     }
@@ -501,6 +606,8 @@ class Editor{
     async openVisualization() {
         let data = await this.getQueryData()
 
+        if (!data) return
+
         let dataviz = this.dataviz.find(d => d.id.toString() === data.dataviz)
 
         this.queryTools.goToVisualization(data, dataviz)
@@ -520,6 +627,7 @@ class Editor{
 
         // Get form values
         const values = await this.getQueryData()
+        if (!values) return
         values.id = new Date().getTime();
 
         values.isPublished = false;
@@ -539,10 +647,11 @@ class Editor{
      * Asks for the user confirmation before making the request (edit published and locked status, or query content)
      * Redirect to the index when successful
      */
-    async editQuery(data) { 
-
+    async editQuery(data) {
         let values = {}
         values = await this.getQueryData()
+        if (!values) return;
+
         values.isPublished = data.isPublished;
         values.isLocked = data.isLocked;
        
@@ -558,7 +667,10 @@ class Editor{
         }
     }
 
-    async deleteQuery(data) {
+    async deleteQuery(id) {
+        let data = this.queriesList.find(e => e.id === id)
+        if (!data) return
+
         if (confirm("Are you sure you want to delete this query? It can still be used in the visualization tool, but further modifications won't be possible.")) {
             let res = await this.queryTools.sendToServer(data, 'delete')
             
@@ -571,6 +683,25 @@ class Editor{
                 LDViz.displayNotification(`The query "${data.name}" was deleted.`)
             }
         }
+    }
+
+    async cloneQuery(id) {
+        let d = this.queriesList.find(e => e.id === id)
+        console.log("d = ", d)
+        let clone = { ...d }
+        clone.name = `Copy of ${d.name}`
+        clone.id = new Date().getTime();
+        clone.isPublished = false
+
+        let res = await this.queryTools.sendToServer(clone, 'add')
+
+        if (res) {
+            this.queriesList.push(clone) // add the new query to the list on the client side
+            this.setQueryList()
+            LDViz.displayNotification(`The query "${clone.name}" was cloned.`)
+        }
+
+
     }
 
     async publishQuery(id, attribute, value) {
@@ -617,15 +748,13 @@ class Editor{
 
     toggleStylesheet(selectedDataviz) {
         let dataviz = new DataViz(this.dataviz.find(d => d.id.toString() === selectedDataviz))
+       
+        document.querySelector("#stylesheetContainer").style.display = "block" // display before including the data
+        let template = dataviz.getStylesheetTemplate()
+        this.jsonCodeMirror.setValue(template || "")
 
-        if (dataviz.getParamKeys().includes('stylesheet')) { // the visualization supports stylesheet
-            document.querySelector("#stylesheetContainer").style.display = "block" // display before including the data
-            this.jsonCodeMirror.setValue(dataviz.getStylesheetTemplate())
-
-            this.updateFormHeight()
-        } else {
-            document.querySelector("#stylesheetContainer").style.display = "none" // display before including the data
-        }
+        this.updateFormHeight()
+       
     }
 
     async displayResults() {
@@ -671,6 +800,8 @@ class Editor{
 
     async getQuery() {
         let queryData = await this.getQueryData()
+        if (!queryData) return
+
         await this.queryTools.tune(queryData)
         return queryData
     }
@@ -679,28 +810,33 @@ class Editor{
         let form = document.querySelector('#query_form')
         let content = this.sparqlCodeMirror.getValue() // get content from textarea
 
-        let stylesheetActive = document.querySelector("#withStylesheet").checked
+        try {
 
-        const values = {
-            query: content,
-            name: form['query_name'].value,
-            dataviz: form['data_vis'].selectedIndex !== 0 ? form['data_vis'].value : null,
-            endpoint: form['query_endpoint'].value.trim(),
-            params: {
-                period: [ content.includes("$beginYear") ? +form['from_year'].value : '', 
-                        content.includes("$endYear") ? +form['to_year'].value : '' ],
-                lab: [ content.includes("$lab1") ? form['query_lab1'].value : '', 
-                    content.includes("$lab2") ? form['query_lab2'].value : '' ],
-                country: content.includes("$country") ? form['query_country'].value : '',
-                value: await this.getVariables() // custom variables/values ($value1, $value2, etc)
-            },
-            stylesheetActive: stylesheetActive,
-            stylesheet: stylesheetActive ? JSON.parse(this.jsonCodeMirror.getValue()) : null
+            let stylesheet = this.jsonCodeMirror.getValue()
+
+            const values = {
+                query: content,
+                name: form['query_name'].value,
+                dataviz: form['data_vis'].selectedIndex !== 0 ? form['data_vis'].value : null,
+                endpoint: form['query_endpoint'].value.trim(),
+                params: {
+                    period: [ content.includes("$beginYear") ? +form['from_year'].value : '', 
+                            content.includes("$endYear") ? +form['to_year'].value : '' ],
+                    lab: [ content.includes("$lab1") ? form['query_lab1'].value : '', 
+                        content.includes("$lab2") ? form['query_lab2'].value : '' ],
+                    country: content.includes("$country") ? form['query_country'].value : '',
+                    value: await this.getVariables() // custom variables/values ($value1, $value2, etc)
+                },
+                stylesheetActive:  document.querySelector("#withStylesheet").checked,
+                stylesheet: stylesheet.length ? JSON.parse(stylesheet) : stylesheet
+            }
+
+            return values
+        } catch(error) {
+            alert(`Failed to process the action: ${error.message}.`)
+            return
         }
-
-        console.log("new data = ", values)
                 
-        return values;
     }
 
     async getVariables(){

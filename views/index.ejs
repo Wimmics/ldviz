@@ -63,7 +63,12 @@
                                             <label>Search for</label>
                                             <input id='filter-name' name='filter_name' type="text" class="form-control" placeholder="Type the query name here..."></input>
                                             <button type="button"  class="btn btn-secondary form-control" id="clear-filters">Clear filters</button>
+                                            
                                         </div>
+                                        <div class="col">
+                                            <button type="button" class="btn btn-primary newQueryButton" >New Query</button>
+                                        </div>
+                                        
 
                                     </div>
 
@@ -72,23 +77,44 @@
                         </div>
 
                     </div>
-                    <hr>
+                   
                     <!-- list of queries (filled later) -->
                     <div id="queries-list" style="overflow-y: scroll; overflow-x: hidden;">
-                        <div id="header" style="display: flex; font-weight: bold;">
+                        <table class="queries-table table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="query-title">Title</th>
+                                    <th class="query-actions">Query Actions</th>
+                                    <th class="query-actions">Dataviz Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+
+                         <!-- Pagination controls -->
+                        
+                        <!-- <div id="header" style="display: flex; font-weight: bold;">
                             <div style="width: 85%; text-align: center;">Title</div>
                             <div style="width: 15%; display: flex; flex-direction: row-reverse; gap: 40px;">
                                 <label style="text-anchor: end;">Dataviz Actions</label>
                                 <label style="text-anchor: end;">Query Actions</label>
                                 
                             </div>
-                        </div>
+                        </div> -->
                         
-                        <ul id="queries-ul"></ul>
-                        <div style="left: 35%; text-anchor: middle; position: relative;" id="empty-queries-list">Please select a SPARQL endpoint or a Visualization Tool to start.</div>
+                        <!-- <ul id="queries-ul"></ul>
+                        <div style="left: 35%; text-anchor: middle; position: relative;" id="empty-queries-list">Please select a SPARQL endpoint or a Visualization Tool to start.</div> -->
                     </div>
-                    <hr>
-                    <button type="button" class="btn btn-primary newQueryButton" >New Query</button>
+
+                    <div>
+                        <nav>
+                            <ul class="pagination" id="pagination-controls">
+                                <!-- Pagination buttons will be inserted dynamically -->
+                            </ul>
+                        </nav>
+                    </div>
+                  
+                    
                 </div>
             </div>
 

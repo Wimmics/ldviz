@@ -67,12 +67,6 @@ ul>li {
     bottom: 0;
   }
 
-.newQueryButton {
-    cursor: pointer;
-    position: relative;
-    left: 90%;
-}
-
 .queries-control-panel #filters-form{
     position:relative;
     display: table-cell;
@@ -108,9 +102,6 @@ ul>li {
     padding-left: 40px;
 }
 
-i {
-    cursor: pointer;
-}
 
 .collapsible {
     cursor: pointer;
@@ -254,9 +245,30 @@ i {
     margin-left: 7px;
 }
 
+#queries-list {
+    height: 550px;
+}
+
 #queries-list i{
     margin-left: 10px;
-    cursor: pointer;
+}
+
+.queries-table {
+    width: 100%;
+}
+
+.queries-table tr {
+    height: 35px;
+}
+
+
+.queries-table .query-title {
+    width: 80%;
+}
+
+.queries-table .query-actions {
+    width: 10%;
+    text-align: center;
 }
 
 .close-icon{
