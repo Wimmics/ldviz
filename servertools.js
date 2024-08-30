@@ -7,32 +7,45 @@ class Users{
         this.users = []
         this.filename = path.join(__dirname, '/data/users.json')
 
-        if (fs.existsSync(this.filename)) {
+        
+    }
+
+    async findUser(req) {
+        try {
+            if (!fs.existsSync(this.filename)) return
+
             let rawdata = fs.readFileSync(this.filename);
-            this.users = JSON.parse(rawdata)
+            const users = JSON.parse(rawdata)
+
+
+            const { username, password } = req.body;
+            return users.find(u => u.username === username && u.password === password)
+            
+        } catch(e) {
+            return e
         }
     }
 
-    async checkConnection (req) {
-        let queryData = req.query;
+    // async checkConnection (req) {
+    //     let queryData = req.query;
     
-        if (queryData && Object.keys(queryData).length) {
-            if (!queryData.email || !queryData.password) {
-                queryData.message = `Please provide your credentials using "&email=" and "&password="`
-                if (req.session.user)  delete req.session.user
-            } else {
-                let user = this.users.find(user => user.email === queryData.email && user.password === queryData.password);
-                if (user)
-                    req.session.user = user;
-                else if (req.session.user) 
-                    delete req.session.user
-            }
-        }
-    }
+    //     if (queryData && Object.keys(queryData).length) {
+    //         if (!queryData.email || !queryData.password) {
+    //             queryData.message = `Please provide your credentials using "&email=" and "&password="`
+    //             if (req.session.user)  delete req.session.user
+    //         } else {
+    //             let user = this.users.find(user => user.email === queryData.email && user.password === queryData.password);
+    //             if (user)
+    //                 req.session.user = user;
+    //             else if (req.session.user) 
+    //                 delete req.session.user
+    //         }
+    //     }
+    // }
 
-    async get(email, password) {
-        return this.users.find(user => user.email === email && user.password === password)
-    }
+    // async get(email, password) {
+    //     return this.users.find(user => user.email === email && user.password === password)
+    // }
 }
 
 class Data{

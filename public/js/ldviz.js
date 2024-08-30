@@ -1,6 +1,5 @@
 class LDViz{
     static init(locals){
-        window.sessionStorage.setItem('sessionID', locals.sessionID)
 
         this.action = locals.action
         this.urlQuery = locals.queryParams

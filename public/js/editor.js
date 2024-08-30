@@ -14,7 +14,7 @@ class Editor{
         this.filters = {}
 
         this.auth = new Auth()
-        this.auth.setLoginButton()
+        this.auth.set()
 
     }
 
@@ -150,7 +150,7 @@ class Editor{
             if (d.auth) {
                 if (!_this.auth.isConnected()) {
                     if ( confirm("Please login before proceeding!") )  {
-                        _this.auth.login('editor', d.value, query)
+                        _this.auth.loadLoginPage('editor', d.value, query)
                         return
                     }
                 } else d.action(query)
@@ -391,7 +391,7 @@ class Editor{
         if (this.action) {
             if (!this.auth.isConnected())
                 if (confirm('Please login to continue') ) 
-                    this.auth.login('editor', this.action, this.query)
+                    this.auth.loadLoginPage('editor', this.action, this.query)
         } 
     }
 
@@ -689,7 +689,7 @@ class Editor{
         if (this.auth.isConnected()) 
             location.href = this.queryTools.loadPage('newquery')
         else {
-            if ( confirm("Please login before proceeding!") ) this.auth.login('editor', 'newQuery')
+            if ( confirm("Please login before proceeding!") ) this.auth.loadLoginPage('editor', 'newQuery')
         }
     }
 

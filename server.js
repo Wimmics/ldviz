@@ -76,42 +76,46 @@ app.use(back());
 
 ////////////// login routes ///////////////////////////
 
+// login page
 app.get(prefix + '/login', function (req, res) {
-    res.render('login');
+    res.render('login')
 })
 
+// Login route
 app.post(prefix + '/login', async (req, res) => {
-    const { email, password} = req.body
-    let user = await users.get(email, password);
-    if(user){
-        req.session.user = user;
-        if (req.query.action && req.query.queryId) { // edit
-            res.redirect(prefix + '/editor/' + req.query.action + '?queryId=' + req.query.queryId)
-        } else if (req.query.action) { // new query
-            res.redirect(prefix + '/editor/' + req.query.action )
-        } else if (req.query.origin) 
-            res.redirect(prefix + '/' + req.query.origin)
-        else res.redirect(prefix + '/')
-    }
-    else {
-        res.render('login', { message: "Incorrect email or password" });
-    }  
-})
+    
+    const user = await users.findUser(req)
+    console.log(req.query, req.body)
+    let result = {... req.query}
 
-app.get(prefix + '/logout', (req, res) => {
+    if (user) {
+        req.session.user = { id: user.id, username: user.username };
+        result.message = 'Login successful'
+        result.sessionId = req.sessionID
+        res.send(result)
+    } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+    }
+});
+
+// Middleware to check if user is authenticated
+function isAuthenticated(req, res, next) {
     if (req.session.user) {
-        delete req.session.user;
+        next();
+    } else {
+        res.status(401).json({ message: 'Unauthorized: Please log in' });
     }
-   
-    res.redirect('/ldviz');  
-})
+}
 
-// Assuming you're using Express.js
-app.get(prefix + '/is-connected', (req, res) => {
-    if (req.session.user)
-        res.status(200).send('User is connected')
-    else res.status(404).send("User is not connected")
-})
+// Logout route
+app.post(prefix + '/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).json({ message: 'Logout failed' });
+        }
+        res.send({ message: 'Logout successful' });
+    });
+});
 
 
 /////////// end login routes //////////////////////////

@@ -8,6 +8,10 @@
         <link rel="stylesheet" type="text/css" href="/ldviz/css/login.css" />
 
         <link rel="stylesheet" type="text/css" href="/ldviz/css/common.css" />
+
+        
+        <script src='/ldviz/js/login.js'></script>
+      
     </head>
 
     <body>
@@ -22,12 +26,13 @@
                     <div class="login-form">
                         <form method='post' id='login_form'>
                             <div class="control-group">
-                                <input class="login-field" type='email' name='email' placeholder='Email' required/>
-                                <input class="login-field" type='password' name='password' placeholder='Password' required/>
+                                <input class="login-field" id="username" type='username' name='username' placeholder='Username' required/>
+                                <input class="login-field" id="password" type='password' name='password' placeholder='Password' required/>
                             </div>
 
-                            <button class="btn btn-primary btn-large btn-block" type="submit">Sign in</button>
+                            <button class="btn btn-primary btn-large btn-block" type="submit" id="submit">Sign in</button>
                         </form> 
+                        <div id="error-message" style="color: red;"></div>
                     </div>
                 </div>
             </div>
@@ -37,12 +42,13 @@
     </body>
 
     <script>
-        let href = window.location.href
-        let origin = window.location.origin
-        href = href.replace(`${origin}`, '')
-        console.log(href)
-
-        document.getElementById('login_form').action = href
+        // console.log(window.location)
+        // let href = window.location.href
+        // let origin = window.location.origin
+        // href = href.replace(`${origin}`, '')
+        
+        let auth = new Auth()
+        auth.set()
 
         document.querySelector("#login").classList.add('active')
     </script>
