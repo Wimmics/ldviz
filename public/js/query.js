@@ -70,14 +70,6 @@ class Query{
         });
     }
 
-    newQuery(){
-        if (LDViz.auth.isConnected()) 
-            location.href = this.pages.newquery
-        else {
-            if ( confirm("Please login before proceeding!") ) LDViz.auth.login('editor', 'newQuery')
-        }
-    }
-
 
     async goToVisualization(data, dataviz) {
         

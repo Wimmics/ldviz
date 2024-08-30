@@ -17,7 +17,7 @@ class VisRegistration {
     async set() {
 
         // only authentified people can register new visualizations
-        if (!await this.auth.isConnected()) 
+        if (!this.auth.isConnected()) 
             document.querySelector('#collapseVisButton').style.display = 'none'
 
         $('#collapseVisForm').on('shown.bs.collapse', function () {

@@ -41,8 +41,9 @@ class Editor{
         document.querySelector("#export_sparqlquery").addEventListener("click", () => this.exportQuery())
         document.querySelector("#add-value-button").addEventListener("click", () => this.addValue())
         document.querySelector("#data_vis").addEventListener("change", function() { _this.toggleStylesheet(this.value) })
+        document.querySelector('#cancel_button').addEventListener('click', () =>  this.queryTools.loadPage('home'))
 
-        document.querySelector(".newQueryButton").addEventListener("click", () => this.queryTools.newQuery())
+        document.querySelector(".newQueryButton").addEventListener("click", () => this.newQuery())
 
         d3.selectAll(".clipboard").on('click', function() { copyToClipboard(this.id) })
 
@@ -143,9 +144,11 @@ class Editor{
         }
 
         const iconOnClick = async function(d) {
+            if (!d.action) return;
+
             const query = d3.select(this.parentNode).datum()
             if (d.auth) {
-                if (!await _this.auth.isConnected()) {
+                if (!_this.auth.isConnected()) {
                     if ( confirm("Please login before proceeding!") )  {
                         _this.auth.login('editor', d.value, query)
                         return
@@ -277,62 +280,8 @@ class Editor{
 
         //////
 
-        // Function to display the data in the table
-        
+        // Function to display the data in the table  
         this.displayTable(displayedQueries)
-        
-
-
-        // ul.selectAll('li')
-        //     .data(displayedQueries)
-        //     .join(
-        //         enter => enter.append('li')
-        //             .styles({
-        //                 display: 'flex',
-        //                 'justify-content': 'space-between'
-        //             })
-        //             .call(li => li.append('tspan')
-        //                 .style('width', '75%')
-        //                 .style('font-weight', fontWeight)
-        //                 .text(d => d.name))
-        //             .call(li => li.append('div')
-        //                 .styles({
-        //                     'width': '25%',
-        //                     'display': 'flex',
-        //                     'flex-direction': 'row-reverse',
-        //                     'justifiy-content': 'space-between'
-        //                 })),
-        //         update => update.call(li => li.select('tspan')
-        //             .text(d => d.name)
-        //             .style('font-weight', fontWeight)),
-        //         exit => exit.remove()
-        //     )
-        //     .on('mouseover', itemOnMouseOver)
-        //     .on('mouseout', itemOnMouseOut)
-
-        
-
-        // let iconsContainer = ul.selectAll('li')
-        //     .selectAll('div')
-        
-        // let icons = iconsContainer.selectAll('i')
-        //     .data(this.queryIcons)
-        //     .join(
-        //         enter => enter.append('i'),
-        //         update => update,
-        //         exit => exit.remove()
-        //     )
-        //     .on('click', iconOnClick)
-        //     .attrs(attrs)
-
-        // icons.filter(d => d.value === 'delete')
-        //     .styles({
-        //         'padding-right': '20px',
-        //         'border-right': 'solid 1px'
-        //     })
-
-        // icons.filter(d => d.value === 'upload-status')
-        //     .style("margin-left", '20px')
     }
 
     
@@ -347,7 +296,7 @@ class Editor{
         let endpoints = this.queriesList.map(d => d.endpoint)
 
         endpoints = endpoints.filter((d,i) => endpoints.indexOf(d) === i && d.length)
-        endpoints = endpoints.map(d => ({ filter: 'endpoint', value: d, label: d, comparable: d.split('//')[1] }))
+        endpoints = endpoints.map(d => ({ filter: 'endpoint', value: d, label: d, comparable: d.split('//')[1] || d }))
         endpoints = endpoints.sort( (a,b) => a.comparable.localeCompare(b.comparable) )
 
         this.setDatalist('endpoint', endpoints)
@@ -425,11 +374,10 @@ class Editor{
     }
 
     async checkConnection() {
-        console.log(this.action)
         if (this.action === "view") return;
 
         if (this.action) {
-            if (!await this.auth.isConnected())
+            if (!this.auth.isConnected())
                 if (confirm('Please login to continue') ) 
                     this.auth.login('editor', this.action, this.query)
         } 
@@ -485,9 +433,6 @@ class Editor{
             }
         }
 
-        if (this.action != 'edit') {
-            document.querySelector('#cancel_button').addEventListener('click', () =>  this.queryTools.loadPage('home'))
-        }
         
         if (['newQuery', 'clone'].includes(this.action)) {
             document.getElementById('save_button').addEventListener('click', () => this.saveQuery())
@@ -497,13 +442,7 @@ class Editor{
             document.getElementById('form_queryTitle').value = 'Copy of ' + data.name;
         } else if (this.action == 'edit') {
             document.querySelector('#save_button').addEventListener('click', () => this.editQuery(data))
-            document.querySelector('#cancel_button').addEventListener('click', () => {
-                if (confirm("Are you sure? Your changes will be lost!")) {
-                    this.queryTools.loadPage('home')
-                }
-            } )
         } else if (this.action == 'view') {
-            // document.querySelector('#cancel_button').addEventListener('click', () =>  this.queryTools.loadPage('home'))
             document.querySelector('#save_button').style.display = 'none';
             
             // when in view mode, disable all text fields
@@ -514,11 +453,6 @@ class Editor{
             this.jsonCodeMirror.options.readOnly = true
         } 
         
-        // else if (this.action === "newQuery") {
-        //     //testGetQueryData()
-        //     // default stylesheet for new queries
-        //     this.jsonCodeMirror.setValue(JSON.stringify(this.gss, undefined, 4))
-        // }
 
         this.updateFormHeight()
     }
@@ -738,6 +672,14 @@ class Editor{
 
         this.setQueryList()
     
+    }
+
+    newQuery(){
+        if (this.auth.isConnected()) 
+            location.href = this.queryTools.loadPage('newquery')
+        else {
+            if ( confirm("Please login before proceeding!") ) this.auth.login('editor', 'newQuery')
+        }
     }
 
     visualizeQueryResults(data) {

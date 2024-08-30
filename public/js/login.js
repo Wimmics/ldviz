@@ -22,33 +22,37 @@ class Auth {
         location.href = this.logoutRoute
     }
 
-    async isConnected() {
-        try {
-            const response = await fetch('/ldviz/is-connected', {
-                method: 'GET',
-                cache: 'no-cache'
-            })
+    isConnected() {
+
+        return window.sessionStorage.sessionID !== 'null'
+
+        // try {
+        //     const response = await fetch('/ldviz/is-connected', {
+        //         method: 'GET',
+        //         cache: 'no-cache'
+        //     })
     
-            if (response.ok) {
-                return true // there is a user connected
-            } else {
-                return false // no user is connected
-            }
-        } catch (e) {
-            console.error("Error checking connection to the website:", e);
-            alert("No connection to the website. Please check your internet connection or try again later.");
-            return false;
-        }
+        //     if (response.ok) {
+        //         return true // there is a user connected
+        //     } else {
+        //         return false // no user is connected
+        //     }
+        // } catch (e) {
+        //     console.error("Error checking connection to the website:", e);
+        //     alert("No connection to the website. Please check your internet connection or try again later.");
+        //     return false;
+        // }
     }
 
     async setLoginButton() {
         let loginButton = document.querySelector("#login")
-        if (await this.isConnected()) {
+
+        if (this.isConnected()) {
             loginButton.textContent = 'Logout'
-            loginButton.href = '/ldviz/logout'
+            loginButton.href = this.logoutRoute
         } else {
             loginButton.textContent = 'Login'
-            loginButton.href = '/ldviz/login'
+            loginButton.href = this.loginPage
         }
     }
 }   

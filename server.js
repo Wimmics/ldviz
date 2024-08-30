@@ -102,6 +102,7 @@ app.get(prefix + '/logout', (req, res) => {
     if (req.session.user) {
         delete req.session.user;
     }
+    console.log(req.sessionID)
     res.redirect('/ldviz');  
 })
 
@@ -120,7 +121,7 @@ app.get(prefix + '/is-connected', (req, res) => {
 
 // home page
 app.get(prefix + '/', async function (req, res) {
-    await users.checkConnection(req) 
+   // await users.checkConnection(req) 
 
     let endpoints = fs.readFileSync('data/analysis/endpoints.json')
     endpoints = JSON.parse(endpoints)
@@ -132,19 +133,26 @@ app.get(prefix + '/', async function (req, res) {
     let pagedata = await data.load(req)
     pagedata.endpoints = endpoints
     pagedata.result = result
+    pagedata.sessionID = req.session.user ? req.sessionID : null
 
     res.render("about", pagedata)
 })
 
 // LDViz about page 
 app.get(prefix + '/editor', async function (req, res) {
-    await users.checkConnection(req)
-    res.render("index", await data.load(req));
+    //await users.checkConnection(req)
+    let pagedata = await data.load(req)
+    pagedata.sessionID = req.session.user ? req.sessionID : null
+    
+    res.render("index", pagedata)
 })
 
 app.get(prefix + '/dataviz', async function (req, res) {
-    await users.checkConnection(req)
-    res.render("dataviz", await data.load(req));
+    //await users.checkConnection(req)
+    let pagedata = await data.load(req)
+    pagedata.sessionID = req.session.user ? req.sessionID : null
+
+    res.render("dataviz", pagedata)
 })
 
 // generic page which url is set when changing the href of the page
@@ -157,6 +165,8 @@ app.get(prefix + '/editor/:action/', async function(req, res){
     let result = await data.load(req)
     result.existingQuery = result.queries.filter(d => d.id == queryId)[0] || {}
     result.action = params.action
+    result.sessionID = req.session.user ? req.sessionID : null
+
     res.render("index", result)
 })
 
