@@ -4,10 +4,17 @@
         "debug": true
     },
     
-    "node": {            
+    "node": { 
+        "radius": {
+            "variable": "qtNodes",
+            "scale": "linear"
+        },           
         "default": {"color": "steelblue"},
-        "mix":     {"color": "yellow"},
-        
+        "mix":     {
+            "color": "yellow",
+            "active": true
+        },
+
         "member":  {"color": "purple"},
         "other":   {"color": "green"},
         
@@ -17,7 +24,11 @@
         
         
     },
-    
+    "barchart" : {
+        "x" : {
+            "title": "Title of the X axis"
+        }
+    },
     "edge": {
         "color": "green"
     },
