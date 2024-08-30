@@ -14,7 +14,7 @@ class Auth {
             if (query) 
                 url += '&queryId=' + query.id 
         } 
-        console.log("url = ", url)
+       
         location.href = url
     }
 
@@ -25,7 +25,6 @@ class Auth {
     isConnected() {
 
         return window.sessionStorage.sessionID !== 'null'
-
         // try {
         //     const response = await fetch('/ldviz/is-connected', {
         //         method: 'GET',
@@ -33,7 +32,8 @@ class Auth {
         //     })
     
         //     if (response.ok) {
-        //         return true // there is a user connected
+        //         let data = await response.json()
+        //         return window.sessionStorage.sessionID === data.sessionID
         //     } else {
         //         return false // no user is connected
         //     }

@@ -10,7 +10,7 @@ class LDViz{
         this.editor = new Editor(locals)
 
         this.results = new Results()
-       
+        
     }
 
     static displayResults() {

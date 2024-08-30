@@ -102,7 +102,7 @@ app.get(prefix + '/logout', (req, res) => {
     if (req.session.user) {
         delete req.session.user;
     }
-    console.log(req.sessionID)
+   
     res.redirect('/ldviz');  
 })
 
@@ -121,7 +121,6 @@ app.get(prefix + '/is-connected', (req, res) => {
 
 // home page
 app.get(prefix + '/', async function (req, res) {
-   // await users.checkConnection(req) 
 
     let endpoints = fs.readFileSync('data/analysis/endpoints.json')
     endpoints = JSON.parse(endpoints)
@@ -134,7 +133,7 @@ app.get(prefix + '/', async function (req, res) {
     pagedata.endpoints = endpoints
     pagedata.result = result
     pagedata.sessionID = req.session.user ? req.sessionID : null
-
+    
     res.render("about", pagedata)
 })
 

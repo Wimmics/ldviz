@@ -1,6 +1,6 @@
 class Editor{
     constructor(locals) {
-        console.log(locals)
+      
         this.gss = locals.stylesheet // default stylesheet (for new queries)
         this.params = locals.params // default values for the query fields, such as institution
         this.query = locals.existingQuery // existing query, when on mode edit, view or clone
@@ -215,6 +215,14 @@ class Editor{
         this.updatePagination(data)
     }
 
+    recoverPagination() {
+        this.currentPage = +window.sessionStorage.currentPage || 1
+    }
+    
+    savePagination() {
+        window.sessionStorage.setItem("currentPage", this.currentPage)
+    }
+
     // Function to update pagination controls
     updatePagination(data) {
         const totalPages = Math.ceil(data.length / this.rowsPerPage);
@@ -260,10 +268,14 @@ class Editor{
             }
         });
         paginationControls.appendChild(nextButton);
+
+        this.savePagination()
     }
 
     setQueryList(){
         
+        this.recoverPagination()
+
         // recover valid queries based on current filters ////
 
         let displayedQueries = this.queriesList.filter(d => d.endpoint.length) // in case there are empty endpoints
@@ -295,7 +307,7 @@ class Editor{
 
         let endpoints = this.queriesList.map(d => d.endpoint)
 
-        endpoints = endpoints.filter((d,i) => endpoints.indexOf(d) === i && d.length)
+        endpoints = endpoints.filter((d,i) => endpoints.indexOf(d) === i && d && d.length)
         endpoints = endpoints.map(d => ({ filter: 'endpoint', value: d, label: d, comparable: d.split('//')[1] || d }))
         endpoints = endpoints.sort( (a,b) => a.comparable.localeCompare(b.comparable) )
 
@@ -621,7 +633,7 @@ class Editor{
 
     async cloneQuery(id) {
         let d = this.queriesList.find(e => e.id === id)
-        console.log("d = ", d)
+       
         let clone = { ...d }
         clone.name = `Copy of ${d.name}`
         clone.id = new Date().getTime();
@@ -644,13 +656,12 @@ class Editor{
         if (!d || !d.dataviz) return
 
         let dataviz = this.getDatavizObj(d.dataviz)
-        console.log(dataviz)
+       
         
         if (!dataviz.getPublishRoute())
             return
 
         d[attribute] = value
-        console.log("data = ", d)
 
         // save the query on the visualization's server
         let res = await this.queryTools.sendToServer(d, null, dataviz.getPublishRoute())
