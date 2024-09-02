@@ -43,7 +43,7 @@ class Editor{
         document.querySelector("#data_vis").addEventListener("change", function() { _this.toggleStylesheet(this.value) })
         document.querySelector('#cancel_button').addEventListener('click', () =>  this.queryTools.loadPage('home'))
 
-        document.querySelector(".newQueryButton").addEventListener("click", () => this.newQuery())
+        document.querySelector(".newQueryButton").addEventListener("click", (e) => this.newQuery() ) 
 
         d3.selectAll(".clipboard").on('click', function() { copyToClipboard(this.id) })
 
@@ -686,10 +686,12 @@ class Editor{
     }
 
     newQuery(){
+       
         if (this.auth.isConnected()) 
-            location.href = this.queryTools.loadPage('newquery')
+            this.queryTools.loadPage('newquery')
         else {
-            if ( confirm("Please login before proceeding!") ) this.auth.loadLoginPage('editor', 'newQuery')
+            if ( confirm("Please login before proceeding!") ) 
+                this.auth.loadLoginPage('editor', 'newQuery')
         }
     }
 

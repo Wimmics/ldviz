@@ -177,7 +177,6 @@ class Query{
 
 
     loadPage(page, query) {
-        console.log(page, query, this.pages[page] + (query ? query.id : ''))
         location.href = this.pages[page] + (query ? query.id : '')
     }
     
