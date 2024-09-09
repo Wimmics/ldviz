@@ -25,27 +25,6 @@ class Users{
             return e
         }
     }
-
-    // async checkConnection (req) {
-    //     let queryData = req.query;
-    
-    //     if (queryData && Object.keys(queryData).length) {
-    //         if (!queryData.email || !queryData.password) {
-    //             queryData.message = `Please provide your credentials using "&email=" and "&password="`
-    //             if (req.session.user)  delete req.session.user
-    //         } else {
-    //             let user = this.users.find(user => user.email === queryData.email && user.password === queryData.password);
-    //             if (user)
-    //                 req.session.user = user;
-    //             else if (req.session.user) 
-    //                 delete req.session.user
-    //         }
-    //     }
-    // }
-
-    // async get(email, password) {
-    //     return this.users.find(user => user.email === email && user.password === password)
-    // }
 }
 
 class Data{
