@@ -7,7 +7,7 @@
  * Aline Menin - Maroua Tikat (2020-2022)
  * Aline Menin (2023-present)
 **/
-import 'dotenv/config'; // this loads the .env variables
+require('dotenv').config(); // this loads the .env variables
 
 const fs = require('fs');
 const fileUpload = require('express-fileupload');
