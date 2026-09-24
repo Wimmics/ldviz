@@ -135,3 +135,5 @@ data/queries*.json
 data/dataviz.json
 
 package-lock.json
+
+.env
